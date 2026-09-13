@@ -6,7 +6,17 @@
 <meta name="theme-color" content="#000000">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Заброшки">
+<meta name="application-name" content="Заброшки Симферополя">
 <title>Заброшки Симферополя</title>
+
+<!-- ═══ ИКОНКА САЙТА (favicon) ═══ -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffb340'/%3E%3Cstop offset='1' stop-color='%23ff9500'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4 C18 4 8 14 8 28 C8 42 22 54 32 60 C42 54 56 42 56 28 C56 14 46 4 32 4 Z' fill='url(%23g)' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='32' cy='26' r='9' fill='%23000' opacity='.85'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%23000'/%3E%3Cpath d='M90 30 C65 30 46 49 46 74 C46 100 74 124 90 138 C106 124 134 100 134 74 C134 49 115 30 90 30 Z' fill='%23ff9500' stroke='%23fff' stroke-width='5'/%3E%3Ccircle cx='90' cy='70' r='16' fill='%23000' opacity='.85'/%3E%3C/svg%3E">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="msapplication-TileColor" content="#ff9500">
+<meta name="theme-color" content="#000000">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -27,6 +37,7 @@
   --green:#34c759;
   --nav-h:68px;
   --ease:cubic-bezier(.32,.72,0,1);
+  --glass-bg:rgba(15,15,18,.88);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none;position:fixed;inset:0}
@@ -54,23 +65,21 @@ input,textarea{font-family:inherit}
   font-size:9px!important;padding:2px 6px!important;border-radius:8px 0 0 0!important;
 }
 .leaflet-control-attribution a{color:#777!important}
-
-/* ===== ГЛАВНЫЙ ФИКС — нет transition на маркерах ===== */
 .leaflet-marker-icon{transition:none!important}
 .leaflet-zoom-animated{transition:none!important}
 
 /* ===== POPUP ===== */
 .leaflet-popup-content-wrapper{
-  background:rgba(22,22,26,.9)!important;
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg)!important;
+  backdrop-filter:blur(30px) saturate(180%);
+  -webkit-backdrop-filter:blur(30px) saturate(180%);
   color:var(--text);border-radius:16px!important;
   border:1px solid var(--border-2);
   box-shadow:0 20px 60px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.08);
   padding:0;overflow:hidden;
 }
 .leaflet-popup-content{margin:0;width:auto!important;line-height:1.4}
-.leaflet-popup-tip{background:rgba(22,22,26,.9)!important;border:1px solid var(--border-2)}
+.leaflet-popup-tip{background:var(--glass-bg)!important;border:1px solid var(--border-2)}
 .leaflet-popup-close-button{color:#888!important;font-size:22px!important;padding:8px 8px 0 0!important;z-index:10}
 .leaflet-popup-close-button:hover{color:#fff!important;background:none!important}
 .popup-card{padding:14px 16px 16px;min-width:200px;max-width:250px}
@@ -86,53 +95,60 @@ input,textarea{font-family:inherit}
 }
 .popup-btn:active{transform:scale(.96)}
 
-/* ===== МАРКЕРЫ — CSS-КАПЛИ (как SVG, но быстро) ===== */
+/* ===== МАРКЕРЫ — ОПТИМИЗИРОВАННЫЕ ===== */
 .pin{
   position:relative;
-  width:42px;height:50px;
+  width:38px;height:46px;
+  contain:layout style paint;
+  pointer-events:auto;
 }
 .pin-body{
   position:absolute;
-  left:50%;top:2px;
-  transform:translateX(-50%) rotate(-45deg);
+  left:50%;top:0;
   width:34px;height:34px;
+  margin-left:-17px;
   border-radius:50% 50% 50% 0;
-  display:flex;align-items:center;justify-content:center;
-  border:3px solid #fff;
-  background:linear-gradient(135deg,var(--pin-1),var(--pin-2));
+  transform:rotate(-45deg);
+  transform-origin:center;
+  background:linear-gradient(135deg,var(--c1),var(--c2));
+  border:2.5px solid #fff;
   box-shadow:
-    0 6px 16px rgba(0,0,0,.55),
-    0 2px 4px rgba(0,0,0,.4),
-    inset 0 -4px 8px rgba(0,0,0,.2),
-    inset 0 4px 8px rgba(255,255,255,.25);
+    0 3px 8px rgba(0,0,0,.55),
+    0 0 0 1px rgba(0,0,0,.15);
+  display:flex;align-items:center;justify-content:center;
 }
-.pin-icon{
+.pin-ic{
   transform:rotate(45deg);
-  font-size:15px;line-height:1;
+  font-size:14px;line-height:1;
+  display:block;
   filter:brightness(0) invert(1);
   opacity:.95;
 }
-.pin-shadow{
+.pin-ic.symbol{
+  filter:none;
+  color:#fff;
+  font-weight:900;
+  font-size:17px;
+  text-shadow:0 1px 2px rgba(0,0,0,.4);
+}
+.pin-tip{
   position:absolute;
   bottom:0;left:50%;
-  transform:translateX(-50%);
-  width:18px;height:5px;
-  background:rgba(0,0,0,.5);
+  width:16px;height:4px;
+  margin-left:-8px;
+  background:radial-gradient(ellipse at center,rgba(0,0,0,.55) 0%,transparent 75%);
   border-radius:50%;
-  filter:blur(2px);
 }
 
-/* ===== СТЕКЛО ===== */
+/* ===== СТЕКЛО — БЕЗ BACKDROP-FILTER над картой ===== */
 .search-wrap{
   display:flex;align-items:center;gap:10px;
-  background:rgba(22,22,26,.72);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border:1px solid var(--border);
   border-radius:16px;padding:12px 15px;
   box-shadow:0 10px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08);
 }
-.search-wrap:focus-within{border-color:rgba(255,149,0,.55)}
+.search-wrap:focus-within{border-color:rgba(255,149,0,.55);box-shadow:0 10px 32px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08),0 0 24px rgba(255,149,0,.2)}
 .search-wrap svg{flex-shrink:0;color:var(--text-3)}
 .search-wrap input{
   flex:1;background:none;border:none;outline:none;
@@ -157,9 +173,7 @@ input,textarea{font-family:inherit}
 .chip{
   flex-shrink:0;display:flex;align-items:center;gap:6px;
   padding:9px 14px;border-radius:999px;
-  background:rgba(22,22,26,.72);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border:1px solid var(--border);
   color:var(--text-2);font-size:12.5px;font-weight:700;
   transition:transform .2s var(--ease);
@@ -170,7 +184,10 @@ input,textarea{font-family:inherit}
 .chip.active{
   background:linear-gradient(180deg,#ffb340,var(--accent));
   color:#000;border-color:transparent;
-  box-shadow:0 6px 20px rgba(255,149,0,.4),inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow:
+    0 6px 20px rgba(255,149,0,.45),
+    0 0 28px rgba(255,149,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.4);
 }
 .chip-count{
   background:rgba(0,0,0,.15);padding:1px 6px;border-radius:999px;
@@ -184,9 +201,7 @@ input,textarea{font-family:inherit}
 }
 .fab{
   width:48px;height:48px;border-radius:15px;
-  background:rgba(22,22,26,.72);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border:1px solid var(--border);
   color:var(--text);
   display:flex;align-items:center;justify-content:center;
@@ -197,18 +212,21 @@ input,textarea{font-family:inherit}
 .fab.primary{
   background:linear-gradient(180deg,#ffb340,var(--accent));
   color:#000;border-color:transparent;
-  box-shadow:0 8px 24px rgba(255,149,0,.4),inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow:
+    0 8px 24px rgba(255,149,0,.5),
+    0 0 32px rgba(255,149,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.4);
 }
 
+/* ===== НАВИГАЦИЯ ===== */
 .nav{
   position:absolute;bottom:0;left:0;right:0;
   height:calc(var(--nav-h) + env(safe-area-inset-bottom));
   padding-bottom:env(safe-area-inset-bottom);
-  background:rgba(10,10,12,.78);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border-top:1px solid var(--border);
   display:flex;z-index:1000;
+  box-shadow:0 -10px 40px rgba(0,0,0,.5);
 }
 .nav-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -217,12 +235,15 @@ input,textarea{font-family:inherit}
 }
 .nav-btn svg{width:22px;height:22px;transition:transform .2s var(--ease);stroke-width:2.2}
 .nav-btn.active{color:var(--accent)}
-.nav-btn.active svg{transform:translateY(-1px) scale(1.05)}
+.nav-btn.active svg{
+  transform:translateY(-1px) scale(1.05);
+  filter:drop-shadow(0 0 8px rgba(255,149,0,.6));
+}
 .nav-btn.active::before{
   content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
   width:26px;height:3px;border-radius:0 0 4px 4px;
   background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  box-shadow:0 4px 12px rgba(255,149,0,.55);
+  box-shadow:0 4px 14px rgba(255,149,0,.7),0 0 20px rgba(255,149,0,.4);
 }
 .nav-badge{
   position:absolute;top:5px;right:calc(50% - 22px);
@@ -231,15 +252,14 @@ input,textarea{font-family:inherit}
   border-radius:999px;font-size:9px;font-weight:900;
   display:flex;align-items:center;justify-content:center;
   border:2px solid #000;
+  box-shadow:0 0 10px rgba(255,149,0,.5);
 }
 
 .scr-header{
   padding:20px 20px 14px;padding-top:calc(20px + env(safe-area-inset-top));
   display:flex;justify-content:space-between;align-items:flex-end;
   border-bottom:1px solid var(--border);
-  background:rgba(0,0,0,.7);
-  backdrop-filter:blur(30px) saturate(180%);
-  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  background:rgba(0,0,0,.85);
   position:sticky;top:0;z-index:10;
 }
 .scr-header h1{
@@ -248,7 +268,10 @@ input,textarea{font-family:inherit}
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;
   background-clip:text;
 }
-.scr-header h1 em{font-style:normal;color:var(--accent);-webkit-text-fill-color:var(--accent)}
+.scr-header h1 em{
+  font-style:normal;color:var(--accent);-webkit-text-fill-color:var(--accent);
+  text-shadow:0 0 24px rgba(255,149,0,.5);
+}
 .scr-counter{font-size:11px;color:var(--text-3);font-weight:700;letter-spacing:.5px}
 .list{
   flex:1;overflow-y:auto;padding:14px 14px calc(var(--nav-h) + 24px);
@@ -266,6 +289,7 @@ input,textarea{font-family:inherit}
 .card::before{
   content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
   background:var(--cat-color,#8e8e93);
+  box-shadow:0 0 12px var(--cat-color,#8e8e93);
 }
 .card:active{transform:scale(.985);border-color:var(--border-2)}
 .card-inner{padding:14px 16px 14px 20px}
@@ -325,9 +349,9 @@ input,textarea{font-family:inherit}
 }
 .icon-btn{
   width:42px;height:42px;border-radius:14px;
-  background:rgba(10,10,12,.7);
-  backdrop-filter:blur(30px) saturate(180%);
-  -webkit-backdrop-filter:blur(30px) saturate(180%);
+  background:rgba(10,10,12,.75);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
   border:1px solid var(--border-2);color:#fff;
   display:flex;align-items:center;justify-content:center;
   transition:transform .2s var(--ease);
@@ -340,12 +364,14 @@ input,textarea{font-family:inherit}
   display:inline-flex;align-items:center;gap:7px;
   font-size:11px;font-weight:800;letter-spacing:1.5px;
   text-transform:uppercase;color:var(--cat-color,#ff9500);
-  background:rgba(22,22,26,.75);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border:1px solid var(--border-2);
   padding:7px 13px;border-radius:999px;margin-bottom:14px;
-  box-shadow:0 8px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.08);
+  box-shadow:
+    0 8px 24px rgba(0,0,0,.4),
+    0 0 20px var(--cat-color,#ff9500),
+    inset 0 1px 0 rgba(255,255,255,.08);
+  --cat-glow:0;
 }
 .detail-title{
   font-size:30px;font-weight:900;color:#fff;
@@ -401,14 +427,23 @@ input,textarea{font-family:inherit}
 }
 .action-btn:active{transform:scale(.97)}
 .action-btn svg{width:17px;height:17px;flex-shrink:0}
-.action-btn.fav-on{background:rgba(255,149,0,.15);border-color:rgba(255,149,0,.5);color:var(--accent)}
-.action-btn.vis-on{background:rgba(52,199,89,.15);border-color:rgba(52,199,89,.5);color:#4ade80}
+.action-btn.fav-on{
+  background:rgba(255,149,0,.15);border-color:rgba(255,149,0,.5);color:var(--accent);
+  box-shadow:0 0 20px rgba(255,149,0,.25),inset 0 0 20px rgba(255,149,0,.05);
+}
+.action-btn.vis-on{
+  background:rgba(52,199,89,.15);border-color:rgba(52,199,89,.5);color:#4ade80;
+  box-shadow:0 0 20px rgba(52,199,89,.25),inset 0 0 20px rgba(52,199,89,.05);
+}
 .action-btn.google{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.3);color:#5ea6ff}
 .action-btn.yandex{background:rgba(252,63,29,.12);border-color:rgba(252,63,29,.3);color:#ff7a5c}
 .action-btn.share{
   background:linear-gradient(180deg,#ffb340,var(--accent));
   color:#000;border-color:transparent;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
+  box-shadow:
+    0 8px 24px rgba(255,149,0,.35),
+    0 0 32px rgba(255,149,0,.25),
+    inset 0 1px 0 rgba(255,255,255,.4);
 }
 
 .rating-row{display:flex;align-items:center;gap:6px}
@@ -417,7 +452,10 @@ input,textarea{font-family:inherit}
   transition:transform .15s var(--ease),color .2s;
   padding:0;letter-spacing:-2px;
 }
-.star.on{color:var(--accent)}
+.star.on{
+  color:var(--accent);
+  text-shadow:0 0 20px rgba(255,149,0,.6);
+}
 .star:active{transform:scale(.85)}
 .rating-hint{font-size:12.5px;color:var(--text-3);margin-left:8px;font-weight:700}
 
@@ -427,7 +465,7 @@ input,textarea{font-family:inherit}
   font-size:14px;line-height:1.55;outline:none;resize:vertical;min-height:90px;
   transition:border-color .2s var(--ease);
 }
-.notes-area:focus{border-color:rgba(255,149,0,.5)}
+.notes-area:focus{border-color:rgba(255,149,0,.5);box-shadow:0 0 20px rgba(255,149,0,.15)}
 .notes-area::placeholder{color:var(--text-3)}
 
 .nearby-list{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:0 20px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
@@ -452,24 +490,25 @@ input,textarea{font-family:inherit}
   content:'';position:absolute;top:-30px;right:-30px;
   width:110px;height:110px;border-radius:50%;
   background:radial-gradient(circle,var(--sc,#ff9500) 0%,transparent 70%);
-  opacity:.18;
+  opacity:.22;
 }
-.stat-val{font-size:38px;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px;margin-bottom:6px}
+.stat-val{font-size:38px;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px;margin-bottom:6px;text-shadow:0 0 20px rgba(255,255,255,.15)}
 .stat-lbl{font-size:10.5px;color:var(--text-3);font-weight:800;letter-spacing:.8px;text-transform:uppercase}
 .stat-icon{position:absolute;top:16px;right:16px;font-size:22px;opacity:.4}
 
 .toast{
   position:fixed;bottom:calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));
   left:50%;transform:translateX(-50%) translateY(20px);
-  background:rgba(22,22,26,.88);
-  backdrop-filter:blur(40px) saturate(180%);
-  -webkit-backdrop-filter:blur(40px) saturate(180%);
+  background:var(--glass-bg);
   border:1px solid var(--border-2);color:var(--text);
   padding:13px 22px;border-radius:16px;
   font-size:13.5px;font-weight:700;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.6),
+    0 0 24px rgba(255,149,0,.15),
+    inset 0 1px 0 rgba(255,255,255,.1);
   z-index:9999;opacity:0;pointer-events:none;
-  transition:all .3s var(--ease);
+  transition:opacity .3s var(--ease),transform .3s var(--ease);
   max-width:90vw;
 }
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -478,6 +517,7 @@ input,textarea{font-family:inherit}
   position:fixed;top:0;left:0;height:2px;
   background:linear-gradient(90deg,var(--accent),var(--accent-2));
   z-index:99999;width:0;
+  box-shadow:0 0 14px rgba(255,149,0,.8);
 }
 </style>
 </head>
@@ -561,10 +601,10 @@ input,textarea{font-family:inherit}
       <div class="stat-card" style="padding:24px 20px">
         <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px">
           <div style="font-size:13px;color:var(--text-2);font-weight:600">Посещено из <span id="stTotal2" style="color:#fff;font-weight:900">0</span></div>
-          <div id="stPercent" style="font-size:26px;font-weight:900;color:var(--accent);letter-spacing:-1.5px">0%</div>
+          <div id="stPercent" style="font-size:26px;font-weight:900;color:var(--accent);letter-spacing:-1.5px;text-shadow:0 0 20px rgba(255,149,0,.5)">0%</div>
         </div>
         <div style="height:8px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden">
-          <div id="stBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .6s var(--ease)"></div>
+          <div id="stBar" style="height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));border-radius:999px;transition:width .6s var(--ease);box-shadow:0 0 12px rgba(255,149,0,.5)"></div>
         </div>
       </div>
     </div>
@@ -619,9 +659,6 @@ input,textarea{font-family:inherit}
 </div>
 
 <script>
-/* ======================================================
-   КАТЕГОРИИ
-====================================================== */
 const CATEGORIES = {
   'Промышленные':   { color: '#ff9500', icon: '🏭' },
   'Медицинские':    { color: '#ff3b30', icon: '🏥' },
@@ -637,9 +674,6 @@ const CATEGORIES = {
 };
 const catOf = c => CATEGORIES[c] || CATEGORIES.default;
 
-/* ======================================================
-   50 ОБЪЕКТОВ
-====================================================== */
 const places = [
   { name:"Возле старого завода", lat:44.96366, lon:34.04886, category:"Промышленные", desc:"Руины возле бывшего завода. Само промышленное здание снесено, остались только фрагменты строений и бетонные основания.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
   { name:"Водонапорная башня", lat:44.965817, lon:34.056448, category:"Инфраструктура", desc:"Старая водонапорная башня XIX–XX века. Есть вероятность, что уже снесена — требуется проверка на местности. Объект в прошлом обеспечивал водой весь район.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
@@ -700,9 +734,6 @@ let ratings   = JSON.parse(localStorage.getItem('urbex_ratings')   || '{}');
 let markers   = [];
 let map, userMarker, currentFilter = 'all', searchTimer;
 
-/* ======================================================
-   CSS-КАПЛЯ (визуально как SVG, но быстро)
-====================================================== */
 function shade(hex, pct){
   const n = parseInt(hex.replace('#',''),16);
   let r = (n>>16)+pct, g = ((n>>8)&0xff)+pct, b = (n&0xff)+pct;
@@ -712,44 +743,44 @@ function shade(hex, pct){
 
 function makeIcon(category, isFav, isVis){
   const c = catOf(category);
-  let c1 = c.color, c2 = shade(c.color, -50);
+  let c1 = c.color, c2 = shade(c.color, -55);
   let icon = c.icon;
+  let symbolClass = '';
   if (isVis){
     c1 = '#4ad66a'; c2 = '#1e8f3c';
     icon = '✓';
+    symbolClass = 'symbol';
   } else if (isFav){
     c1 = '#ffd54a'; c2 = '#d19b00';
     icon = '★';
+    symbolClass = 'symbol';
   }
   return L.divIcon({
     className: '',
     html: `<div class="pin">
-      <div class="pin-body" style="--pin-1:${c1};--pin-2:${c2}">
-        <div class="pin-icon" ${isVis||isFav?'style="filter:none;color:#fff;font-weight:900;font-size:18px"':''}>${icon}</div>
+      <div class="pin-body" style="--c1:${c1};--c2:${c2}">
+        <span class="pin-ic ${symbolClass}">${icon}</span>
       </div>
-      <div class="pin-shadow"></div>
+      <div class="pin-tip"></div>
     </div>`,
-    iconSize: [42, 50],
-    iconAnchor: [21, 46],
-    popupAnchor: [0, -44]
+    iconSize: [38, 46],
+    iconAnchor: [19, 42],
+    popupAnchor: [0, -40]
   });
 }
 
-/* ======================================================
-   КАРТА — МАКСИМАЛЬНАЯ ОПТИМИЗАЦИЯ
-====================================================== */
 function initMap(){
   map = L.map('map', {
     zoomControl: false,
     attributionControl: true,
-    updateWhenIdle: false,       // грузим тайлы сразу, не ждём остановки
-    updateWhenZooming: true,     // грузим во время зума
-    keepBuffer: 4,               // держим больше тайлов в буфере
+    updateWhenIdle: false,
+    updateWhenZooming: true,
+    keepBuffer: 4,
     maxZoom: 19,
     tap: false,
     inertia: true,
     inertiaDeceleration: 3000,
-    zoomAnimation: false,        // ← КЛЮЧЕВОЙ ФИКС: зум без анимации → метки не мигают
+    zoomAnimation: false,
     fadeAnimation: false,
     markerZoomAnimation: false
   }).setView([44.952, 34.10], 12);
@@ -759,7 +790,8 @@ function initMap(){
     subdomains: 'abcd',
     attribution: '© OpenStreetMap · © CARTO',
     detectRetina: false,
-    crossOrigin: true
+    crossOrigin: true,
+    className: 'map-tiles'
   }).addTo(map);
 
   places.forEach((place, index) => {
