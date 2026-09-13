@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Заброшки Симферополя</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #0a0a0a;
+    color: #e8e8e8;
+    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    width: 100%;
+  }
+
+  /* ===== ЭКРАНЫ ===== */
+  .screen {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: none;
+    flex-direction: column;
+    background: #0a0a0a;
+  }
+  .screen.active { display: flex; }
+
+  /* ===== КАРТА ===== */
+  #map { flex: 1; width: 100%; background: #1a1a1a; }
+  .leaflet-tile { filter: brightness(0.7) invert(1) contrast(0.9) hue-rotate(180deg) saturate(0.5); }
+  .leaflet-container { background: #1a1a1a; }
+  .leaflet-popup-content-wrapper {
+    background: #1a1a1a; color: #e8e8e8; border-radius: 8px;
+    border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+  }
+  .leaflet-popup-tip { background: #1a1a1a; border: 1px solid #333; }
+  .leaflet-popup-content { margin: 12px; }
+  .popup-title { font-weight: 700; font-size: 15px; color: #fff; margin-bottom: 6px; }
+  .popup-cat { font-size: 11px; color: #f59e0b; text-transform: uppercase; letter-spacing: 1px; }
+  .popup-btn {
+    display: block; width: 100%; margin-top: 10px; padding: 8px;
+    background: #f59e0b; color: #000; border: none; border-radius: 6px;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+
+  /* ===== ЗАГОЛОВОК ===== */
+  .header {
+    padding: 16px 18px 12px;
+    background: #0a0a0a;
+    border-bottom: 1px solid #1f1f1f;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .header h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+  .header h1 span { color: #f59e0b; }
+  .counter { font-size: 11px; color: #666; }
+
+  /* ===== СПИСКИ ===== */
+  .list { flex: 1; overflow-y: auto; padding: 12px; padding-bottom: 90px; }
+  .card {
+    background: #151515;
+    border: 1px solid #1f1f1f;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .card:active { transform: scale(0.98); border-color: #f59e0b; }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .card-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .card-cat { font-size: 10px; color: #f59e0b; text-transform: uppercase; letter-spacing: 1px; }
+  .card-desc { font-size: 12px; color: #888; margin-top: 8px; line-height: 1.4; }
+  .card-badges { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+  .badge {
+    font-size: 10px; padding: 3px 8px; border-radius: 20px;
+    background: #222; color: #aaa; border: 1px solid #2a2a2a;
+  }
+  .badge.danger-high { background: #3b0d0d; color: #ff5555; border-color: #5a1515; }
+  .badge.danger-mid { background: #3b2a0d; color: #ffaa33; border-color: #5a4015; }
+  .badge.danger-low { background: #0d2a1a; color: #33dd77; border-color: #155a35; }
+  .badge.visited { background: #0d2a1a; color: #33dd77; border-color: #155a35; }
+  .badge.favorite { background: #3b2a0d; color: #ffcc44; border-color: #5a4015; }
+
+  .empty {
+    text-align: center; color: #444; padding: 60px 20px; font-size: 14px;
+  }
+  .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+
+  /* ===== НИЖНЯЯ НАВИГАЦИЯ ===== */
+  .nav {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: #0f0f0f;
+    border-top: 1px solid #1f1f1f;
+    display: flex;
+    padding: 8px 0 12px;
+    z-index: 1000;
+  }
+  .nav-btn {
+    flex: 1; background: none; border: none; color: #555;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    font-size: 10px; cursor: pointer; padding: 6px; transition: color 0.2s;
+    font-family: inherit;
+  }
+  .nav-btn.active { color: #f59e0b; }
+  .nav-icon { font-size: 20px; line-height: 1; }
+
+  /* ===== ЭКРАН КАРТОЧКИ ===== */
+  #detailScreen { background: #0a0a0a; overflow-y: auto; }
+  .detail-image {
+    width: 100%; height: 260px; object-fit: cover; display: block;
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    position: relative;
+  }
+  .detail-image-placeholder {
+    width: 100%; height: 260px;
+    background: linear-gradient(135deg, #151515 0%, #1f1f1f 50%, #151515 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 60px; opacity: 0.3;
+    position: relative;
+  }
+  .detail-image-placeholder::after {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(245,158,11,0.03) 10px, rgba(245,158,11,0.03) 20px);
+  }
+  .back-btn {
+    position: absolute; top: 16px; left: 16px; z-index: 10;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(0,0,0,0.7); border: 1px solid #333;
+    color: #fff; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+  }
+  .detail-body { padding: 20px; padding-bottom: 40px; }
+  .detail-cat { font-size: 11px; color: #f59e0b; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+  .detail-title { font-size: 24px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 16px; }
+  .detail-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .detail-desc { font-size: 15px; line-height: 1.6; color: #bbb; margin-bottom: 24px; }
+
+  .detail-coords {
+    background: #151515; border: 1px solid #1f1f1f; border-radius: 10px;
+    padding: 14px; margin-bottom: 20px; font-family: monospace;
+    font-size: 13px; color: #888;
+  }
+  .detail-coords strong { color: #f59e0b; display: block; margin-bottom: 4px; font-family: sans-serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; }
+
+  .actions-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .action-btn {
+    padding: 14px; border-radius: 10px; border: 1px solid #222;
+    background: #151515; color: #e8e8e8; font-size: 13px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+    text-decoration: none; font-family: inherit; transition: all 0.15s;
+  }
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.active-fav { background: #3b2a0d; border-color: #f59e0b; color: #f59e0b; }
+  .action-btn.active-vis { background: #0d2a1a; border-color: #33dd77; color: #33dd77; }
+  .action-btn.google { background: #1a2332; border-color: #2a3a52; color: #6ba3ff; }
+  .action-btn.yandex { background: #2a1515; border-color: #521f1f; color: #ff6b4a; }
+
+  /* ===== КНОПКА ЛОКАЦИИ ===== */
+  .locate-btn {
+    position: absolute; bottom: 100px; right: 16px; z-index: 500;
+    width: 48px; height: 48px; border-radius: 50%;
+    background: #1a1a1a; border: 1px solid #333; color: #f59e0b;
+    font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  }
+</style>
+</head>
+<body>
+
+<!-- ЭКРАН 1: КАРТА -->
+<div id="mapScreen" class="screen active">
+  <div id="map"></div>
+  <button class="locate-btn" onclick="locateMe()">◎</button>
+</div>
+
+<!-- ЭКРАН 2: ВСЕ ОБЪЕКТЫ -->
+<div id="listScreen" class="screen">
+  <div class="header">
+    <h1>ВСЕ <span>ОБЪЕКТЫ</span></h1>
+    <div class="counter" id="listCounter"></div>
+  </div>
+  <div class="list" id="listContainer"></div>
+</div>
+
+<!-- ЭКРАН 3: ИЗБРАННОЕ -->
+<div id="favScreen" class="screen">
+  <div class="header">
+    <h1>⭐ <span>ИЗБРАННОЕ</span></h1>
+    <div class="counter" id="favCounter"></div>
+  </div>
+  <div class="list" id="favContainer"></div>
+</div>
+
+<!-- ЭКРАН 4: Я ЗДЕСЬ БЫЛ -->
+<div id="visitedScreen" class="screen">
+  <div class="header">
+    <h1>✅ <span>Я ЗДЕСЬ БЫЛ</span></h1>
+    <div class="counter" id="visitedCounter"></div>
+  </div>
+  <div class="list" id="visitedContainer"></div>
+</div>
+
+<!-- ЭКРАН 5: КАРТОЧКА ОБЪЕКТА -->
+<div id="detailScreen" class="screen">
+  <button class="back-btn" onclick="closeDetail()">←</button>
+  <div id="detailContent"></div>
+</div>
+
+<!-- НИЖНЯЯ НАВИГАЦИЯ -->
+<div class="nav" id="mainNav">
+  <button class="nav-btn active" data-screen="mapScreen" onclick="switchScreen('mapScreen')">
+    <span class="nav-icon">🗺</span><span>Карта</span>
+  </button>
+  <button class="nav-btn" data-screen="listScreen" onclick="switchScreen('listScreen')">
+    <span class="nav-icon">📋</span><span>Объекты</span>
+  </button>
+  <button class="nav-btn" data-screen="favScreen" onclick="switchScreen('favScreen')">
+    <span class="nav-icon">⭐</span><span>Избранное</span>
+  </button>
+  <button class="nav-btn" data-screen="visitedScreen" onclick="switchScreen('visitedScreen')">
+    <span class="nav-icon">✅</span><span>Посещено</span>
+  </button>
+</div>
+
+<script>
+// ================= ДАННЫЕ =================
+// Поле image: сюда можно вставить ссылку на картинку. Если пусто — будет заглушка.
+var places = [
+  { name: "Птицекомбинат", lat: 44.962926, lon: 34.046303, category: "Промышленные", desc: "Бывший птицекомбинат. Сохранились остатки корпусов и хозяйственных построек, территория частично заросла.", danger: "Средняя", image: "" },
+  { name: "Комплекс разрушенных заводов", lat: 44.862878, lon: 34.046122, category: "Промышленные", desc: "Территория бывшего промышленного комплекса. Остались фрагменты стен и фундаментов, объект постепенно сносится.", danger: "Средняя", image: "" },
+  { name: "Котельная", lat: 44.941227, lon: 34.083173, category: "Промышленные", desc: "Старая котельная. Сохранились кирпичные стены и дымоход. Внутри возможны обвалы.", danger: "Средняя", image: "" },
+  { name: "Многоэтажное индустриальное строение", lat: 44.937837, lon: 34.067297, category: "Промышленные", desc: "Крупное многоэтажное здание с открытыми пролётами между этажами. Требует осторожности.", danger: "Высокая", image: "" },
+  { name: "Сильно разрушенный склад/завод", lat: 44.924591, lon: 34.139754, category: "Промышленные", desc: "Остатки производственного здания. Стены частично обрушены, доступ свободный.", danger: "Средняя", image: "" },
+  { name: "Разрушенная автомойка", lat: 44.973972, lon: 34.034062, category: "Промышленные", desc: "Бывшая автомойка. Остались только фрагменты стен, доступ свободный.", danger: "Низкая", image: "" },
+  { name: "Резервуары после колхоза", lat: 44.973146, lon: 34.034288, category: "Промышленные", desc: "Металлические резервуары на открытой территории. Объект не используется.", danger: "Низкая", image: "" },
+  { name: "Недостроенный комплекс больницы", lat: 44.967912, lon: 34.092683, category: "Медицинские", desc: "Каркас и перекрытия без отделки. Открытые шахты лифтов, высокая опасность падения.", danger: "Высокая", image: "" },
+  { name: "Недостроенное крыло больницы", lat: 44.967835, lon: 34.092533, category: "Медицинские", desc: "Недостроенное крыло с признаками подвальных и защитных помещений. Возможно, бомбоубежище.", danger: "Высокая", image: "" },
+  { name: "Заброшенная стройка", lat: 44.946488, lon: 34.120455, category: "Недострои", desc: "Открытая площадка с бетонными конструкциями. Каркас без отделки.", danger: "Средняя", image: "" },
+  { name: "Усадьба Монжене (Замок графини)", lat: 44.87778, lon: 34.19477, category: "Исторические", desc: "Неоготический замок XIX века в селе Пионерское. Руины, ищут инвестора для восстановления.", danger: "Средняя", image: "" },
+  { name: "Усадьба Арендтов-Ребец", lat: 44.954188, lon: 34.094748, category: "Исторические", desc: "Памятник архитектуры на ул. Карла Маркса / Долгоруковская. Находится в реставрации.", danger: "Низкая", image: "" },
+  { name: "Недостроенный замок", lat: 44.914372, lon: 34.150359, category: "Исторические", desc: "Неоконченное строение с элементами замковой архитектуры. Частично возведено.", danger: "Средняя", image: "" },
+  { name: "Старый Телеграф", lat: 44.954202, lon: 34.094673, category: "Исторические", desc: "Здание, связанное с телеграфной сетью. Принимало важные сообщения, включая исторические.", danger: "Средняя", image: "" },
+  { name: "Дом, сильно разрушен и зарос", lat: 44.960202, lon: 33.967056, category: "Жилые", desc: "Дом почти полностью разрушен, территория сильно заросла травой. Проходимость затруднена.", danger: "Средняя", image: "" },
+  { name: "Руины дома", lat: 44.863009, lon: 34.247229, category: "Жилые", desc: "Остатки жилого дома. Доступ свободный, опасность низкая.", danger: "Низкая", image: "" },
+  { name: "Бетонный дом", lat: 44.965474, lon: 34.110088, category: "Жилые", desc: "Монолитное бетонное здание без отделки. Частично сохранилось.", danger: "Средняя", image: "" },
+  { name: "Кинотеатр «Симферополь»", lat: 44.952629, lon: 34.103489, category: "Культурные", desc: "Знаковый кинотеатр города с узнаваемым фасадом. Охраняется, возможна реставрация.", danger: "Низкая", image: "" },
+  { name: "Водонапорная башня", lat: 44.965817, lon: 34.056448, category: "Инфраструктура", desc: "Объект требует повторной проверки на местности. Возможно, уже снесён.", danger: "Неизвестно", image: "" },
+  { name: "Вертикальная шахта", lat: 44.915585, lon: 34.113622, category: "Инфраструктура", desc: "Вертикальный ствол шахты. Вход может быть перекрыт, высокая опасность падения.", danger: "Высокая", image: "" },
+  { name: "Военный объект, руины", lat: 44.84346, lon: 34.04080, category: "Военные", desc: "Остатки военного объекта. Состояние нестабильное, возможна уборка территории.", danger: "Средняя", image: "" },
+  { name: "Возможный бункер / руины дачи", lat: 44.81748, lon: 34.12188, category: "Военные", desc: "Может быть бункером либо руинами дачи. Требуется уточнение на месте.", danger: "Средняя", image: "" },
+  { name: "Возможно заброшенный самолёт", lat: 44.962241, lon: 35.252233, category: "Транспортные", desc: "Требуется выездная проверка — объект может отсутствовать или быть вывезен.", danger: "Неизвестно", image: "" },
+  { name: "Здание возле завода", lat: 44.97327, lon: 34.09025, category: "Промышленные", desc: "Примыкает к заводской территории. Частично сохранилось, доступ сложный.", danger: "Средняя", image: "" },
+  { name: "Двухэтажное бетонное здание", lat: 45.017935, lon: 34.057360, category: "Промышленные", desc: "Простое бетонное здание без отделки. Заброшено.", danger: "Средняя", image: "" },
+  { name: "Заброшенное здание возле ж/д путей", lat: 45.043498, lon: 34.028511, category: "Транспортные", desc: "Находится рядом с железнодорожными путями. Частично сохранилось.", danger: "Средняя", image: "" },
+  { name: "Заброшенная пожарная часть, ул. Речная 3", lat: 44.959336, lon: 34.093751, category: "Инфраструктура", desc: "4 этажа, лестница на крышу, охраны нет. Есть выход на крышу.", danger: "Средняя", image: "" },
+  { name: "Долгострой, пр. Академика Вернадского 97", lat: 44.937526, lon: 34.132046, category: "Недострои", desc: "Подвал и 2 этажа. Вид на Парк Сити, граффити на стенах.", danger: "Средняя", image: "" },
+  { name: "Заброшка на ул. Радищева", lat: 44.931815, lon: 34.131229, category: "Жилые", desc: "2–3 этажа, есть выход на крышу, рядом озеро. Хороший вид.", danger: "Средняя", image: "" }
+];
+
+// ================= СОСТОЯНИЕ =================
+var favorites = JSON.parse(localStorage.getItem('urbex_favorites') || '[]');
+var visited = JSON.parse(localStorage.getItem('urbex_visited') || '[]');
+var markers = [];
+var map;
+
+// ================= ИНИЦИАЛИЗАЦИЯ КАРТЫ =================
+function initMap() {
+  map = L.map('map', { zoomControl: false }).setView([44.95, 34.10], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap',
+    maxZoom: 19
+  }).addTo(map);
+
+  places.forEach(function(place, index) {
+    var marker = L.marker([place.lat, place.lon]).addTo(map);
+    markers.push({ marker: marker, data: place, index: index });
+
+    marker.bindPopup(
+      '<div class="popup-cat">' + place.category + '</div>' +
+      '<div class="popup-title">' + place.name + '</div>' +
+      '<button class="popup-btn" onclick="openDetail(' + index + ')">Открыть карточку →</button>'
+    );
+  });
+  updateMarkerIcons();
+}
+
+// ================= ЦВЕТА МАРКЕРОВ =================
+function updateMarkerIcons() {
+  markers.forEach(function(m) {
+    var url = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png';
+    if (visited.indexOf(m.index) !== -1) url = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png';
+    else if (favorites.indexOf(m.index) !== -1) url = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png';
+    else url = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png';
+
+    m.marker.setIcon(L.icon({
+      iconUrl: url,
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+      iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]
+    }));
+  });
+}
+
+// ================= НАВИГАЦИЯ =================
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.screen === id);
+  });
+  document.getElementById('mainNav').style.display = (id === 'detailScreen') ? 'none' : 'flex';
+
+  if (id === 'listScreen') renderList('listContainer', places.map(function(_, i) { return i; }), 'listCounter');
+  if (id === 'favScreen') renderList('favContainer', favorites, 'favCounter');
+  if (id === 'visitedScreen') renderList('visitedContainer', visited, 'visitedCounter');
+
+  if (id === 'mapScreen' && map) setTimeout(function() { map.invalidateSize(); }, 100);
+}
+
+// ================= РЕНДЕР СПИСКОВ =================
+function renderList(containerId, indices, counterId) {
+  var c = document.getElementById(containerId);
+  document.getElementById(counterId).textContent = indices.length + ' мест';
+  if (indices.length === 0) {
+    c.innerHTML = '<div class="empty"><div class="empty-icon">' +
+      (containerId === 'favContainer' ? '⭐' : containerId === 'visitedContainer' ? '✅' : '📭') +
+      '</div>' + (containerId === 'favContainer' ? 'Пока ничего не добавлено в избранное' :
+      containerId === 'visitedContainer' ? 'Пока нет посещённых мест' : 'Нет объектов') + '</div>';
+    return;
+  }
+  c.innerHTML = indices.map(function(i) { return buildCard(places[i], i); }).join('');
+}
+
+function buildCard(p, index) {
+  var dangerClass = p.danger === 'Высокая' ? 'danger-high' : p.danger === 'Средняя' ? 'danger-mid' : p.danger === 'Низкая' ? 'danger-low' : '';
+  var badges = '<span class="badge ' + dangerClass + '">⚠ ' + p.danger + '</span>';
+  if (favorites.indexOf(index) !== -1) badges += '<span class="badge favorite">⭐ В избранном</span>';
+  if (visited.indexOf(index) !== -1) badges += '<span class="badge visited">✅ Посещено</span>';
+
+  return '<div class="card" onclick="openDetail(' + index + ')">' +
+    '<div class="card-top"><div>' +
+    '<div class="card-cat">' + p.category + '</div>' +
+    '<div class="card-title">' + p.name + '</div>' +
+    '</div></div>' +
+    '<div class="card-desc">' + p.desc + '</div>' +
+    '<div class="card-badges">' + badges + '</div>' +
+    '</div>';
+}
+
+// ================= КАРТОЧКА ОБЪЕКТА =================
+function openDetail(index) {
+  var p = places[index];
+  var isFav = favorites.indexOf(index) !== -1;
+  var isVis = visited.indexOf(index) !== -1;
+  var dangerClass = p.danger === 'Высокая' ? 'danger-high' : p.danger === 'Средняя' ? 'danger-mid' : p.danger === 'Низкая' ? 'danger-low' : '';
+
+  var imageHtml = p.image
+    ? '<img class="detail-image" src="' + p.image + '" alt="' + p.name + '">'
+    : '<div class="detail-image-placeholder">🏚</div>';
+
+  var html =
+    imageHtml +
+    '<div class="detail-body">' +
+      '<div class="detail-cat">' + p.category + '</div>' +
+      '<h1 class="detail-title">' + p.name + '</h1>' +
+      '<div class="detail-badges">' +
+        '<span class="badge ' + dangerClass + '">⚠ Опасность: ' + p.danger + '</span>' +
+        (isFav ? '<span class="badge favorite">⭐ В избранном</span>' : '') +
+        (isVis ? '<span class="badge visited">✅ Посещено</span>' : '') +
+      '</div>' +
+      '<p class="detail-desc">' + p.desc + '</p>' +
+      '<div class="detail-coords"><strong>Координаты</strong>' + p.lat.toFixed(6) + ', ' + p.lon.toFixed(6) + '</div>' +
+      '<div class="actions-grid">' +
+        '<button class="action-btn ' + (isFav ? 'active-fav' : '') + '" onclick="toggleFav(' + index + ')">⭐ ' + (isFav ? 'В избранном' : 'В избранное') + '</button>' +
+        '<button class="action-btn ' + (isVis ? 'active-vis' : '') + '" onclick="toggleVis(' + index + ')">✅ ' + (isVis ? 'Я здесь был' : 'Отметить') + '</button>' +
+        '<a class="action-btn google" href="https://www.google.com/maps/dir/?api=1&destination=' + p.lat + ',' + p.lon + '" target="_blank">Google Карты</a>' +
+        '<a class="action-btn yandex" href="https://yandex.ru/maps/?rtext=~' + p.lat + ',' + p.lon + '&rtt=auto" target="_blank">Яндекс Карты</a>' +
+      '</div>' +
+    '</div>';
+
+  document.getElementById('detailContent').innerHTML = html;
+  switchScreen('detailScreen');
+  document.getElementById('detailScreen').scrollTop = 0;
+}
+
+function closeDetail() {
+  switchScreen('mapScreen');
+}
+
+// ================= ИЗБРАННОЕ И ПОСЕЩЁННОЕ =================
+function toggleFav(index) {
+  var pos = favorites.indexOf(index);
+  if (pos === -1) favorites.push(index); else favorites.splice(pos, 1);
+  localStorage.setItem('urbex_favorites', JSON.stringify(favorites));
+  updateMarkerIcons();
+  openDetail(index); // перерисовываем карточку
+}
+
+function toggleVis(index) {
+  var pos = visited.indexOf(index);
+  if (pos === -1) visited.push(index); else visited.splice(pos, 1);
+  localStorage.setItem('urbex_visited', JSON.stringify(visited));
+  updateMarkerIcons();
+  openDetail(index);
+}
+
+// ================= ГЕОЛОКАЦИЯ =================
+function locateMe() {
+  if (!navigator.geolocation) { alert('Геолокация не поддерживается'); return; }
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    map.setView([pos.coords.latitude, pos.coords.longitude], 15);
+    L.circleMarker([pos.coords.latitude, pos.coords.longitude], {
+      radius: 8, color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.6, weight: 2
+    }).addTo(map).bindPopup('Вы здесь').openPopup();
+  }, function() { alert('Не удалось определить местоположение'); });
+}
+
+// ================= СТАРТ =================
+initMap();
+renderList('listContainer', places.map(function(_, i) { return i; }), 'listCounter');
+</script>
+</body>
+</html>
