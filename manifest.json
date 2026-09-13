@@ -2,8 +2,8 @@
   "name": "Заброшки Симферополя",
   "short_name": "Заброшки",
   "description": "Карта заброшенных мест Симферополя",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/UrbaxA5000/",
+  "scope": "/UrbaxA5000/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#000000",
@@ -11,7 +11,7 @@
   "lang": "ru",
   "icons": [
     {
-      "src": "./icon.svg",
+      "src": "/UrbaxA5000/icon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
