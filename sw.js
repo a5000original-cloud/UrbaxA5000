@@ -1,4 +1,4 @@
-const CACHE_NAME = 'abandoned-v1';
+const CACHE_NAME = 'urbaxa-v1';
 const ASSETS = [
   './',
   './index.html',
