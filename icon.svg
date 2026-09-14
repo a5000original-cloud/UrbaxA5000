@@ -1,12 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffb340"/>
-      <stop offset="1" stop-color="#ff9500"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1a1a20"/><stop offset="1" stop-color="#000"/>
     </linearGradient>
+    <linearGradient id="pin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb340"/><stop offset="1" stop-color="#ff9500"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff9500" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#ff9500" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect width="512" height="512" rx="96" fill="#000"/>
-  <path d="M256 80 C170 80 100 150 100 236 C100 322 200 400 256 440 C312 400 412 322 412 236 C412 150 342 80 256 80 Z"
-        fill="url(#g)" stroke="#fff" stroke-width="16"/>
-  <circle cx="256" cy="220" r="52" fill="#000" opacity="0.85"/>
+  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="115" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/>
+  <circle cx="256" cy="240" r="180" fill="url(#glow)"/>
+  <path d="M256 70 C176 70 110 136 110 216 C110 306 206 388 256 430 C306 388 402 306 402 216 C402 136 336 70 256 70 Z"
+        fill="url(#pin)" stroke="#fff" stroke-width="14" stroke-linejoin="round"/>
+  <circle cx="256" cy="210" r="56" fill="#000" opacity=".9"/>
+  <text x="256" y="228" text-anchor="middle" font-family="Inter,system-ui,sans-serif"
+        font-size="60" font-weight="900" fill="#ff9500" letter-spacing="-2">A</text>
+  <text x="256" y="472" text-anchor="middle" font-family="Inter,system-ui,sans-serif"
+        font-size="24" font-weight="800" fill="#5a5a60" letter-spacing="6">A5000</text>
 </svg>
