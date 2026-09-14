@@ -1,7 +1,7 @@
 {
   "name": "UrbaxA5000",
   "short_name": "UrbaxA5000",
-  "description": "Карта заброшенных мест Симферополя",
+  "description": "Карта заброшенных мест. Исследуй. Находи. Помни. · A5000 Labs",
   "start_url": "/UrbaxA5000/",
   "scope": "/UrbaxA5000/",
   "display": "standalone",
@@ -9,12 +9,9 @@
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "ru",
+  "categories": ["travel", "navigation", "lifestyle"],
   "icons": [
-    {
-      "src": "/UrbaxA5000/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any maskable"
-    }
+    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
   ]
 }
