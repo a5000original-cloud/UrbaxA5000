@@ -10,7 +10,7 @@
 <title>UrbaxA5000</title>
 <link rel="manifest" href="./manifest.json">
 <link rel="apple-touch-icon" href="./icon.svg">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffb340'/%3E%3Cstop offset='1' stop-color='%23ff9500'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M32 4 C18 4 8 14 8 28 C8 42 22 54 32 60 C42 54 56 42 56 28 C56 14 46 4 32 4 Z' fill='url(%23g)' stroke='%23fff' stroke-width='3'/%3E%3Ccircle cx='32' cy='26' r='9' fill='%23000' opacity='.85'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="./icon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -27,426 +27,286 @@
   --text-3:#5a5a60;
   --accent:#ff9500;
   --accent-2:#f59e0b;
+  --green:#34c759;
   --nav-h:68px;
   --ease:cubic-bezier(.32,.72,0,1);
   --solid-panel:rgba(14,14,17,.94);
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none;position:fixed;inset:0}
-body{
-  font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
-  background:var(--bg);color:var(--text);
-  overflow:hidden;font-size:15px;line-height:1.5;
-  -webkit-font-smoothing:antialiased;
-}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 ::-webkit-scrollbar{width:0;height:0}
 img{display:block;max-width:100%}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;-webkit-user-select:none;user-select:none}
 input,textarea{font-family:inherit}
-
 .screen{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg)}
 .screen.active{display:flex}
 .screen.detail-active{animation:slideIn .25s var(--ease)}
 @keyframes slideIn{from{transform:translateX(24px);opacity:0}to{transform:translateX(0);opacity:1}}
-
-/* КАРТА */
 #map{flex:1;background:#0a0a0c;z-index:1}
 .leaflet-container{background:#0a0a0c;font-family:'Inter',sans-serif;outline:none;-webkit-tap-highlight-color:transparent}
-.leaflet-control-attribution{
-  background:rgba(0,0,0,.55)!important;color:#555!important;
-  font-size:9px!important;padding:2px 6px!important;border-radius:8px 0 0 0!important;
-}
+.leaflet-control-attribution{background:rgba(0,0,0,.55)!important;color:#555!important;font-size:9px!important;padding:2px 6px!important;border-radius:8px 0 0 0!important}
 .leaflet-control-attribution a{color:#777!important}
 .leaflet-marker-icon{transition:none!important;will-change:auto}
 .leaflet-zoom-animated{transition:none!important}
-
-/* POPUP */
-.leaflet-popup-content-wrapper{
-  background:var(--solid-panel)!important;
-  color:var(--text);border-radius:14px!important;
-  border:1px solid var(--border-2);
-  box-shadow:0 20px 60px rgba(0,0,0,.75);
-  padding:0;overflow:hidden;
-}
+.tiles-satellite{filter:brightness(0.55) saturate(0.75) contrast(1.15) hue-rotate(-8deg)}
+.leaflet-popup-content-wrapper{background:var(--solid-panel)!important;color:var(--text);border-radius:14px!important;border:1px solid var(--border-2);box-shadow:0 20px 60px rgba(0,0,0,.75);padding:0;overflow:hidden}
 .leaflet-popup-content{margin:0;width:auto!important;line-height:1.4}
 .leaflet-popup-tip{background:var(--solid-panel)!important;border:1px solid var(--border-2)}
 .leaflet-popup-close-button{color:#888!important;font-size:22px!important;padding:8px 8px 0 0!important;z-index:10}
 .popup-card{padding:13px 15px 15px;min-width:190px;max-width:240px}
 .popup-cat{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
 .popup-title{font-size:14.5px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:10px}
-.popup-btn{
-  display:flex;align-items:center;justify-content:center;
-  width:100%;padding:10px;margin-top:4px;
-  background:linear-gradient(180deg,#ffb340,var(--accent));
-  color:#000;font-weight:800;font-size:12px;border-radius:10px;
-  transition:transform .15s var(--ease);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4);
-}
+.popup-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:10px;margin-top:4px;background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;font-weight:800;font-size:12px;border-radius:10px;transition:transform .15s var(--ease);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 .popup-btn:active{transform:scale(.96)}
-
-/* МАРКЕРЫ — МИНИМАЛЬНЫЙ DOM */
-.pin{
-  width:34px;height:34px;
-  border-radius:50% 50% 50% 0;
-  transform:rotate(-45deg);
-  transform-origin:center;
-  background:linear-gradient(135deg,var(--c1),var(--c2));
-  border:2.5px solid #fff;
-  box-shadow:0 3px 6px rgba(0,0,0,.55);
-  display:flex;align-items:center;justify-content:center;
-  contain:layout style;
-}
-.pin span{
-  transform:rotate(45deg);
-  font-size:14px;
-  line-height:1;
-  display:block;
-  font-weight:900;
-  color:#fff;
-  text-shadow:0 1px 2px rgba(0,0,0,.4);
-}
+.pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);transform-origin:center;background:linear-gradient(135deg,var(--c1),var(--c2));border:2.5px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;contain:layout style}
+.pin span{transform:rotate(45deg);font-size:14px;line-height:1;display:block;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4)}
 .pin.emoji span{font-size:15px;text-shadow:none}
-
-/* ВЕРХ КАРТЫ */
-.map-top{
-  position:absolute;top:0;left:0;right:0;z-index:400;
-  padding:14px 14px 6px;padding-top:calc(14px + env(safe-area-inset-top));
-  pointer-events:none;
-}
+.map-top{position:absolute;top:0;left:0;right:0;z-index:400;padding:14px 14px 6px;padding-top:calc(14px + env(safe-area-inset-top));pointer-events:none}
 .map-top > *{pointer-events:auto}
-.search-wrap{
-  display:flex;align-items:center;gap:10px;
-  background:var(--solid-panel);
-  border:1px solid var(--border);
-  border-radius:16px;padding:12px 15px;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);
-}
+.search-wrap{display:flex;align-items:center;gap:10px;background:var(--solid-panel);border:1px solid var(--border);border-radius:16px;padding:12px 15px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
 .search-wrap:focus-within{border-color:rgba(255,149,0,.55)}
 .search-wrap svg{flex-shrink:0;color:var(--text-3)}
-.search-wrap input{
-  flex:1;background:none;border:none;outline:none;
-  color:var(--text);font-size:15px;font-weight:500;
-}
+.search-wrap input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:15px;font-weight:500}
 .search-wrap input::placeholder{color:var(--text-3)}
-
-.chips-row{
-  display:flex;gap:8px;overflow-x:auto;
-  margin-top:10px;padding-bottom:6px;
-  scrollbar-width:none;-ms-overflow-style:none;
-  -webkit-overflow-scrolling:touch;
-}
+.chips-row{display:flex;gap:8px;overflow-x:auto;margin-top:10px;padding-bottom:6px;scrollbar-width:none;-ms-overflow-style:none;-webkit-overflow-scrolling:touch}
 .chips-row::-webkit-scrollbar{display:none}
-.chip{
-  flex-shrink:0;display:flex;align-items:center;gap:6px;
-  padding:9px 14px;border-radius:999px;
-  background:var(--solid-panel);
-  border:1px solid var(--border);
-  color:var(--text-2);font-size:12.5px;font-weight:700;
-  transition:transform .15s var(--ease);
-  white-space:nowrap;
-}
+.chip{flex-shrink:0;display:flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;background:var(--solid-panel);border:1px solid var(--border);color:var(--text-2);font-size:12.5px;font-weight:700;transition:transform .15s var(--ease);white-space:nowrap}
 .chip:active{transform:scale(.94)}
-.chip.active{
-  background:linear-gradient(180deg,#ffb340,var(--accent));
-  color:#000;border-color:transparent;
-  box-shadow:0 4px 16px rgba(255,149,0,.45),inset 0 1px 0 rgba(255,255,255,.4);
-}
-.chip-count{
-  background:rgba(0,0,0,.15);padding:1px 6px;border-radius:999px;
-  font-size:10px;font-weight:800;
-}
+.chip.active{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;border-color:transparent;box-shadow:0 4px 16px rgba(255,149,0,.45),inset 0 1px 0 rgba(255,255,255,.4)}
+.chip-count{background:rgba(0,0,0,.15);padding:1px 6px;border-radius:999px;font-size:10px;font-weight:800}
 .chip:not(.active) .chip-count{background:rgba(255,255,255,.08);color:var(--text-2)}
-
-.map-fabs{
-  position:absolute;right:14px;bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));
-  z-index:400;display:flex;flex-direction:column;gap:10px;
-}
-.fab{
-  width:48px;height:48px;border-radius:15px;
-  background:var(--solid-panel);
-  border:1px solid var(--border);
-  color:var(--text);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 8px 24px rgba(0,0,0,.5);
-  transition:transform .15s var(--ease);
-}
+.map-fabs{position:absolute;right:14px;bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));z-index:400;display:flex;flex-direction:column;gap:10px}
+.fab{width:48px;height:48px;border-radius:15px;background:var(--solid-panel);border:1px solid var(--border);color:var(--text);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.5);transition:transform .15s var(--ease)}
 .fab:active{transform:scale(.9)}
-.fab.primary{
-  background:linear-gradient(180deg,#ffb340,var(--accent));
-  color:#000;border-color:transparent;
-  box-shadow:0 8px 24px rgba(255,149,0,.5),inset 0 1px 0 rgba(255,255,255,.4);
-}
-
-/* НАВИГАЦИЯ */
-.nav{
-  position:absolute;bottom:0;left:0;right:0;
-  height:calc(var(--nav-h) + env(safe-area-inset-bottom));
-  padding-bottom:env(safe-area-inset-bottom);
-  background:var(--solid-panel);
-  border-top:1px solid var(--border);
-  display:flex;z-index:1000;
-}
-.nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:4px;color:var(--text-3);font-size:10px;font-weight:600;
-  transition:color .15s var(--ease);position:relative;padding-top:6px;
-}
+.fab.primary{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;border-color:transparent;box-shadow:0 8px 24px rgba(255,149,0,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.layer-switch{position:absolute;right:14px;bottom:calc(var(--nav-h) + 24px + env(safe-area-inset-bottom) + 116px);z-index:400;display:flex;flex-direction:column;gap:4px;background:var(--solid-panel);border:1px solid var(--border);border-radius:15px;padding:4px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.layer-btn{width:40px;height:40px;border-radius:11px;color:var(--text-3);display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease)}
+.layer-btn:active{transform:scale(.9)}
+.layer-btn.active{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.nav{position:absolute;bottom:0;left:0;right:0;height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--solid-panel);border-top:1px solid var(--border);display:flex;z-index:1000}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--text-3);font-size:10px;font-weight:600;transition:color .15s var(--ease);position:relative;padding-top:6px}
 .nav-btn svg{width:22px;height:22px;stroke-width:2.2}
 .nav-btn.active{color:var(--accent)}
 .nav-btn.active svg{filter:drop-shadow(0 0 6px rgba(255,149,0,.7))}
-.nav-btn.active::before{
-  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
-  width:26px;height:3px;border-radius:0 0 4px 4px;
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  box-shadow:0 2px 10px rgba(255,149,0,.7);
-}
-.nav-badge{
-  position:absolute;top:5px;right:calc(50% - 22px);
-  min-width:16px;height:16px;padding:0 4px;
-  background:var(--accent);color:#000;
-  border-radius:999px;font-size:9px;font-weight:900;
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid #000;
-}
-
-/* СПИСКИ */
-.scr-header{
-  padding:20px 20px 14px;padding-top:calc(20px + env(safe-area-inset-top));
-  display:flex;justify-content:space-between;align-items:flex-end;
-  border-bottom:1px solid var(--border);
-  background:var(--bg);
-  position:sticky;top:0;z-index:10;
-}
-.scr-header h1{
-  font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1;
-  background:linear-gradient(180deg,#fff 0%,#888 130%);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  background-clip:text;
-}
-.scr-header h1 em{
-  font-style:normal;color:var(--accent);-webkit-text-fill-color:var(--accent);
-  text-shadow:0 0 24px rgba(255,149,0,.5);
-}
+.nav-btn.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:26px;height:3px;border-radius:0 0 4px 4px;background:linear-gradient(90deg,var(--accent),var(--accent-2));box-shadow:0 2px 10px rgba(255,149,0,.7)}
+.nav-badge{position:absolute;top:5px;right:calc(50% - 22px);min-width:16px;height:16px;padding:0 4px;background:var(--accent);color:#000;border-radius:999px;font-size:9px;font-weight:900;display:flex;align-items:center;justify-content:center;border:2px solid #000}
+.scr-header{padding:20px 20px 14px;padding-top:calc(20px + env(safe-area-inset-top));display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:0;z-index:10}
+.scr-header h1{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1;background:linear-gradient(180deg,#fff 0%,#888 130%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.scr-header h1 em{font-style:normal;color:var(--accent);-webkit-text-fill-color:var(--accent);text-shadow:0 0 24px rgba(255,149,0,.5)}
 .scr-counter{font-size:11px;color:var(--text-3);font-weight:700}
-.list{
-  flex:1;overflow-y:auto;padding:14px 14px calc(var(--nav-h) + 24px);
-  -webkit-overflow-scrolling:touch;overscroll-behavior:contain;
-}
-
-.card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  margin-bottom:10px;
-  overflow:hidden;
-  transition:transform .15s var(--ease);
-  position:relative;
-}
-.card::before{
-  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:var(--cat-color,#8e8e93);
-}
+.list{flex:1;overflow-y:auto;padding:14px 14px calc(var(--nav-h) + 24px);-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden;transition:transform .15s var(--ease);position:relative}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--cat-color,#8e8e93)}
 .card:active{transform:scale(.985)}
 .card-inner{padding:14px 16px 14px 20px}
-.card-cat{
-  font-size:10px;font-weight:800;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--cat-color,#8e8e93);margin-bottom:5px;
-}
+.card-cat{font-size:10px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--cat-color,#8e8e93);margin-bottom:5px}
 .card-title{font-size:15.5px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:6px}
-.card-desc{
-  font-size:12.5px;color:var(--text-2);line-height:1.5;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
-}
+.card-desc{font-size:12.5px;color:var(--text-2);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card-foot{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-
-.badge{
-  font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;
-  background:rgba(255,255,255,.06);color:var(--text-2);
-  display:inline-flex;align-items:center;gap:3px;
-}
+.badge{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;background:rgba(255,255,255,.06);color:var(--text-2);display:inline-flex;align-items:center;gap:3px}
 .badge.d-high{background:rgba(255,59,48,.15);color:#ff6b6b}
 .badge.d-mid{background:rgba(255,149,0,.15);color:var(--accent)}
 .badge.d-low{background:rgba(52,199,89,.15);color:#4ade80}
 .badge.visited{background:rgba(52,199,89,.15);color:#4ade80}
 .badge.fav{background:rgba(255,149,0,.15);color:var(--accent)}
-
 .empty{text-align:center;color:var(--text-3);padding:80px 30px;font-size:13.5px;line-height:1.6}
 .empty .ic{font-size:56px;margin-bottom:18px;opacity:.25;display:block}
 .empty strong{display:block;color:var(--text-2);font-size:16px;font-weight:800;margin-bottom:8px}
-
-/* КАРТОЧКА */
 #detailScreen{overflow-y:auto;-webkit-overflow-scrolling:touch;background:var(--bg)}
 .hero{position:relative;height:300px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0a0c}
-.hero::after{
-  content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 30%,transparent 55%,var(--bg) 100%);
-  pointer-events:none;z-index:1;
-}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.4) 0%,transparent 30%,transparent 55%,var(--bg) 100%);pointer-events:none;z-index:1}
 .hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.hero-placeholder{
-  position:absolute;inset:0;
-  display:flex;align-items:center;justify-content:center;
-  background:
-    radial-gradient(circle at 25% 25%,var(--cat-color,#ff9500) 0%,transparent 55%),
-    radial-gradient(circle at 75% 75%,#0a84ff 0%,transparent 55%),
-    linear-gradient(135deg,#0f0f12 0%,#1a1a20 100%);
-  background-blend-mode:soft-light,soft-light,normal;
-  opacity:.9;
-}
+.hero-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 25% 25%,var(--cat-color,#ff9500) 0%,transparent 55%),radial-gradient(circle at 75% 75%,#0a84ff 0%,transparent 55%),linear-gradient(135deg,#0f0f12 0%,#1a1a20 100%);background-blend-mode:soft-light,soft-light,normal;opacity:.9}
 .hero-emoji{position:relative;z-index:1;font-size:100px;opacity:.35}
-.hero-top{
-  position:absolute;top:0;left:0;right:0;z-index:5;
-  padding:16px;padding-top:calc(16px + env(safe-area-inset-top));
-  display:flex;justify-content:space-between;
-}
-.icon-btn{
-  width:42px;height:42px;border-radius:14px;
-  background:rgba(10,10,12,.78);
-  border:1px solid var(--border-2);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  transition:transform .15s var(--ease);
-}
+.hero-top{position:absolute;top:0;left:0;right:0;z-index:5;padding:16px;padding-top:calc(16px + env(safe-area-inset-top));display:flex;justify-content:space-between}
+.icon-btn{width:42px;height:42px;border-radius:14px;background:rgba(10,10,12,.78);border:1px solid var(--border-2);color:#fff;display:flex;align-items:center;justify-content:center;transition:transform .15s var(--ease)}
 .icon-btn:active{transform:scale(.9)}
-
 .detail-body{padding:0 20px 60px;margin-top:-34px;position:relative;z-index:2}
-.detail-cat{
-  display:inline-flex;align-items:center;gap:7px;
-  font-size:11px;font-weight:800;letter-spacing:1.5px;
-  text-transform:uppercase;color:var(--cat-color,#ff9500);
-  background:var(--solid-panel);
-  border:1px solid var(--border-2);
-  padding:7px 13px;border-radius:999px;margin-bottom:14px;
-  box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 20px var(--cat-color,#ff9500);
-}
-.detail-title{
-  font-size:30px;font-weight:900;color:#fff;
-  line-height:1.1;letter-spacing:-1.2px;margin-bottom:20px;
-}
-
+.detail-cat{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--cat-color,#ff9500);background:var(--solid-panel);border:1px solid var(--border-2);padding:7px 13px;border-radius:999px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.4),0 0 20px var(--cat-color,#ff9500)}
+.detail-title{font-size:30px;font-weight:900;color:#fff;line-height:1.1;letter-spacing:-1.2px;margin-bottom:20px}
 .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px}
-.info-cell{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:14px 8px;text-align:center;
-}
+.info-cell{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 8px;text-align:center}
 .info-cell .ic{font-size:22px;margin-bottom:6px;display:block}
 .info-cell .lbl{font-size:9px;color:var(--text-3);font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
 .info-cell .val{font-size:12.5px;font-weight:800;color:#fff}
-
 .detail-section{margin-bottom:24px}
-.detail-section h3{
-  font-size:11px;font-weight:800;letter-spacing:1.8px;
-  text-transform:uppercase;color:var(--text-3);
-  margin-bottom:12px;display:flex;align-items:center;gap:10px;
-}
+.detail-section h3{font-size:11px;font-weight:800;letter-spacing:1.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:12px;display:flex;align-items:center;gap:10px}
 .detail-section h3::after{content:'';flex:1;height:1px;background:var(--border)}
 .detail-desc{font-size:15px;line-height:1.7;color:#c8c8d0}
-
-.coords-box{
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:14px 16px;
-  font-family:'SF Mono',Monaco,monospace;font-size:13px;color:var(--text-2);
-}
-.coords-box .lbl{
-  font-family:'Inter',sans-serif;font-size:9px;font-weight:800;
-  letter-spacing:1.2px;color:var(--text-3);text-transform:uppercase;
-  display:block;margin-bottom:4px;
-}
-.coords-copy{
-  padding:9px 13px;border-radius:10px;
-  background:rgba(255,149,0,.15);color:var(--accent);
-  font-size:11.5px;font-weight:800;
-}
-
+.coords-box{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-family:'SF Mono',Monaco,monospace;font-size:13px;color:var(--text-2)}
+.coords-box .lbl{font-family:'Inter',sans-serif;font-size:9px;font-weight:800;letter-spacing:1.2px;color:var(--text-3);text-transform:uppercase;display:block;margin-bottom:4px}
+.coords-copy{padding:9px 13px;border-radius:10px;background:rgba(255,149,0,.15);color:var(--accent);font-size:11.5px;font-weight:800}
 .actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.action-btn{
-  padding:15px 12px;border-radius:14px;
-  border:1px solid var(--border);
-  background:var(--card);color:var(--text);
-  font-size:13.5px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  text-decoration:none;
-}
+.action-btn{padding:15px 12px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--text);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
 .action-btn:active{transform:scale(.97)}
 .action-btn svg{width:17px;height:17px;flex-shrink:0}
 .action-btn.fav-on{background:rgba(255,149,0,.15);border-color:rgba(255,149,0,.5);color:var(--accent)}
 .action-btn.vis-on{background:rgba(52,199,89,.15);border-color:rgba(52,199,89,.5);color:#4ade80}
+.action-btn.plan{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.4);color:#5ea6ff}
+.action-btn.plan-on{background:rgba(10,132,255,.2);border-color:rgba(10,132,255,.6);color:#5ea6ff;box-shadow:0 0 20px rgba(10,132,255,.3)}
 .action-btn.google{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.3);color:#5ea6ff}
 .action-btn.yandex{background:rgba(252,63,29,.12);border-color:rgba(252,63,29,.3);color:#ff7a5c}
-.action-btn.share{
-  background:linear-gradient(180deg,#ffb340,var(--accent));
-  color:#000;border-color:transparent;
-  box-shadow:0 8px 24px rgba(255,149,0,.35),inset 0 1px 0 rgba(255,255,255,.4);
-}
-
+.action-btn.share{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;border-color:transparent;box-shadow:0 8px 24px rgba(255,149,0,.35),inset 0 1px 0 rgba(255,255,255,.4)}
 .rating-row{display:flex;align-items:center;gap:6px}
-.star{
-  font-size:30px;line-height:1;color:#2a2a30;cursor:pointer;
-  padding:0;letter-spacing:-2px;
-}
+.star{font-size:30px;line-height:1;color:#2a2a30;cursor:pointer;padding:0;letter-spacing:-2px}
 .star.on{color:var(--accent);text-shadow:0 0 16px rgba(255,149,0,.6)}
 .rating-hint{font-size:12.5px;color:var(--text-3);margin-left:8px;font-weight:700}
-
-.notes-area{
-  width:100%;background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:16px;color:var(--text);
-  font-size:14px;line-height:1.55;outline:none;resize:vertical;min-height:90px;
-}
+.notes-area{width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;color:var(--text);font-size:14px;line-height:1.55;outline:none;resize:vertical;min-height:90px}
 .notes-area:focus{border-color:rgba(255,149,0,.5)}
 .notes-area::placeholder{color:var(--text-3)}
-
 .nearby-list{display:flex;gap:10px;overflow-x:auto;margin:0 -20px;padding:0 20px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .nearby-list::-webkit-scrollbar{display:none}
-.nearby-card{
-  flex-shrink:0;width:180px;
-  background:var(--card);border:1px solid var(--border);
-  border-radius:14px;padding:14px;
-}
+.nearby-card{flex-shrink:0;width:180px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px}
 .nearby-cat{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--nc,#8e8e93);margin-bottom:5px}
 .nearby-title{font-size:13px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .nearby-dist{font-size:11px;color:var(--text-3);font-weight:700}
-
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.stat-card{
-  background:var(--card);border:1px solid var(--border);
-  border-radius:16px;padding:20px 16px;position:relative;overflow:hidden;
-}
-.stat-card::before{
-  content:'';position:absolute;top:-30px;right:-30px;
-  width:110px;height:110px;border-radius:50%;
-  background:radial-gradient(circle,var(--sc,#ff9500) 0%,transparent 70%);
-  opacity:.22;
-}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 16px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:-30px;right:-30px;width:110px;height:110px;border-radius:50%;background:radial-gradient(circle,var(--sc,#ff9500) 0%,transparent 70%);opacity:.22}
 .stat-val{font-size:38px;font-weight:900;color:#fff;line-height:1;letter-spacing:-2px;margin-bottom:6px}
 .stat-lbl{font-size:10.5px;color:var(--text-3);font-weight:800;letter-spacing:.8px;text-transform:uppercase}
 .stat-icon{position:absolute;top:16px;right:16px;font-size:22px;opacity:.4}
-
-.toast{
-  position:fixed;bottom:calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));
-  left:50%;transform:translateX(-50%) translateY(20px);
-  background:var(--solid-panel);
-  border:1px solid var(--border-2);color:var(--text);
-  padding:13px 22px;border-radius:16px;
-  font-size:13.5px;font-weight:700;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
-  z-index:9999;opacity:0;pointer-events:none;
-  transition:opacity .25s var(--ease),transform .25s var(--ease);
-  max-width:90vw;
-}
+.toast{position:fixed;bottom:calc(var(--nav-h) + 28px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--solid-panel);border:1px solid var(--border-2);color:var(--text);padding:13px 22px;border-radius:16px;font-size:13.5px;font-weight:700;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:9999;opacity:0;pointer-events:none;transition:opacity .25s var(--ease),transform .25s var(--ease);max-width:90vw}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-.progress-bar{
-  position:fixed;top:0;left:0;height:2px;
-  background:linear-gradient(90deg,var(--accent),var(--accent-2));
-  z-index:99999;width:0;
-  box-shadow:0 0 10px rgba(255,149,0,.7);
-}
+.progress-bar{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,var(--accent),var(--accent-2));z-index:99999;width:0;box-shadow:0 0 10px rgba(255,149,0,.7)}
+#splash{position:fixed;inset:0;z-index:999999;background:radial-gradient(circle at 50% 40%,#1a1a20 0%,#000 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;perspective:1000px;overflow:hidden;transition:opacity .8s var(--ease),transform .8s var(--ease)}
+#splash::before{content:'';position:absolute;inset:-50%;background:repeating-linear-gradient(0deg,transparent 0,transparent 3px,rgba(255,149,0,.03) 3px,rgba(255,149,0,.03) 4px);animation:splashScan 8s linear infinite;pointer-events:none}
+@keyframes splashScan{0%{transform:translateY(0)}100%{transform:translateY(8px)}}
+#splash.hide{opacity:0;transform:scale(1.15);pointer-events:none}
+.splash-pin{width:120px;height:120px;position:relative;transform-style:preserve-3d;animation:pinFloat 3s ease-in-out infinite}
+@keyframes pinFloat{0%,100%{transform:translateY(0) rotateY(0deg)}50%{transform:translateY(-8px) rotateY(15deg)}}
+.splash-pin svg{width:100%;height:100%;filter:drop-shadow(0 20px 40px rgba(255,149,0,.4))}
+.splash-title{margin-top:32px;font-size:42px;font-weight:900;letter-spacing:-2px;background:linear-gradient(180deg,#fff 0%,#ff9500 120%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(20px);animation:splashText .8s .3s var(--ease) forwards}
+@keyframes splashText{to{opacity:1;transform:translateY(0)}}
+.splash-sub{margin-top:10px;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--accent);opacity:0;transform:translateY(20px);animation:splashText .8s .6s var(--ease) forwards}
+.splash-labs{position:absolute;bottom:40px;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--text-3);opacity:0;animation:splashText .8s 1s var(--ease) forwards}
+.splash-progress{position:absolute;bottom:90px;width:60px;height:2px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;opacity:0;animation:splashText .8s .8s var(--ease) forwards}
+.splash-progress::after{content:'';display:block;height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:splashBar 1.6s .8s ease-in-out infinite}
+@keyframes splashBar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.achievements-carousel-wrap{position:relative;height:220px;perspective:1200px;margin:0 -20px 20px;overflow:hidden}
+.achievements-carousel{position:absolute;inset:0;transform-style:preserve-3d;display:flex;align-items:center;justify-content:center;transition:transform .5s var(--ease)}
+.ach-card-3d{position:absolute;width:160px;height:200px;border-radius:20px;padding:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform-style:preserve-3d;transition:transform .5s var(--ease),opacity .5s var(--ease);will-change:transform;box-shadow:0 20px 60px rgba(0,0,0,.6),inset 0 1px 0 rgba(255,255,255,.1);background:linear-gradient(160deg,#1e1e24 0%,#14141a 100%);border:1px solid var(--border-2)}
+.ach-card-3d.unlocked{background:linear-gradient(160deg,#2a2010 0%,#1a1410 100%);border-color:rgba(255,149,0,.4);box-shadow:0 20px 60px rgba(255,149,0,.25),inset 0 1px 0 rgba(255,255,255,.15)}
+.ach-card-3d.secret{background:linear-gradient(160deg,#1a0f2a 0%,#0f0a1a 100%);border-color:rgba(168,85,247,.4)}
+.ach-card-3d .ach-icon{font-size:56px;margin-bottom:12px;filter:drop-shadow(0 6px 20px rgba(255,149,0,.5))}
+.ach-card-3d.locked .ach-icon{filter:grayscale(1) brightness(.3)}
+.ach-card-3d .ach-name{font-size:13px;font-weight:800;color:#fff;line-height:1.2;margin-bottom:6px}
+.ach-card-3d .ach-desc{font-size:10px;color:var(--text-3);line-height:1.3}
+.ach-card-3d .ach-rarity{position:absolute;top:12px;right:12px;font-size:9px;font-weight:800;padding:3px 8px;border-radius:6px;letter-spacing:.5px}
+.ach-rarity.common{background:rgba(205,127,50,.2);color:#cd7f32}
+.ach-rarity.rare{background:rgba(192,192,192,.15);color:#c0c0c0}
+.ach-rarity.epic{background:rgba(255,215,0,.15);color:#ffd700}
+.ach-rarity.legendary{background:rgba(229,228,226,.15);color:#e5e4e2}
+.ach-rarity.secret{background:rgba(168,85,247,.2);color:#a855f7}
+.ach-nav{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:5}
+.ach-nav-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.15);transition:all .3s var(--ease)}
+.ach-nav-dot.active{background:var(--accent);width:20px;border-radius:3px;box-shadow:0 0 12px rgba(255,149,0,.7)}
+.ach-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ach-tile{aspect-ratio:1;border-radius:16px;padding:10px 6px;background:linear-gradient(160deg,#1e1e24 0%,#14141a 100%);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;position:relative;transition:transform .2s var(--ease)}
+.ach-tile:active{transform:scale(.95)}
+.ach-tile.unlocked{border-color:rgba(255,149,0,.4);background:linear-gradient(160deg,#2a2010 0%,#1a1410 100%);box-shadow:inset 0 0 30px rgba(255,149,0,.1)}
+.ach-tile .ach-icon{font-size:30px;margin-bottom:6px;filter:drop-shadow(0 4px 12px rgba(255,149,0,.5))}
+.ach-tile.locked .ach-icon{filter:grayscale(1) brightness(.3)}
+.ach-tile .ach-name{font-size:10px;font-weight:700;color:#fff;line-height:1.15;letter-spacing:-.2px}
+.ach-unlock-overlay{position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at center,rgba(255,149,0,.15) 0%,rgba(0,0,0,.98) 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.ach-unlock-overlay.show{opacity:1;pointer-events:auto}
+.ach-unlock-icon{font-size:120px;filter:drop-shadow(0 20px 60px rgba(255,149,0,.8));transform:scale(0) rotate(-180deg);transition:transform .8s cubic-bezier(.34,1.56,.64,1)}
+.ach-unlock-overlay.show .ach-unlock-icon{transform:scale(1) rotate(0deg)}
+.ach-unlock-title{margin-top:24px;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);opacity:0;transition:opacity .5s .4s var(--ease)}
+.ach-unlock-name{margin-top:8px;font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;opacity:0;transform:translateY(20px);transition:all .5s .6s var(--ease);text-align:center;padding:0 30px}
+.ach-unlock-desc{margin-top:12px;font-size:14px;color:var(--text-2);text-align:center;padding:0 40px;opacity:0;transition:opacity .5s .9s var(--ease)}
+.ach-unlock-overlay.show .ach-unlock-title,.ach-unlock-overlay.show .ach-unlock-name,.ach-unlock-overlay.show .ach-unlock-desc{opacity:1;transform:translateY(0)}
+.modal-overlay{position:fixed;inset:0;z-index:99998;background:rgba(0,0,0,.85);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s var(--ease);padding:0}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal-sheet{width:100%;max-width:500px;background:#14141a;border-radius:24px 24px 0 0;padding:24px 22px calc(24px + env(safe-area-inset-bottom));border:1px solid var(--border-2);border-bottom:none;transform:translateY(100%);transition:transform .4s var(--ease);max-height:90vh;overflow-y:auto}
+.modal-overlay.show .modal-sheet{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;border-radius:999px;background:rgba(255,255,255,.2);margin:-12px auto 16px}
+.modal-title{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:8px}
+.modal-sub{font-size:14px;color:var(--text-2);line-height:1.5;margin-bottom:20px}
+.modal-actions{display:flex;gap:10px;margin-top:20px}
+.modal-btn{flex:1;padding:15px;border-radius:14px;font-size:14px;font-weight:800;text-align:center;transition:transform .15s var(--ease);letter-spacing:-.2px}
+.modal-btn:active{transform:scale(.97)}
+.modal-btn.primary{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.modal-btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border-2)}
+.checklist{display:flex;flex-direction:column;gap:10px}
+.check-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s var(--ease)}
+.check-item:active{transform:scale(.98)}
+.check-item.checked{background:rgba(52,199,89,.1);border-color:rgba(52,199,89,.4)}
+.check-box{width:24px;height:24px;border-radius:8px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease);flex-shrink:0}
+.check-item.checked .check-box{background:var(--green);border-color:var(--green)}
+.check-box svg{opacity:0;transition:opacity .2s}
+.check-item.checked .check-box svg{opacity:1}
+.check-label{font-size:14px;font-weight:600;color:var(--text)}
+.weather-card{background:linear-gradient(160deg,#1a1a20 0%,#14141a 100%);border:1px solid var(--border);border-radius:16px;padding:18px;position:relative;overflow:hidden}
+.weather-card::before{content:'';position:absolute;top:-50px;right:-50px;width:150px;height:150px;background:radial-gradient(circle,var(--w-color,#ff9500) 0%,transparent 70%);opacity:.25;pointer-events:none}
+.weather-now{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.weather-temp{font-size:46px;font-weight:900;color:#fff;letter-spacing:-3px;line-height:1}
+.weather-icon{font-size:44px;filter:drop-shadow(0 4px 12px var(--w-color,#ff9500))}
+.weather-desc{font-size:13px;color:var(--text-2);margin-top:6px;font-weight:600}
+.weather-meta{display:flex;gap:14px;font-size:12px;color:var(--text-3);font-weight:700;margin-top:4px}
+.weather-days{display:flex;gap:8px;padding-top:14px;border-top:1px solid var(--border)}
+.weather-day{flex:1;text-align:center}
+.weather-day-name{font-size:10px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.weather-day-icon{font-size:22px;margin-bottom:4px}
+.weather-day-temp{font-size:12px;font-weight:800;color:#fff}
+.heatmap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding:12px 0}
+.heat-cell{aspect-ratio:1;border-radius:5px;background:rgba(255,255,255,.05)}
+.heat-cell.l1{background:rgba(255,149,0,.25)}
+.heat-cell.l2{background:rgba(255,149,0,.5)}
+.heat-cell.l3{background:rgba(255,149,0,.75)}
+.heat-cell.l4{background:#ff9500;box-shadow:0 0 8px rgba(255,149,0,.6)}
+.activity-chart{display:flex;align-items:flex-end;gap:6px;height:100px;padding:12px 0}
+.chart-bar{flex:1;background:linear-gradient(180deg,var(--accent),rgba(255,149,0,.3));border-radius:6px 6px 3px 3px;min-height:4px;position:relative;transition:height .5s var(--ease)}
+.chart-bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:9px;font-weight:700;color:var(--text-3)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-label{font-size:14px;font-weight:600;color:var(--text)}
+.toggle-desc{font-size:12px;color:var(--text-3);margin-top:2px;line-height:1.4}
+.toggle-switch{width:50px;height:30px;background:rgba(255,255,255,.1);border-radius:999px;position:relative;flex-shrink:0;transition:background .25s var(--ease);border:none;cursor:pointer;padding:0}
+.toggle-switch::after{content:'';position:absolute;width:26px;height:26px;background:#fff;border-radius:50%;top:2px;left:2px;transition:transform .25s var(--ease);box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.toggle-switch.on{background:var(--green)}
+.toggle-switch.on::after{transform:translateX(20px)}
+.push-banner{position:fixed;top:calc(14px + env(safe-area-inset-top));left:14px;right:14px;z-index:99997;background:var(--solid-panel);border:1px solid var(--border-2);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 0 1px rgba(255,149,0,.15);transform:translateY(-120%);transition:transform .4s var(--ease)}
+.push-banner.show{transform:translateY(0)}
+.push-icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(180deg,#ffb340,var(--accent));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.push-content{flex:1;min-width:0}
+.push-title{font-size:13px;font-weight:800;color:#fff;margin-bottom:2px}
+.push-text{font-size:12px;color:var(--text-2);line-height:1.3}
+.app-icon-3d-wrap{display:flex;justify-content:center;padding:24px 0 12px;perspective:800px}
+.app-icon-3d{width:120px;height:120px;border-radius:28px;overflow:hidden;box-shadow:0 20px 60px rgba(255,149,0,.35),0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.15);transition:transform .6s var(--ease);animation:iconFloat 5s ease-in-out infinite;transform-style:preserve-3d}
+@keyframes iconFloat{0%,100%{transform:rotateY(-15deg) rotateX(8deg)}50%{transform:rotateY(15deg) rotateX(-8deg)}}
+.app-icon-3d svg{width:100%;height:100%;display:block}
+.ach-tile.secret-tile .ach-icon{animation:secretPulse 2s ease-in-out infinite}
+@keyframes secretPulse{0%,100%{filter:drop-shadow(0 0 8px rgba(168,85,247,.5));opacity:.7}50%{filter:drop-shadow(0 0 20px rgba(168,85,247,.9));opacity:1}}
 </style>
 </head>
 <body>
 
+<!-- СПЛЭШ -->
+<div id="splash">
+  <div class="splash-pin">
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="splashGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffb340"/>
+          <stop offset="1" stop-color="#ff9500"/>
+        </linearGradient>
+      </defs>
+      <path d="M60 8 C36 8 18 26 18 50 C18 76 44 100 60 112 C76 100 102 76 102 50 C102 26 84 8 60 8 Z" fill="url(#splashGrad)" stroke="#fff" stroke-width="4"/>
+      <circle cx="60" cy="46" r="14" fill="#000" opacity="0.85"/>
+      <text x="60" y="52" text-anchor="middle" font-family="Inter,sans-serif" font-size="18" font-weight="900" fill="#ff9500">A</text>
+    </svg>
+  </div>
+  <div class="splash-title">UrbaxA5000</div>
+  <div class="splash-sub">Исследуй. Находи. Помни.</div>
+  <div class="splash-progress"></div>
+  <div class="splash-labs">A5000 Labs</div>
+</div>
+
 <div class="progress-bar" id="progressBar"></div>
 
+<!-- КАРТА -->
 <div id="mapScreen" class="screen active">
   <div id="map"></div>
   <div class="map-top">
@@ -455,6 +315,14 @@ input,textarea{font-family:inherit}
       <input id="searchInput" placeholder="Найти место..." autocomplete="off">
     </div>
     <div class="chips-row" id="chipsRow"></div>
+  </div>
+  <div class="layer-switch" id="layerSwitch">
+    <button class="layer-btn active" data-layer="scheme" onclick="switchLayer('scheme')" title="Схема">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+    </button>
+    <button class="layer-btn" data-layer="satellite" onclick="switchLayer('satellite')" title="Спутник">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    </button>
   </div>
   <div class="map-fabs">
     <button class="fab primary" onclick="locateMe()">
@@ -466,58 +334,40 @@ input,textarea{font-family:inherit}
   </div>
 </div>
 
+<!-- ВСЕ -->
 <div id="listScreen" class="screen">
-  <div class="scr-header">
-    <h1>Все <em>объекты</em></h1>
-    <div class="scr-counter" id="listCounter">—</div>
-  </div>
+  <div class="scr-header"><h1>Все <em>объекты</em></h1><div class="scr-counter" id="listCounter">—</div></div>
   <div class="list" id="listContainer"></div>
 </div>
 
+<!-- ИЗБРАННОЕ -->
 <div id="favScreen" class="screen">
-  <div class="scr-header">
-    <h1>Избран<em>ное</em></h1>
-    <div class="scr-counter" id="favCounter">—</div>
-  </div>
+  <div class="scr-header"><h1>Избран<em>ное</em></h1><div class="scr-counter" id="favCounter">—</div></div>
   <div class="list" id="favContainer"></div>
 </div>
 
+<!-- ПОСЕЩЕНО -->
 <div id="visitedScreen" class="screen">
-  <div class="scr-header">
-    <h1>Я здесь <em>был</em></h1>
-    <div class="scr-counter" id="visitedCounter">—</div>
-  </div>
+  <div class="scr-header"><h1>Я здесь <em>был</em></h1><div class="scr-counter" id="visitedCounter">—</div></div>
   <div class="list" id="visitedContainer"></div>
 </div>
 
+<!-- ПЛАНЫ -->
+<div id="plansScreen" class="screen">
+  <div class="scr-header"><h1>Мои <em>планы</em></h1><div class="scr-counter" id="plansCounter">—</div></div>
+  <div class="list" id="plansContainer"></div>
+</div>
+
+<!-- ПРОФИЛЬ -->
 <div id="statsScreen" class="screen">
-  <div class="scr-header">
-    <h1>Моя <em>статистика</em></h1>
-  </div>
+  <div class="scr-header"><h1>Моя <em>статистика</em></h1></div>
   <div class="list">
     <div class="stat-grid">
-      <div class="stat-card" style="--sc:#ff9500">
-        <span class="stat-icon">📍</span>
-        <div class="stat-val" id="stTotal">0</div>
-        <div class="stat-lbl">Всего мест</div>
-      </div>
-      <div class="stat-card" style="--sc:#ffcc00">
-        <span class="stat-icon">⭐</span>
-        <div class="stat-val" id="stFav">0</div>
-        <div class="stat-lbl">В избранном</div>
-      </div>
-      <div class="stat-card" style="--sc:#34c759">
-        <span class="stat-icon">✅</span>
-        <div class="stat-val" id="stVis">0</div>
-        <div class="stat-lbl">Посещено</div>
-      </div>
-      <div class="stat-card" style="--sc:#bf5af2">
-        <span class="stat-icon">📝</span>
-        <div class="stat-val" id="stNotes">0</div>
-        <div class="stat-lbl">Заметок</div>
-      </div>
+      <div class="stat-card" style="--sc:#ff9500"><span class="stat-icon">📍</span><div class="stat-val" id="stTotal">0</div><div class="stat-lbl">Всего мест</div></div>
+      <div class="stat-card" style="--sc:#ffcc00"><span class="stat-icon">⭐</span><div class="stat-val" id="stFav">0</div><div class="stat-lbl">В избранном</div></div>
+      <div class="stat-card" style="--sc:#34c759"><span class="stat-icon">✅</span><div class="stat-val" id="stVis">0</div><div class="stat-lbl">Посещено</div></div>
+      <div class="stat-card" style="--sc:#bf5af2"><span class="stat-icon">📝</span><div class="stat-val" id="stNotes">0</div><div class="stat-lbl">Заметок</div></div>
     </div>
-
     <div class="detail-section">
       <h3>Прогресс исследования</h3>
       <div class="stat-card" style="padding:24px 20px">
@@ -530,25 +380,60 @@ input,textarea{font-family:inherit}
         </div>
       </div>
     </div>
+    <div class="detail-section"><h3>Категории</h3><div id="stCategories"></div></div>
 
-    <div class="detail-section">
-      <h3>Категории</h3>
-      <div id="stCategories"></div>
+    <div class="app-icon-3d-wrap">
+      <div class="app-icon-3d">
+        <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="appIconGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#ffb340"/><stop offset="1" stop-color="#ff9500"/>
+            </linearGradient>
+          </defs>
+          <rect width="120" height="120" fill="#0a0a0c"/>
+          <path d="M60 18 C42 18 28 32 28 50 C28 70 48 90 60 102 C72 90 92 70 92 50 C92 32 78 18 60 18 Z" fill="url(#appIconGrad)" stroke="#fff" stroke-width="3"/>
+          <circle cx="60" cy="48" r="12" fill="#000" opacity="0.85"/>
+          <text x="60" y="54" text-anchor="middle" font-family="Inter,sans-serif" font-size="14" font-weight="900" fill="#ff9500">A</text>
+        </svg>
+      </div>
     </div>
 
-    <!-- ═══ КНОПКА ОБНОВЛЕНИЯ ═══ -->
     <div class="detail-section">
-      <h3>Обновление</h3>
-      <button class="action-btn" style="width:100%;margin-bottom:10px" onclick="forceUpdate()">
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
-        Проверить обновления
+      <h3>Прогресс</h3>
+      <div class="actions-grid">
+        <button class="action-btn" onclick="switchScreen('achScreen')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+          Ачивки
+        </button>
+        <button class="action-btn" onclick="switchScreen('analyticsScreen')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg>
+          Аналитика
+        </button>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Уведомления</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:6px 16px">
+        <div class="toggle-row">
+          <div><div class="toggle-label">Рядом заброшка</div><div class="toggle-desc">Когда ты близко к объекту</div></div>
+          <button class="toggle-switch" id="tgNearby" onclick="toggleSetting('notifyNearby', this)"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Напоминания</div><div class="toggle-desc">Если давно не было вылазок</div></div>
+          <button class="toggle-switch" id="tgRemind" onclick="toggleSetting('notifyRemind', this)"></button>
+        </div>
+        <div class="toggle-row">
+          <div><div class="toggle-label">Новые места</div><div class="toggle-desc">Когда добавляются объекты</div></div>
+          <button class="toggle-switch" id="tgNew" onclick="toggleSetting('notifyNew', this)"></button>
+        </div>
+      </div>
+      <button class="action-btn" style="width:100%;margin-top:10px" onclick="requestNotificationPermission()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        Разрешить уведомления
       </button>
-      <p style="font-size:12px;color:var(--text-3);line-height:1.5">
-        Если сайт долго не обновляется — нажмите кнопку. Приложение очистит кэш и загрузит свежую версию.
-      </p>
     </div>
 
-    <!-- ═══ КНОПКА УСТАНОВКИ (Android) ═══ -->
     <div class="detail-section" id="installBtn" style="display:none">
       <h3>Установка</h3>
       <button class="action-btn share" style="width:100%" onclick="installPWA()">
@@ -557,22 +442,31 @@ input,textarea{font-family:inherit}
       </button>
     </div>
 
-    <!-- ═══ ИНСТРУКЦИЯ ДЛЯ iOS ═══ -->
     <div class="detail-section" id="iosInstall" style="display:none">
       <h3>Установка на iPhone</h3>
       <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;font-size:13px;line-height:1.7;color:var(--text-2)">
-        <b style="color:#fff">1.</b> Нажмите кнопку <b style="color:var(--accent)">«Поделиться»</b> (квадрат со стрелкой вверх) в Safari.<br>
-        <b style="color:#fff">2.</b> Выберите <b style="color:var(--accent)">«На экран “Домой”»</b>.<br>
-        <b style="color:#fff">3.</b> Нажмите <b style="color:var(--accent)">«Добавить»</b>.
+        <b style="color:#fff">1.</b> Нажми <b style="color:var(--accent)">«Поделиться»</b> в Safari.<br>
+        <b style="color:#fff">2.</b> Выбери <b style="color:var(--accent)">«На экран "Домой"»</b>.<br>
+        <b style="color:#fff">3.</b> Нажми <b style="color:var(--accent)">«Добавить»</b>.
       </div>
+    </div>
+
+    <div class="detail-section">
+      <h3>Обновление</h3>
+      <button class="action-btn" style="width:100%;margin-bottom:10px" onclick="forceUpdate()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        Проверить обновления
+      </button>
+      <p style="font-size:12px;color:var(--text-3);line-height:1.5">Если сайт долго не обновляется — нажми кнопку.</p>
     </div>
 
     <div class="detail-section">
       <h3>О приложении</h3>
       <div style="font-size:13.5px;color:var(--text-2);line-height:1.7">
-        Неофициальная карта заброшенных мест Симферополя и окрестностей.
+        Карта заброшенных мест Симферополя и окрестностей.<br><br>
+        <strong style="color:#ff6b6b">⚠ Внимание.</strong> Посещение заброшенных объектов может быть <b style="color:#fff">опасным и незаконным</b>. Соблюдай законодательство.
         <br><br>
-        <strong style="color:#ff6b6b">⚠ Внимание.</strong> Посещение заброшенных объектов может быть <b style="color:#fff">опасным и незаконным</b>. Соблюдайте законодательство.
+        <span style="color:var(--text-3);font-size:11px">© A5000 Labs · UrbaxA5000</span>
       </div>
       <button class="action-btn" style="width:100%;margin-top:16px" onclick="clearAll()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
@@ -582,10 +476,74 @@ input,textarea{font-family:inherit}
   </div>
 </div>
 
+<!-- АЧИВКИ -->
+<div id="achScreen" class="screen">
+  <div class="scr-header"><h1>Мои <em>ачивки</em></h1><div class="scr-counter" id="achCounter">—</div></div>
+  <div class="list">
+    <div class="detail-section" style="margin-top:0">
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="chip active" style="flex:1;justify-content:center" id="viewCarousel" onclick="switchAchView('carousel')">3D карусель</button>
+        <button class="chip" style="flex:1;justify-content:center" id="viewGrid" onclick="switchAchView('grid')">Сетка</button>
+      </div>
+    </div>
+    <div id="achCarouselWrap" class="achievements-carousel-wrap">
+      <div class="achievements-carousel" id="achCarousel"></div>
+      <div class="ach-nav" id="achNav"></div>
+    </div>
+    <div id="achGridWrap" class="detail-section" style="display:none">
+      <div class="ach-grid" id="achGrid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- АНАЛИТИКА -->
+<div id="analyticsScreen" class="screen">
+  <div class="scr-header"><h1>Моя <em>активность</em></h1></div>
+  <div class="list">
+    <div class="stat-grid">
+      <div class="stat-card" style="--sc:#ff9500"><span class="stat-icon">🚶</span><div class="stat-val" id="anVisits">0</div><div class="stat-lbl">Посещений</div></div>
+      <div class="stat-card" style="--sc:#0a84ff"><span class="stat-icon">📅</span><div class="stat-val" id="anStreak">0</div><div class="stat-lbl">Дней подряд</div></div>
+      <div class="stat-card" style="--sc:#34c759"><span class="stat-icon">🛣</span><div class="stat-val" id="anKm">0</div><div class="stat-lbl">Километров</div></div>
+      <div class="stat-card" style="--sc:#bf5af2"><span class="stat-icon">🏆</span><div class="stat-val" id="anAch">0</div><div class="stat-lbl">Ачивок</div></div>
+    </div>
+    <div class="detail-section">
+      <h3>Любимая категория</h3>
+      <div class="weather-card" id="favCatCard" style="padding:20px">
+        <div style="font-size:42px;margin-bottom:8px" id="favCatIcon">🏭</div>
+        <div style="font-size:20px;font-weight:900;color:#fff" id="favCatName">—</div>
+        <div style="font-size:13px;color:var(--text-2);margin-top:4px" id="favCatCount">—</div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Активность за 12 недель</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px">
+        <div class="heatmap-grid" id="heatmap"></div>
+        <div style="display:flex;justify-content:flex-end;gap:6px;font-size:10px;color:var(--text-3);margin-top:6px;align-items:center">
+          <span>меньше</span>
+          <div class="heat-cell" style="width:12px;height:12px"></div>
+          <div class="heat-cell l1" style="width:12px;height:12px"></div>
+          <div class="heat-cell l2" style="width:12px;height:12px"></div>
+          <div class="heat-cell l3" style="width:12px;height:12px"></div>
+          <div class="heat-cell l4" style="width:12px;height:12px"></div>
+          <span>больше</span>
+        </div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Последние 7 дней</h3>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 14px 30px">
+        <div class="activity-chart" id="activityChart"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- КАРТОЧКА -->
 <div id="detailScreen" class="screen">
   <div id="detailContent"></div>
 </div>
 
+<!-- НАВИГАЦИЯ -->
 <div class="nav" id="mainNav">
   <button class="nav-btn active" data-screen="mapScreen" onclick="switchScreen('mapScreen')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
@@ -600,6 +558,11 @@ input,textarea{font-family:inherit}
     <span>Избранное</span>
     <span class="nav-badge" id="favBadge" style="display:none">0</span>
   </button>
+  <button class="nav-btn" data-screen="plansScreen" onclick="switchScreen('plansScreen')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>Планы</span>
+    <span class="nav-badge" id="planBadge" style="display:none">0</span>
+  </button>
   <button class="nav-btn" data-screen="visitedScreen" onclick="switchScreen('visitedScreen')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     <span>Посещено</span>
@@ -611,7 +574,55 @@ input,textarea{font-family:inherit}
   </button>
 </div>
 
+<!-- МОДАЛКА: ПЛАН -->
+<div class="modal-overlay" id="planModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📅 Запланировать вылазку?</div>
+    <div class="modal-sub">Добавить напоминание в календарь телефона?</div>
+    <div class="modal-actions">
+      <button class="modal-btn secondary" onclick="closePlanModal(false)">Просто в голове</button>
+      <button class="modal-btn primary" onclick="closePlanModal(true)">В календарь</button>
+    </div>
+  </div>
+</div>
+
+<!-- МОДАЛКА: ЧЕК-ЛИСТ -->
+<div class="modal-overlay" id="checklistModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✅ Чек-лист перед выездом</div>
+    <div class="modal-sub">Отметь то, что взял с собой.</div>
+    <div class="checklist" id="checklistItems"></div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="closeChecklist()">Готов</button>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY АЧИВКИ -->
+<div class="ach-unlock-overlay" id="achUnlockOverlay" onclick="hideAchUnlock()">
+  <div class="ach-unlock-icon" id="achUnlockIcon">🏆</div>
+  <div class="ach-unlock-title">Новое достижение</div>
+  <div class="ach-unlock-name" id="achUnlockName">—</div>
+  <div class="ach-unlock-desc" id="achUnlockDesc">—</div>
+</div>
+
+<!-- PUSH БАННЕР -->
+<div class="push-banner" id="pushBanner" onclick="hidePushBanner()">
+  <div class="push-icon" id="pushIcon">📍</div>
+  <div class="push-content">
+    <div class="push-title" id="pushTitle">UrbaxA5000</div>
+    <div class="push-text" id="pushText">Сообщение</div>
+  </div>
+</div>
+
 <script>
+  /* ═══════════════════════════════════════════════════════════
+   URBaxA5000 · A5000 Labs · Reloaded
+   ═══════════════════════════════════════════════════════════ */
+
+/* ═══ КАТЕГОРИИ ═══ */
 const CATEGORIES = {
   'Промышленные':   { color: '#ff9500', icon: '🏭' },
   'Медицинские':    { color: '#ff3b30', icon: '🏥' },
@@ -627,6 +638,7 @@ const CATEGORIES = {
 };
 const catOf = c => CATEGORIES[c] || CATEGORIES.default;
 
+/* ═══ 50 ОБЪЕКТОВ ═══ */
 const places = [
   { name:"Возле старого завода", lat:44.96366, lon:34.04886, category:"Промышленные", desc:"Руины возле бывшего завода. Само промышленное здание снесено, остались только фрагменты строений и бетонные основания.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
   { name:"Водонапорная башня", lat:44.965817, lon:34.056448, category:"Инфраструктура", desc:"Старая водонапорная башня XIX–XX века. Есть вероятность, что уже снесена — требуется проверка на местности. Объект в прошлом обеспечивал водой весь район.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
@@ -680,14 +692,35 @@ const places = [
   { name:"Кинотеатр «Космос» (снесён)", lat:44.952000, lon:34.100000, category:"Культурные", desc:"Кинотеатр открыт в 1967 году, был визитной карточкой города. Фасад декорирован уникальной мозаикой в космической тематике. Продан за 73 млн рублей и снесён в 2025 году вместе с мозаичным панно.", danger:"Низкая", access:"Снесён", status:"Снесён", image:"" }
 ];
 
+/* ═══ СОСТОЯНИЕ ═══ */
 let favorites = JSON.parse(localStorage.getItem('urbex_favorites') || '[]');
 let visited   = JSON.parse(localStorage.getItem('urbex_visited')   || '[]');
 let notes     = JSON.parse(localStorage.getItem('urbex_notes')     || '{}');
 let ratings   = JSON.parse(localStorage.getItem('urbex_ratings')   || '{}');
-let markers   = [];
+let plans     = JSON.parse(localStorage.getItem('urbex_plans')     || '[]');
+let unlockedAch = JSON.parse(localStorage.getItem('urbex_achievements') || '[]');
+let visitHistory = JSON.parse(localStorage.getItem('urbex_history') || '[]');
+let settings  = JSON.parse(localStorage.getItem('urbex_settings') || '{"notifyNearby":false,"notifyRemind":false,"notifyNew":false}');
+let lastNotifDate = localStorage.getItem('urbex_lastNotif') || '';
+let markers = [];
 let map, userMarker, currentFilter = 'all', searchTimer;
 let cullQueued = false;
+let tileScheme, tileSatellite, currentLayer = 'scheme';
+let pendingPlanIndex = null;
+let checklistState = {};
+let currentAchView = 'carousel';
+let currentAchIndex = 0;
 
+/* ═══ СПЛЭШ ═══ */
+setTimeout(() => {
+  const splash = document.getElementById('splash');
+  if (splash) {
+    splash.classList.add('hide');
+    setTimeout(() => splash.remove(), 900);
+  }
+}, 2200);
+
+/* ═══ УТИЛИТЫ ═══ */
 function shade(hex, pct){
   const n = parseInt(hex.replace('#',''),16);
   let r = (n>>16)+pct, g = ((n>>8)&0xff)+pct, b = (n&0xff)+pct;
@@ -703,24 +736,18 @@ function getIcon(category, isFav, isVis){
   let c1 = c.color, c2 = shade(c.color, -55);
   let icon = c.icon;
   let isSymbol = false;
-  if (isVis){
-    c1 = '#4ad66a'; c2 = '#1e8f3c';
-    icon = '✓'; isSymbol = true;
-  } else if (isFav){
-    c1 = '#ffd54a'; c2 = '#d19b00';
-    icon = '★'; isSymbol = true;
-  }
+  if (isVis){ c1 = '#4ad66a'; c2 = '#1e8f3c'; icon = '✓'; isSymbol = true; }
+  else if (isFav){ c1 = '#ffd54a'; c2 = '#d19b00'; icon = '★'; isSymbol = true; }
   const ic = L.divIcon({
     className: '',
     html: `<div class="pin ${isSymbol?'':'emoji'}" style="--c1:${c1};--c2:${c2}"><span>${icon}</span></div>`,
-    iconSize: [34, 40],
-    iconAnchor: [17, 34],
-    popupAnchor: [0, -32]
+    iconSize: [34, 40], iconAnchor: [17, 34], popupAnchor: [0, -32]
   });
   iconCache[key] = ic;
   return ic;
 }
 
+/* ═══ КАРТА ═══ */
 function initMap(){
   map = L.map('map', {
     zoomControl: false,
@@ -739,22 +766,30 @@ function initMap(){
     removeOutsideWorld: true
   }).setView([44.952, 34.10], 12);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    maxZoom: 19,
-    subdomains: 'abcd',
+  tileScheme = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    maxZoom: 19, subdomains: 'abcd',
     attribution: '© OpenStreetMap · © CARTO',
-    detectRetina: false,
-    crossOrigin: true,
-    updateWhenIdle: false,
-    updateWhenZooming: true,
-    keepBuffer: 3
-  }).addTo(map);
+    detectRetina: false, crossOrigin: true,
+    updateWhenIdle: false, updateWhenZooming: true, keepBuffer: 3
+  });
+
+  tileSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom: 19,
+    attribution: '© Esri · Maxar',
+    detectRetina: false, crossOrigin: true,
+    updateWhenIdle: false, updateWhenZooming: true, keepBuffer: 3,
+    className: 'tiles-satellite'
+  });
+
+  const savedLayer = localStorage.getItem('urbex_layer') || 'scheme';
+  currentLayer = savedLayer;
+  (savedLayer === 'satellite' ? tileSatellite : tileScheme).addTo(map);
+  updateLayerButtons();
 
   places.forEach((place, index) => {
     const marker = L.marker([place.lat, place.lon], {
       icon: getIcon(place.category, false, false),
-      keyboard: false,
-      interactive: true
+      keyboard: false, interactive: true
     });
     marker.bindPopup(
       `<div class="popup-card">
@@ -775,13 +810,26 @@ function initMap(){
   cullMarkers();
 }
 
+function switchLayer(layer){
+  if (layer === currentLayer || !map) return;
+  currentLayer = layer;
+  if (layer === 'satellite'){ map.removeLayer(tileScheme); tileSatellite.addTo(map); }
+  else { map.removeLayer(tileSatellite); tileScheme.addTo(map); }
+  localStorage.setItem('urbex_layer', layer);
+  updateLayerButtons();
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function updateLayerButtons(){
+  document.querySelectorAll('.layer-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.layer === currentLayer);
+  });
+}
+
 function queueCull(){
   if (cullQueued) return;
   cullQueued = true;
-  requestAnimationFrame(() => {
-    cullQueued = false;
-    cullMarkers();
-  });
+  requestAnimationFrame(() => { cullQueued = false; cullMarkers(); });
 }
 
 function cullMarkers(){
@@ -790,14 +838,12 @@ function cullMarkers(){
   const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
   const favSet = new Set(favorites);
   const visSet = new Set(visited);
-
   for (let i = 0; i < markers.length; i++){
     const m = markers[i];
     const catOk = currentFilter === 'all' || m.data.category === currentFilter;
     const searchOk = !q || m.data.name.toLowerCase().includes(q) || m.data.desc.toLowerCase().includes(q);
     const inView = bounds.contains([m.data.lat, m.data.lon]);
     const should = catOk && searchOk && inView;
-
     if (should && !m.visible){
       m.marker.setIcon(getIcon(m.data.category, favSet.has(m.index), visSet.has(m.index)));
       m.marker.addTo(map);
@@ -809,6 +855,7 @@ function cullMarkers(){
   }
 }
 
+/* ═══ ФИЛЬТРЫ ═══ */
 function renderChips(){
   const counts = {};
   places.forEach(p => { counts[p.category] = (counts[p.category] || 0) + 1; });
@@ -820,6 +867,7 @@ function renderChips(){
   });
   document.getElementById('chipsRow').innerHTML = html;
 }
+
 function setFilter(cat){
   currentFilter = cat;
   document.querySelectorAll('#chipsRow .chip').forEach(el => {
@@ -828,6 +876,7 @@ function setFilter(cat){
   cullMarkers();
 }
 
+/* ═══ ПЕРЕКЛЮЧЕНИЕ ЭКРАНОВ ═══ */
 function switchScreen(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(id);
@@ -841,21 +890,27 @@ function switchScreen(id){
   if (id === 'listScreen')    renderList('listContainer',   places.map((_,i)=>i), 'listCounter');
   if (id === 'favScreen')     renderList('favContainer',    favorites, 'favCounter');
   if (id === 'visitedScreen') renderList('visitedContainer',visited,   'visitedCounter');
+  if (id === 'plansScreen')   renderList('plansContainer',  plans, 'plansCounter');
   if (id === 'statsScreen')   renderStats();
+  if (id === 'achScreen'){ updateAchCounter(); renderCarousel(); renderAchGrid(); }
+  if (id === 'analyticsScreen') renderAnalytics();
   if (id === 'mapScreen' && map) setTimeout(()=>{ map.invalidateSize({pan:false}); cullMarkers(); }, 50);
 }
 
+/* ═══ СПИСКИ ═══ */
 function renderList(containerId, indices, counterId){
   const c = document.getElementById(containerId);
   document.getElementById(counterId).textContent = indices.length + ' ' + plural(indices.length, 'место','места','мест');
   if (!indices.length){
     const isFav = containerId === 'favContainer';
     const isVis = containerId === 'visitedContainer';
+    const isPlan = containerId === 'plansContainer';
     c.innerHTML = `<div class="empty">
-      <span class="ic">${isFav ? '⭐' : isVis ? '✅' : '📭'}</span>
-      <strong>${isFav ? 'Пока пусто' : isVis ? 'Здесь пока пусто' : 'Ничего не найдено'}</strong>
+      <span class="ic">${isFav ? '⭐' : isVis ? '✅' : isPlan ? '📅' : '📭'}</span>
+      <strong>${isFav ? 'Пока пусто' : isVis ? 'Здесь пока пусто' : isPlan ? 'Нет планов' : 'Ничего не найдено'}</strong>
       ${isFav ? 'Открой любой объект и нажми «В избранное»' :
         isVis ? 'Отмечай места кнопкой «Я здесь был»' :
+        isPlan ? 'Нажми «Хочу пойти» на любом объекте' :
         'Попробуй изменить поисковый запрос'}
     </div>`;
     return;
@@ -870,6 +925,7 @@ function buildCard(p, index){
   badges += `<span class="badge">🚪 ${p.access}</span>`;
   if (favorites.includes(index)) badges += `<span class="badge fav">⭐ В избранном</span>`;
   if (visited.includes(index))   badges += `<span class="badge visited">✅ Посещено</span>`;
+  if (plans.includes(index))     badges += `<span class="badge" style="background:rgba(10,132,255,.15);color:#5ea6ff">📅 В планах</span>`;
   return `<div class="card" style="--cat-color:${c.color}" onclick="openDetail(${index})">
     <div class="card-inner">
       <div class="card-cat">${c.icon} ${p.category}</div>
@@ -880,11 +936,522 @@ function buildCard(p, index){
   </div>`;
 }
 
+/* ═══ ПОГОДА ═══ */
+const weatherCache = {};
+async function getWeather(lat, lon){
+  const key = `${lat.toFixed(2)},${lon.toFixed(2)}`;
+  const cached = weatherCache[key];
+  if (cached && Date.now() - cached.time < 3600000) return cached.data;
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto&forecast_days=4`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('weather fail');
+    const data = await res.json();
+    weatherCache[key] = { data, time: Date.now() };
+    return data;
+  } catch(e) { return cached ? cached.data : null; }
+}
+
+function weatherCodeInfo(code){
+  if (code === 0) return { icon: '☀️', desc: 'Ясно', color: '#ffb340' };
+  if (code <= 3) return { icon: '⛅', desc: 'Переменная облачность', color: '#8e8e93' };
+  if (code <= 48) return { icon: '🌫', desc: 'Туман', color: '#98989d' };
+  if (code <= 57) return { icon: '🌧', desc: 'Морось', color: '#5ac8fa' };
+  if (code <= 67) return { icon: '🌧', desc: 'Дождь', color: '#0a84ff' };
+  if (code <= 77) return { icon: '❄️', desc: 'Снег', color: '#c7c7cc' };
+  if (code <= 82) return { icon: '🌧', desc: 'Ливень', color: '#0a84ff' };
+  if (code <= 86) return { icon: '❄️', desc: 'Снегопад', color: '#c7c7cc' };
+  return { icon: '⛈', desc: 'Гроза', color: '#bf5af2' };
+}
+
+function getDayName(offset){
+  const days = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const d = new Date();
+  d.setDate(d.getDate() + offset);
+  return days[d.getDay()];
+}
+
+async function renderWeather(index){
+  const container = document.getElementById('weatherContainer');
+  if (!container) return;
+  const p = places[index];
+  container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">🌤 Загрузка погоды...</div>';
+  const data = await getWeather(p.lat, p.lon);
+  if (!data || !data.current){
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-3);font-size:13px">Погода недоступна офлайн</div>';
+    return;
+  }
+  const cur = data.current;
+  const info = weatherCodeInfo(cur.weather_code);
+  const temp = Math.round(cur.temperature_2m);
+  let daysHtml = '';
+  if (data.daily){
+    for (let i = 0; i < Math.min(4, data.daily.time.length); i++){
+      const code = data.daily.weather_code[i];
+      const dInfo = weatherCodeInfo(code);
+      const max = Math.round(data.daily.temperature_2m_max[i]);
+      const min = Math.round(data.daily.temperature_2m_min[i]);
+      daysHtml += `<div class="weather-day">
+        <div class="weather-day-name">${getDayName(i)}</div>
+        <div class="weather-day-icon">${dInfo.icon}</div>
+        <div class="weather-day-temp">${max}° <span style="color:var(--text-3);font-weight:600">${min}°</span></div>
+      </div>`;
+    }
+  }
+  container.innerHTML = `
+    <div class="weather-card" style="--w-color:${info.color}">
+      <div class="weather-now">
+        <div>
+          <div class="weather-temp">${temp}°</div>
+          <div class="weather-desc">${info.desc}</div>
+          <div class="weather-meta">
+            <span>💧 ${cur.relative_humidity_2m}%</span>
+            <span>💨 ${Math.round(cur.wind_speed_10m)} км/ч</span>
+          </div>
+        </div>
+        <div class="weather-icon">${info.icon}</div>
+      </div>
+      <div class="weather-days">${daysHtml}</div>
+    </div>
+  `;
+}
+
+/* ═══ ХОЧУ ПОЙТИ + КАЛЕНДАРЬ + ЧЕК-ЛИСТ ═══ */
+function togglePlan(index){
+  const pos = plans.indexOf(index);
+  if (pos === -1){
+    plans.push(index);
+    localStorage.setItem('urbex_plans', JSON.stringify(plans));
+    updatePlanBadge();
+    openDetail(index);
+    setTimeout(() => showPlanModal(index), 250);
+  } else {
+    plans.splice(pos, 1);
+    localStorage.setItem('urbex_plans', JSON.stringify(plans));
+    updatePlanBadge();
+    openDetail(index);
+    toast('Убрано из планов');
+  }
+}
+
+function showPlanModal(index){
+  pendingPlanIndex = index;
+  const overlay = document.getElementById('planModal');
+  if (overlay) overlay.classList.add('show');
+}
+
+function closePlanModal(openCalendar){
+  const overlay = document.getElementById('planModal');
+  if (overlay) overlay.classList.remove('show');
+  if (openCalendar && pendingPlanIndex !== null) downloadICS(pendingPlanIndex);
+  setTimeout(() => showChecklist(), 400);
+}
+
+function downloadICS(index){
+  const p = places[index];
+  const now = new Date();
+  const target = new Date(now);
+  const daysToSat = (6 - now.getDay() + 7) % 7 || 7;
+  target.setDate(now.getDate() + daysToSat);
+  target.setHours(10, 0, 0, 0);
+  const end = new Date(target.getTime() + 3 * 3600000);
+  const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  const ics = [
+    'BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//UrbaxA5000//RU','BEGIN:VEVENT',
+    `UID:urbaxa-${index}-${Date.now()}@urbaxa5000`,
+    `DTSTAMP:${fmt(now)}`,`DTSTART:${fmt(target)}`,`DTEND:${fmt(end)}`,
+    `SUMMARY:Вылазка: ${p.name}`,
+    `DESCRIPTION:${p.desc.replace(/\n/g,' ').slice(0,200)}`,
+    `LOCATION:${p.lat},${p.lon}`,`GEO:${p.lat};${p.lon}`,
+    'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:Напоминание','END:VALARM',
+    'END:VEVENT','END:VCALENDAR'
+  ].join('\r\n');
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `urbaxa-${p.name.replace(/[^a-zа-я0-9]/gi, '_')}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast('📅 Событие отправлено в календарь');
+}
+
+const CHECKLIST_ITEMS = [
+  { id: 'light', icon: '🔦', text: 'Фонарик' },
+  { id: 'tell', icon: '👥', text: 'Сказал близким куда иду' },
+  { id: 'weather', icon: '🌤', text: 'Проверил погоду' },
+  { id: 'aid', icon: '🩹', text: 'Аптечка в рюкзаке' },
+  { id: 'buddy', icon: '🚶', text: 'Иду не один' }
+];
+
+function showChecklist(){
+  checklistState = {};
+  const container = document.getElementById('checklistItems');
+  if (container){
+    container.innerHTML = CHECKLIST_ITEMS.map(item => `
+      <div class="check-item" onclick="toggleCheck('${item.id}', this)">
+        <div class="check-box">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="check-label">${item.icon} ${item.text}</div>
+      </div>
+    `).join('');
+  }
+  const overlay = document.getElementById('checklistModal');
+  if (overlay) overlay.classList.add('show');
+}
+
+function toggleCheck(id, el){
+  checklistState[id] = !checklistState[id];
+  el.classList.toggle('checked', checklistState[id]);
+  if (navigator.vibrate) navigator.vibrate(5);
+}
+
+function closeChecklist(){
+  const overlay = document.getElementById('checklistModal');
+  if (overlay) overlay.classList.remove('show');
+  toast('🏃 Хорошей вылазки!');
+  if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+}
+
+function updatePlanBadge(){
+  const b = document.getElementById('planBadge');
+  if (!b) return;
+  if (plans.length){ b.style.display = 'flex'; b.textContent = plans.length > 99 ? '99+' : plans.length; }
+  else b.style.display = 'none';
+}
+
+/* ═══ АЧИВКИ ═══ */
+const ACHIEVEMENTS = [
+  { id:'first_step', icon:'🌱', name:'Первый шаг', desc:'1 посещение', rarity:'common', check:(s)=>s.v>=1 },
+  { id:'traveler', icon:'🚶', name:'Путешественник', desc:'5 посещений', rarity:'common', check:(s)=>s.v>=5 },
+  { id:'explorer', icon:'🧭', name:'Исследователь', desc:'10 посещений', rarity:'rare', check:(s)=>s.v>=10 },
+  { id:'veteran', icon:'🎖', name:'Ветеран', desc:'25 посещений', rarity:'epic', check:(s)=>s.v>=25 },
+  { id:'legend', icon:'👑', name:'Легенда', desc:'Все 50 объектов', rarity:'legendary', check:(s)=>s.v>=50 },
+  { id:'industrial', icon:'🏭', name:'Промышленник', desc:'5 промышленных', rarity:'rare', check:(s)=>s.cat['Промышленные']>=5 },
+  { id:'archivist', icon:'📜', name:'Архивариус', desc:'5 исторических', rarity:'rare', check:(s)=>s.cat['Исторические']>=5 },
+  { id:'digger', icon:'🕳', name:'Диггер', desc:'3 подземных', rarity:'epic', check:(s)=>s.cat['Подземные']>=3 },
+  { id:'engineer', icon:'🏗', name:'Инженер', desc:'5 недостроев', rarity:'rare', check:(s)=>s.cat['Недострои']>=5 },
+  { id:'war_corr', icon:'🎯', name:'Военкор', desc:'3 военных', rarity:'rare', check:(s)=>s.cat['Военные']>=3 },
+  { id:'local', icon:'🏠', name:'Краевед', desc:'5 жилых', rarity:'common', check:(s)=>s.cat['Жилые']>=5 },
+  { id:'culture', icon:'🎬', name:'Культурный', desc:'3 культурных', rarity:'common', check:(s)=>s.cat['Культурные']>=3 },
+  { id:'infra', icon:'🗼', name:'Инфраструктурщик', desc:'5 инфраструктурных', rarity:'rare', check:(s)=>s.cat['Инфраструктура']>=5 },
+  { id:'photographer', icon:'📸', name:'Фотограф', desc:'5 фото', rarity:'rare', check:(s)=>s.photos>=5 },
+  { id:'photo_legend', icon:'🎞', name:'Фото-легенда', desc:'25 фото', rarity:'epic', check:(s)=>s.photos>=25 },
+  { id:'author', icon:'✍️', name:'Автор', desc:'Добавил место', rarity:'rare', check:(s)=>s.added>=1 },
+  { id:'pioneer', icon:'⭐', name:'Первооткрыватель', desc:'5 мест добавлено', rarity:'legendary', check:(s)=>s.added>=5 },
+  { id:'critic', icon:'💯', name:'Ценитель', desc:'10 оценок', rarity:'common', check:(s)=>s.ratings>=10 },
+  { id:'planner', icon:'📅', name:'Планировщик', desc:'5 вылазок в планах', rarity:'rare', check:(s)=>s.plans>=5 },
+  { id:'night_raid', icon:'🌙', name:'Ночной рейд', desc:'Посещение после 22:00', rarity:'rare', check:(s)=>s.night>=1 },
+  { id:'early_bird', icon:'🌅', name:'Ранняя пташка', desc:'Посещение до 7:00', rarity:'rare', check:(s)=>s.morning>=1 },
+  { id:'saturday', icon:'🎉', name:'Субботний воин', desc:'Посещение в субботу', rarity:'common', check:(s)=>s.saturday>=1 },
+  { id:'marathon', icon:'🏃', name:'Марафонец', desc:'3 объекта за день', rarity:'epic', check:(s)=>s.maxDay>=3 },
+  { id:'ninja', icon:'🥷', name:'Ниндзя', desc:'5 посещений без фото', rarity:'secret', check:(s)=>s.v>=5 },
+  { id:'treasure', icon:'💎', name:'Кладоискатель', desc:'5 случайных мест', rarity:'secret', check:(s)=>false },
+  { id:'full_moon', icon:'🌕', name:'Ночной сторож', desc:'Посещение в полнолуние', rarity:'secret', check:(s)=>s.fullMoon },
+  { id:'double_agent', icon:'🕵️', name:'Двойной агент', desc:'Оба навигатора', rarity:'secret', check:(s)=>s.bothNav },
+  { id:'crimea_bridge', icon:'🌉', name:'Крымский мост', desc:'10 категорий', rarity:'secret', check:(s)=>s.catCount>=10 },
+  { id:'beloved', icon:'❤️', name:'Всеобщий любимец', desc:'25 оценок', rarity:'secret', check:(s)=>s.ratings>=25 },
+  { id:'ghost', icon:'👻', name:'Призрак', desc:'План в 3:00 ночи', rarity:'secret', check:(s)=>false }
+];
+
+function getAchStats(){
+  const cat = {};
+  const dates = {};
+  let night = 0, morning = 0, saturday = 0, maxDay = 0, fullMoon = 0;
+  const moonCycle = 29.53;
+  const refNew = new Date('2000-01-06').getTime();
+  const moonAge = ((Date.now() - refNew) / 86400000) % moonCycle;
+  const isFullMoon = moonAge > 13.5 && moonAge < 15.5;
+
+  visitHistory.forEach(v => {
+    const p = places[v.index];
+    if (p) cat[p.category] = (cat[p.category]||0) + 1;
+    const d = new Date(v.date);
+    const hour = d.getHours();
+    if (hour >= 22 || hour < 5) night++;
+    if (hour < 7) morning++;
+    if (d.getDay() === 6) saturday++;
+    if (isFullMoon) fullMoon++;
+    const dKey = d.toISOString().slice(0,10);
+    dates[dKey] = (dates[dKey]||0) + 1;
+  });
+  maxDay = Math.max(0, ...Object.values(dates));
+
+  return {
+    v: visited.length, cat, catCount: Object.keys(cat).length,
+    plans: plans.length, ratings: Object.keys(ratings).length,
+    photos: 0, added: 0, night, morning, saturday, maxDay,
+    fullMoon: fullMoon > 0,
+    bothNav: JSON.parse(localStorage.getItem('urbex_both_nav') || 'false')
+  };
+}
+
+function checkAchievements(){
+  const stats = getAchStats();
+  const newOnes = [];
+  ACHIEVEMENTS.forEach(a => {
+    if (unlockedAch.includes(a.id)) return;
+    try { if (a.check(stats)) { unlockedAch.push(a.id); newOnes.push(a); } } catch(e){}
+  });
+  if (newOnes.length){
+    localStorage.setItem('urbex_achievements', JSON.stringify(unlockedAch));
+    newOnes.forEach((a, i) => setTimeout(() => showAchUnlock(a), i * 3400));
+  }
+}
+
+function showAchUnlock(a){
+  const ov = document.getElementById('achUnlockOverlay');
+  if (!ov) return;
+  document.getElementById('achUnlockIcon').textContent = a.icon;
+  document.getElementById('achUnlockName').textContent = a.name;
+  document.getElementById('achUnlockDesc').textContent = a.desc;
+  ov.classList.add('show');
+  if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 100]);
+  setTimeout(() => hideAchUnlock(), 3200);
+}
+
+function hideAchUnlock(){
+  const ov = document.getElementById('achUnlockOverlay');
+  if (ov) ov.classList.remove('show');
+}
+
+function switchAchView(view){
+  currentAchView = view;
+  document.getElementById('viewCarousel').classList.toggle('active', view === 'carousel');
+  document.getElementById('viewGrid').classList.toggle('active', view === 'grid');
+  document.getElementById('achCarouselWrap').style.display = view === 'carousel' ? 'block' : 'none';
+  document.getElementById('achGridWrap').style.display = view === 'grid' ? 'block' : 'none';
+  if (view === 'carousel') renderCarousel(); else renderAchGrid();
+}
+
+function renderAchGrid(){
+  const grid = document.getElementById('achGrid');
+  if (!grid) return;
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const unlocked = unlockedAch.includes(a.id);
+    const hidden = a.rarity === 'secret' && !unlocked;
+    return `<div class="ach-tile ${unlocked?'unlocked':'locked'} ${hidden?'secret-tile':''}">
+      <div class="ach-icon">${hidden ? '🔒' : a.icon}</div>
+      <div class="ach-name">${hidden ? '???' : a.name}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderCarousel(){
+  const c = document.getElementById('achCarousel');
+  const nav = document.getElementById('achNav');
+  if (!c) return;
+  const rarities = { common:'Обычная', rare:'Редкая', epic:'Эпическая', legendary:'Легендарная', secret:'Секретная' };
+  c.innerHTML = ACHIEVEMENTS.map((a, i) => {
+    const unlocked = unlockedAch.includes(a.id);
+    const hidden = a.rarity === 'secret' && !unlocked;
+    return `<div class="ach-card-3d ${unlocked?'unlocked':'locked'} ${hidden?'secret':''}" data-idx="${i}">
+      <div class="ach-rarity ${a.rarity}">${rarities[a.rarity]}</div>
+      <div class="ach-icon">${hidden ? '🔒' : a.icon}</div>
+      <div class="ach-name">${hidden ? '???' : a.name}</div>
+      <div class="ach-desc">${hidden ? 'Откроется неожиданно' : a.desc}</div>
+    </div>`;
+  }).join('');
+  if (nav){
+    nav.innerHTML = ACHIEVEMENTS.map((_, i) =>
+      `<div class="ach-nav-dot ${i === currentAchIndex ? 'active' : ''}" onclick="gotoAch(${i})"></div>`
+    ).join('');
+  }
+  positionCarousel();
+}
+
+function positionCarousel(){
+  const cards = document.querySelectorAll('.ach-card-3d');
+  cards.forEach((card, i) => {
+    const offset = i - currentAchIndex;
+    const abs = Math.abs(offset);
+    if (abs > 3){ card.style.transform = 'translateX(' + (offset > 0 ? 1000 : -1000) + 'px)'; card.style.opacity = '0'; return; }
+    const x = offset * 55, z = -abs * 80, ry = offset * -25, scale = 1 - abs * 0.12;
+    card.style.transform = `translateX(${x}px) translateZ(${z}px) rotateY(${ry}deg) scale(${scale})`;
+    card.style.opacity = 1 - abs * 0.15;
+    card.style.zIndex = 100 - abs;
+  });
+  document.querySelectorAll('.ach-nav-dot').forEach((d, i) => {
+    d.classList.toggle('active', i === currentAchIndex);
+  });
+}
+
+function gotoAch(i){
+  currentAchIndex = i;
+  positionCarousel();
+  if (navigator.vibrate) navigator.vibrate(5);
+}
+
+let achTouchStart = 0;
+document.addEventListener('DOMContentLoaded', () => {
+  const wrap = document.getElementById('achCarouselWrap');
+  if (!wrap) return;
+  wrap.addEventListener('touchstart', (e) => { achTouchStart = e.touches[0].clientX; }, { passive: true });
+  wrap.addEventListener('touchend', (e) => {
+    const dx = e.changedTouches[0].clientX - achTouchStart;
+    if (Math.abs(dx) > 40){
+      if (dx < 0 && currentAchIndex < ACHIEVEMENTS.length - 1) gotoAch(currentAchIndex + 1);
+      else if (dx > 0 && currentAchIndex > 0) gotoAch(currentAchIndex - 1);
+    }
+  }, { passive: true });
+});
+
+/* ═══ АНАЛИТИКА ═══ */
+function renderAnalytics(){
+  const stats = getAchStats();
+  document.getElementById('anVisits').textContent = stats.v;
+  document.getElementById('anAch').textContent = unlockedAch.length;
+
+  let km = 0;
+  for (let i = 1; i < visitHistory.length; i++){
+    const a = places[visitHistory[i-1].index];
+    const b = places[visitHistory[i].index];
+    if (a && b) km += haversine(a.lat, a.lon, b.lat, b.lon);
+  }
+  document.getElementById('anKm').textContent = Math.round(km);
+
+  const dates = [...new Set(visitHistory.map(v => new Date(v.date).toDateString()))];
+  const sorted = dates.map(d => new Date(d)).sort((a,b) => b - a);
+  let streak = 0;
+  if (sorted.length){
+    const today = new Date(); today.setHours(0,0,0,0);
+    const check = new Date(sorted[0]); check.setHours(0,0,0,0);
+    if (Math.round((today - check) / 86400000) <= 1){
+      streak = 1;
+      for (let i = 1; i < sorted.length; i++){
+        const prev = new Date(sorted[i-1]); prev.setHours(0,0,0,0);
+        const cur = new Date(sorted[i]); cur.setHours(0,0,0,0);
+        if (Math.round((prev - cur) / 86400000) === 1) streak++; else break;
+      }
+    }
+  }
+  document.getElementById('anStreak').textContent = streak;
+
+  const catEntries = Object.entries(stats.cat).sort((a,b) => b[1] - a[1]);
+  if (catEntries.length){
+    const [cat, count] = catEntries[0];
+    const c = catOf(cat);
+    document.getElementById('favCatIcon').textContent = c.icon;
+    document.getElementById('favCatName').textContent = cat;
+    document.getElementById('favCatName').style.color = c.color;
+    document.getElementById('favCatCount').textContent = `${count} ${plural(count, 'посещение','посещения','посещений')}`;
+  } else {
+    document.getElementById('favCatIcon').textContent = '—';
+    document.getElementById('favCatName').textContent = 'Пока нет данных';
+    document.getElementById('favCatCount').textContent = 'Отметь первое посещение';
+  }
+
+  const hm = document.getElementById('heatmap');
+  if (hm){
+    const days = 84;
+    const dayCount = {};
+    visitHistory.forEach(v => {
+      const k = new Date(v.date).toISOString().slice(0,10);
+      dayCount[k] = (dayCount[k]||0) + 1;
+    });
+    let html = '';
+    for (let i = days - 1; i >= 0; i--){
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const k = d.toISOString().slice(0,10);
+      const n = dayCount[k] || 0;
+      const lvl = n === 0 ? '' : n === 1 ? 'l1' : n === 2 ? 'l2' : n === 3 ? 'l3' : 'l4';
+      html += `<div class="heat-cell ${lvl}"></div>`;
+    }
+    hm.innerHTML = html;
+  }
+
+  const chart = document.getElementById('activityChart');
+  if (chart){
+    const dayLabels = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+    const dayCount = [0,0,0,0,0,0,0];
+    visitHistory.forEach(v => {
+      const d = new Date(v.date);
+      const daysAgo = Math.floor((Date.now() - d.getTime()) / 86400000);
+      if (daysAgo < 7){
+        const idx = (d.getDay() + 6) % 7;
+        dayCount[idx]++;
+      }
+    });
+    const max = Math.max(1, ...dayCount);
+    let html = '';
+    for (let i = 0; i < 7; i++){
+      const h = Math.max(6, (dayCount[i] / max) * 80);
+      html += `<div class="chart-bar" style="height:${h}px"><div class="chart-bar-label">${dayLabels[i]}</div></div>`;
+    }
+    chart.innerHTML = html;
+  }
+}
+
+/* ═══ УВЕДОМЛЕНИЯ ═══ */
+function toggleSetting(key, el){
+  settings[key] = !settings[key];
+  localStorage.setItem('urbex_settings', JSON.stringify(settings));
+  el.classList.toggle('on', settings[key]);
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+async function requestNotificationPermission(){
+  if (!('Notification' in window)){ toast('Уведомления не поддерживаются'); return; }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted'){
+    toast('🔔 Уведомления включены');
+    setTimeout(() => showPushBanner('🎉', 'Уведомления включены', 'Теперь будем напоминать о вылазках'), 500);
+    scheduleNotifications();
+  } else toast('Уведомления отклонены');
+}
+
+function showPushBanner(icon, title, text){
+  const b = document.getElementById('pushBanner');
+  if (!b) return;
+  document.getElementById('pushIcon').textContent = icon;
+  document.getElementById('pushTitle').textContent = title;
+  document.getElementById('pushText').textContent = text;
+  b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 4000);
+}
+
+function hidePushBanner(){
+  const b = document.getElementById('pushBanner');
+  if (b) b.classList.remove('show');
+}
+
+function checkNearbyNotification(lat, lon){
+  if (!settings.notifyNearby) return;
+  if (localStorage.getItem('urbex_lastNotif') === new Date().toDateString()) return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const nearest = places.map((p, i) => ({ i, p, d: haversine(lat, lon, p.lat, p.lon) })).sort((a,b) => a.d - b.d)[0];
+  if (nearest && nearest.d < 2){
+    showPushBanner('📍', 'Рядом заброшка!', `${nearest.p.name} — ${(nearest.d * 1000).toFixed(0)} м`);
+    localStorage.setItem('urbex_lastNotif', new Date().toDateString());
+    try { new Notification('UrbaxA5000', { body: `Рядом: ${nearest.p.name}`, icon: './icon.svg', tag: 'nearby' }); } catch(e){}
+  }
+}
+
+function scheduleNotifications(){
+  setInterval(() => {
+    const today = new Date().toDateString();
+    if (lastNotifDate === today) return;
+    const daysSince = visitHistory.length
+      ? Math.floor((Date.now() - new Date(visitHistory[visitHistory.length-1].date).getTime()) / 86400000)
+      : 999;
+    if (settings.notifyRemind && daysSince >= 7){
+      showPushBanner('🏚', 'Пора на вылазку!', 'Давно не был. Запланируй что-нибудь?');
+      localStorage.setItem('urbex_lastNotif', today);
+      lastNotifDate = today;
+    }
+  }, 60000);
+}
+
+/* ═══ КАРТОЧКА ОБЪЕКТА ═══ */
 function openDetail(index){
   const p = places[index];
   const c = catOf(p.category);
   const isFav = favorites.includes(index);
   const isVis = visited.includes(index);
+  const isPlan = plans.includes(index);
   const myRating = ratings[index] || 0;
   const nearby = getNearby(index, 5);
 
@@ -904,24 +1471,15 @@ function openDetail(index){
         </button>
       </div>
     </div>
-
     <div class="detail-body">
-      <div class="detail-cat" style="--cat-color:${c.color}">
-        <span>${c.icon}</span><span>${p.category}</span>
-      </div>
+      <div class="detail-cat" style="--cat-color:${c.color}"><span>${c.icon}</span><span>${p.category}</span></div>
       <h1 class="detail-title">${p.name}</h1>
-
       <div class="info-grid">
         <div class="info-cell"><span class="ic">⚠️</span><div class="lbl">Опасность</div><div class="val">${p.danger}</div></div>
         <div class="info-cell"><span class="ic">🚪</span><div class="lbl">Доступ</div><div class="val">${p.access}</div></div>
         <div class="info-cell"><span class="ic">📌</span><div class="lbl">Статус</div><div class="val">${p.status}</div></div>
       </div>
-
-      <div class="detail-section">
-        <h3>Описание</h3>
-        <p class="detail-desc">${p.desc}</p>
-      </div>
-
+      <div class="detail-section"><h3>Описание</h3><p class="detail-desc">${p.desc}</p></div>
       <div class="detail-section">
         <h3>Моя оценка</h3>
         <div class="rating-row" id="ratingRow">
@@ -929,7 +1487,6 @@ function openDetail(index){
           <span class="rating-hint">${myRating ? myRating + ' / 5' : 'Оцени'}</span>
         </div>
       </div>
-
       <div class="detail-section">
         <h3>Координаты</h3>
         <div class="coords-box">
@@ -937,7 +1494,6 @@ function openDetail(index){
           <button class="coords-copy" onclick="copyCoords(${index})">Копировать</button>
         </div>
       </div>
-
       <div class="detail-section">
         <h3>Действия</h3>
         <div class="actions-grid">
@@ -950,6 +1506,10 @@ function openDetail(index){
             ${isVis ? 'Посещено' : 'Я здесь был'}
           </button>
         </div>
+        <button class="action-btn ${isPlan?'plan-on':'plan'}" style="width:100%;margin-bottom:10px" onclick="togglePlan(${index})">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          ${isPlan ? 'В планах' : 'Хочу пойти'}
+        </button>
         <div class="actions-grid">
           <a class="action-btn google" href="https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lon}" target="_blank" rel="noopener">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 110-6 3 3 0 010 6z"/></svg>
@@ -965,12 +1525,14 @@ function openDetail(index){
           Поделиться
         </button>
       </div>
-
+      <div class="detail-section">
+        <h3>Погода</h3>
+        <div id="weatherContainer"></div>
+      </div>
       <div class="detail-section">
         <h3>Мои заметки</h3>
         <textarea class="notes-area" placeholder="Как пройти, что взять, впечатления..." oninput="saveNote(${index}, this.value)">${notes[index] || ''}</textarea>
       </div>
-
       ${nearby.length ? `
       <div class="detail-section">
         <h3>Рядом ещё</h3>
@@ -987,10 +1549,10 @@ function openDetail(index){
       </div>` : ''}
     </div>
   `;
-
   switchScreen('detailScreen');
   document.getElementById('detailScreen').scrollTop = 0;
   history.replaceState(null, '', '#place-' + index);
+  renderWeather(index);
   if (navigator.vibrate) navigator.vibrate(8);
 }
 
@@ -999,6 +1561,7 @@ function closeDetail(){
   switchScreen('mapScreen');
 }
 
+/* ═══ ДЕЙСТВИЯ ═══ */
 function toggleFav(index){
   const pos = favorites.indexOf(index);
   if (pos === -1){ favorites.push(index); toast('⭐ Добавлено в избранное'); }
@@ -1013,12 +1576,22 @@ function toggleFav(index){
 
 function toggleVis(index){
   const pos = visited.indexOf(index);
-  if (pos === -1){ visited.push(index); toast('✅ Отмечено как посещённое'); }
-  else { visited.splice(pos,1); toast('Отметка снята'); }
+  if (pos === -1){
+    visited.push(index);
+    visitHistory.push({ index, date: Date.now() });
+    localStorage.setItem('urbex_history', JSON.stringify(visitHistory));
+    toast('✅ Отмечено как посещённое');
+  } else {
+    visited.splice(pos,1);
+    visitHistory = visitHistory.filter(v => v.index !== index);
+    localStorage.setItem('urbex_history', JSON.stringify(visitHistory));
+    toast('Отметка снята');
+  }
   localStorage.setItem('urbex_visited', JSON.stringify(visited));
   updateBadges();
   const m = markers[index];
   if (m && m.visible) m.marker.setIcon(getIcon(m.data.category, favorites.includes(index), visited.includes(index)));
+  checkAchievements();
   openDetail(index);
   if (navigator.vibrate) navigator.vibrate(10);
 }
@@ -1032,6 +1605,7 @@ function setRating(index, n){
     row.querySelector('.rating-hint').textContent = n + ' / 5';
   }
   toast(`Оценка: ${n} из 5`);
+  checkAchievements();
   if (navigator.vibrate) navigator.vibrate(8);
 }
 
@@ -1048,7 +1622,7 @@ function copyCoords(index){
 async function sharePlace(index){
   const p = places[index];
   const url = location.origin + location.pathname + '#place-' + index;
-  const text = `${p.name} — заброшенное место в Симферополе`;
+  const text = `${p.name} — заброшенное место в Симферополе · UrbaxA5000`;
   const payload = { title: p.name, text, url };
   if (navigator.share){
     try { await navigator.share(payload); return; } catch(e){}
@@ -1058,9 +1632,7 @@ async function sharePlace(index){
 }
 
 function copyText(txt){
-  if (navigator.clipboard && navigator.clipboard.writeText){
-    return navigator.clipboard.writeText(txt);
-  }
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(txt);
   return new Promise(res => {
     const ta = document.createElement('textarea');
     ta.value = txt; ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -1081,6 +1653,7 @@ function locateMe(){
     }).addTo(map).bindPopup('📍 Вы здесь').openPopup();
     map.setView([la, lo], 15, { animate: true });
     toast('📍 Местоположение найдено');
+    checkNearbyNotification(la, lo);
   }, () => toast('Не удалось определить местоположение'));
 }
 
@@ -1099,6 +1672,7 @@ function handleSearch(){
   searchTimer = setTimeout(cullMarkers, 200);
 }
 
+/* ═══ СТАТИСТИКА ═══ */
 function renderStats(){
   document.getElementById('stTotal').textContent = places.length;
   document.getElementById('stTotal2').textContent = places.length;
@@ -1113,24 +1687,28 @@ function renderStats(){
   const catCount = {};
   places.forEach(p => catCount[p.category] = (catCount[p.category] || 0) + 1);
   const maxCat = Math.max(...Object.values(catCount));
-  const html = Object.entries(catCount)
-    .sort((a,b) => b[1] - a[1])
-    .map(([cat, n]) => {
-      const c = catOf(cat);
-      const w = (n / maxCat) * 100;
-      return `<div style="margin-bottom:14px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:7px;font-size:12.5px">
-          <span style="color:var(--text-2);font-weight:700">${c.icon} ${cat}</span>
-          <span style="color:#fff;font-weight:900">${n}</span>
-        </div>
-        <div style="height:6px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden">
-          <div style="height:100%;width:${w}%;background:${c.color};border-radius:999px"></div>
-        </div>
-      </div>`;
-    }).join('');
+  const html = Object.entries(catCount).sort((a,b) => b[1] - a[1]).map(([cat, n]) => {
+    const c = catOf(cat);
+    const w = (n / maxCat) * 100;
+    return `<div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:7px;font-size:12.5px">
+        <span style="color:var(--text-2);font-weight:700">${c.icon} ${cat}</span>
+        <span style="color:#fff;font-weight:900">${n}</span>
+      </div>
+      <div style="height:6px;background:rgba(255,255,255,.06);border-radius:999px;overflow:hidden">
+        <div style="height:100%;width:${w}%;background:${c.color};border-radius:999px"></div>
+      </div>
+    </div>`;
+  }).join('');
   document.getElementById('stCategories').innerHTML = html;
 }
 
+function updateAchCounter(){
+  const el = document.getElementById('achCounter');
+  if (el) el.textContent = unlockedAch.length + ' / ' + ACHIEVEMENTS.length;
+}
+
+/* ═══ ГЕОМЕТРИЯ ═══ */
 function getNearby(index, limit){
   const p = places[index];
   return places.map((pl, i) => ({ i, place: pl, dist: haversine(p.lat, p.lon, pl.lat, pl.lon) }))
@@ -1156,13 +1734,10 @@ function plural(n, one, few, many){
   return many;
 }
 
+/* ═══ TOAST И БЕЙДЖИ ═══ */
 function toast(msg){
   let t = document.querySelector('.toast');
-  if (!t){
-    t = document.createElement('div');
-    t.className = 'toast';
-    document.body.appendChild(t);
-  }
+  if (!t){ t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
   t.innerHTML = msg;
   setTimeout(() => t.classList.add('show'), 10);
   clearTimeout(t._timer);
@@ -1176,66 +1751,50 @@ function updateBadges(){
   else favB.style.display = 'none';
   if (visited.length){ visB.style.display = 'flex'; visB.textContent = visited.length > 99 ? '99+' : visited.length; }
   else visB.style.display = 'none';
+  updatePlanBadge();
 }
 
 function clearAll(){
-  if (!confirm('Сбросить избранное, посещения, оценки и заметки?')) return;
-  favorites = []; visited = []; notes = {}; ratings = {};
-  ['urbex_favorites','urbex_visited','urbex_notes','urbex_ratings'].forEach(k => localStorage.removeItem(k));
+  if (!confirm('Сбросить все данные? Избранное, посещения, оценки, заметки, планы, ачивки.')) return;
+  favorites = []; visited = []; notes = {}; ratings = []; plans = []; unlockedAch = []; visitHistory = [];
+  ['urbex_favorites','urbex_visited','urbex_notes','urbex_ratings','urbex_plans','urbex_achievements','urbex_history','urbex_used_google','urbex_used_yandex','urbex_both_nav'].forEach(k => localStorage.removeItem(k));
   updateBadges(); cullMarkers(); renderStats();
   toast('Данные сброшены');
 }
 
-document.getElementById('detailScreen').addEventListener('scroll', function(){
-  const total = this.scrollHeight - this.clientHeight;
-  const pct = total > 0 ? (this.scrollTop / total) * 100 : 0;
-  document.getElementById('progressBar').style.width = pct + '%';
-}, { passive: true });
-
-// ═══ PWA: РЕГИСТРАЦИЯ SERVICE WORKER ═══
-if ('serviceWorker' in navigator) {
+/* ═══ PWA ═══ */
+if ('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
-      .then(reg => console.log('✅ SW зарегистрирован'))
-      .catch(err => console.log('❌ Ошибка SW:', err));
+      .then(() => console.log('✅ SW registered'))
+      .catch(err => console.log('❌ SW error:', err));
   });
 }
 
-// ═══ PWA: УСТАНОВКА (Android) ═══
 let deferredPrompt = null;
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-// Проверяем, установлено ли уже приложение
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
-  || window.navigator.standalone === true;
-
-if (!isStandalone) {
+if (!isStandalone){
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    // Показываем кнопку установки
     const btn = document.getElementById('installBtn');
     if (btn) btn.style.display = 'block';
   });
 }
 
-// Проверяем, iOS ли это — показываем инструкцию
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-if (isIOS && isSafari && !isStandalone) {
+if (isIOS && isSafari && !isStandalone){
   const iosBlock = document.getElementById('iosInstall');
   if (iosBlock) iosBlock.style.display = 'block';
 }
 
-function installPWA() {
-  if (!deferredPrompt) {
-    // Если событие не сработало, но приложение уже установлено
-    if (isStandalone) {
-      toast('📱 Приложение уже установлено');
-    } else if (isIOS) {
-      toast('📱 Используйте инструкцию для iPhone');
-    } else {
-      toast('Установка недоступна в этом браузере');
-    }
+function installPWA(){
+  if (!deferredPrompt){
+    if (isStandalone) toast('📱 Приложение уже установлено');
+    else if (isIOS) toast('📱 Используй инструкцию для iPhone');
+    else toast('Установка недоступна в этом браузере');
     return;
   }
   deferredPrompt.prompt();
@@ -1245,31 +1804,30 @@ function installPWA() {
   });
 }
 
-// ═══ ПРИНУДИТЕЛЬНОЕ ОБНОВЛЕНИЕ ═══
-async function forceUpdate() {
+async function forceUpdate(){
   toast('🔄 Обновление...');
-  
-  // 1. Удаляем все кэши
-  if ('caches' in window) {
+  if ('caches' in window){
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames.map(name => caches.delete(name)));
   }
-  
-  // 2. Снимаем регистрацию Service Worker
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator){
     const registrations = await navigator.serviceWorker.getRegistrations();
     await Promise.all(registrations.map(reg => reg.unregister()));
   }
-  
-  // 3. Даём браузеру время на обработку (важно для iOS)
   await new Promise(resolve => setTimeout(resolve, 500));
-  
-  // 4. Перезагружаем с обходом кэша
   const url = new URL(window.location.href);
   url.searchParams.set('v', Date.now().toString());
   window.location.replace(url.toString());
 }
 
+/* ═══ PROGRESS BAR ═══ */
+document.getElementById('detailScreen').addEventListener('scroll', function(){
+  const total = this.scrollHeight - this.clientHeight;
+  const pct = total > 0 ? (this.scrollTop / total) * 100 : 0;
+  document.getElementById('progressBar').style.width = pct + '%';
+}, { passive: true });
+
+/* ═══ СТАРТ ═══ */
 initMap();
 renderChips();
 updateBadges();
@@ -1292,6 +1850,27 @@ window.addEventListener('hashchange', () => {
     document.getElementById('mainNav').style.display = 'flex';
   }
 });
-</script>
-</body>
-</html>
+
+/* ═══ ФИНАЛЬНАЯ ИНИЦИАЛИЗАЦИЯ ═══ */
+setTimeout(() => {
+  ['notifyNearby','notifyRemind','notifyNew'].forEach(k => {
+    const map2 = { notifyNearby: 'tgNearby', notifyRemind: 'tgRemind', notifyNew: 'tgNew' };
+    const el = document.getElementById(map2[k]);
+    if (el && settings[k]) el.classList.add('on');
+  });
+  checkAchievements();
+}, 2500);
+
+// Отслеживание использования обоих навигаторов
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('a');
+  if (!a) return;
+  if (a.classList.contains('google') || a.classList.contains('yandex')){
+    const key = a.classList.contains('google') ? 'urbex_used_google' : 'urbex_used_yandex';
+    localStorage.setItem(key, 'true');
+    if (localStorage.getItem('urbex_used_google') === 'true' && localStorage.getItem('urbex_used_yandex') === 'true'){
+      localStorage.setItem('urbex_both_nav', 'true');
+      checkAchievements();
+    }
+  }
+});
