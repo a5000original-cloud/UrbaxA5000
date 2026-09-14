@@ -1,6 +1,6 @@
 /* URBaxA5000 — Service Worker · A5000 Labs · v2 */
-const CACHE_NAME = 'urbaxa-v2';
-const RUNTIME_CACHE = 'urbaxa-runtime-v2';
+const CACHE_NAME = 'urbaxa-v3';
+const RUNTIME_CACHE = 'urbaxa-runtime-v3';
 const PRECACHE = ['./','./index.html','./manifest.json','./icon.svg'];
 
 self.addEventListener('install', (e) => {
