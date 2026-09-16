@@ -1,182 +1,143 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <defs>
-    <!-- Фоновый градиент с металлическим отливом -->
-    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
-      <stop offset="0" stop-color="#2a2a33"/>
-      <stop offset="0.4" stop-color="#14141a"/>
-      <stop offset="1" stop-color="#050507"/>
-    </linearGradient>
+    <radialGradient id="bgGrad" cx="50%" cy="0%" r="120%">
+      <stop offset="0" stop-color="#2d2d3a"/>
+      <stop offset="0.5" stop-color="#0f0f15"/>
+      <stop offset="1" stop-color="#000000"/>
+    </radialGradient>
 
-    <!-- Верхний светлый слой фона (создаёт глубину) -->
-    <linearGradient id="bgTop" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.06"/>
+    <linearGradient id="glassTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.15"/>
+      <stop offset="0.4" stop-color="#ffffff" stop-opacity="0.02"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
 
-    <!-- Пин: 4-ступенчатый градиент для реалистичного металла -->
-    <linearGradient id="pinGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffd66b"/>
-      <stop offset="0.35" stop-color="#ffb340"/>
-      <stop offset="0.75" stop-color="#ff9500"/>
-      <stop offset="1" stop-color="#c66a00"/>
+    <linearGradient id="pinBody" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#ffdc7a"/>
+      <stop offset="0.25" stop-color="#ffb340"/>
+      <stop offset="0.6" stop-color="#ff9500"/>
+      <stop offset="0.85" stop-color="#e87d00"/>
+      <stop offset="1" stop-color="#b35400"/>
     </linearGradient>
 
-    <!-- Боковой блик на пине (слева) -->
-    <linearGradient id="pinSideLight" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5"/>
-      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-
-    <!-- Верхний блик пина (shine) -->
-    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.6"/>
-      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.05"/>
+    <radialGradient id="pinSpec" cx="35%" cy="25%" r="60%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.3" stop-color="#ffffff" stop-opacity="0.2"/>
       <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="innerBg" cx="50%" cy="35%" r="70%">
+      <stop offset="0" stop-color="#1a1a22"/>
+      <stop offset="0.6" stop-color="#050508"/>
+      <stop offset="1" stop-color="#000000"/>
+    </radialGradient>
+
+    <linearGradient id="letterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffdc7a"/>
+      <stop offset="0.5" stop-color="#ffb340"/>
+      <stop offset="1" stop-color="#e07d00"/>
     </linearGradient>
 
-    <!-- Тёплое свечение вокруг пина -->
-    <radialGradient id="glow" cx="50%" cy="42%" r="58%">
-      <stop offset="0" stop-color="#ff9500" stop-opacity="0.55"/>
-      <stop offset="0.5" stop-color="#ff9500" stop-opacity="0.15"/>
-      <stop offset="1" stop-color="#ff9500" stop-opacity="0"/>
-    </radialGradient>
-
-    <!-- Глубокий внутренний круг (Apple-style dark hole) -->
-    <radialGradient id="innerCircle" cx="50%" cy="40%" r="65%">
-      <stop offset="0" stop-color="#0a0a0c"/>
-      <stop offset="0.7" stop-color="#000"/>
-      <stop offset="1" stop-color="#000"/>
-    </radialGradient>
-
-    <!-- Ореол внутри круга вокруг буквы A -->
     <radialGradient id="letterGlow" cx="50%" cy="50%" r="60%">
-      <stop offset="0" stop-color="#ff9500" stop-opacity="0.35"/>
+      <stop offset="0" stop-color="#ff9500" stop-opacity="0.4"/>
       <stop offset="1" stop-color="#ff9500" stop-opacity="0"/>
     </radialGradient>
 
-    <!-- Тень под пином -->
-    <filter id="shadow" x="-30%" y="-20%" width="160%" height="150%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="14"/>
-      <feOffset dx="0" dy="18" result="offsetblur"/>
-      <feComponentTransfer><feFuncA type="linear" slope="0.55"/></feComponentTransfer>
+    <radialGradient id="ambient" cx="50%" cy="45%" r="60%">
+      <stop offset="0" stop-color="#ff9500" stop-opacity="0.4"/>
+      <stop offset="0.6" stop-color="#ff9500" stop-opacity="0.1"/>
+      <stop offset="1" stop-color="#ff9500" stop-opacity="0"/>
+    </radialGradient>
+
+    <filter id="pinShadow" x="-40%" y="-20%" width="180%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="16"/>
+      <feOffset dx="0" dy="20"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.6"/></feComponentTransfer>
       <feMerge>
         <feMergeNode/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
 
-    <!-- Легкое размытие для внутренних бликов -->
-    <filter id="softBlur">
-      <feGaussianBlur stdDeviation="3"/>
+    <filter id="innerBlur">
+      <feGaussianBlur stdDeviation="4"/>
     </filter>
 
-    <!-- Сетка/шум на фоне (тонкая urban-текстура) -->
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-opacity="0.025" stroke-width="1"/>
-    </pattern>
+    <clipPath id="iconClip">
+      <rect width="512" height="512" rx="114"/>
+    </clipPath>
   </defs>
 
-  <!-- ФОН -->
-  <rect width="512" height="512" rx="118" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="118" fill="url(#grid)"/>
-  <rect width="512" height="512" rx="118" fill="url(#bgTop)"/>
+  <g clip-path="url(#iconClip)">
+    <rect width="512" height="512" fill="url(#bgGrad)"/>
+    <rect x="12" y="12" width="488" height="488" rx="102" fill="none" stroke="url(#glassTop)" stroke-width="1.5"/>
+    <ellipse cx="256" cy="240" rx="240" ry="220" fill="url(#ambient)"/>
 
-  <!-- Тонкая светлая обводка (Apple-style edge) -->
-  <rect x="1" y="1" width="510" height="510" rx="117" fill="none" stroke="#ffffff" stroke-opacity="0.1" stroke-width="2"/>
+    <g filter="url(#pinShadow)">
+      <path d="M256 52
+               C162 52 86 128 86 222
+               C86 268 104 312 136 348
+               C180 396 236 434 256 448
+               C276 434 332 396 376 348
+               C408 312 426 268 426 222
+               C426 128 350 52 256 52 Z"
+            fill="url(#pinBody)" stroke="#ffffff" stroke-width="10" stroke-linejoin="round"/>
+    </g>
 
-  <!-- Свечение вокруг пина -->
-  <circle cx="256" cy="228" r="215" fill="url(#glow)"/>
+    <path d="M256 66
+             C168 66 100 134 100 222
+             C100 232 101 242 103 252
+             C112 172 176 108 256 108
+             C336 108 400 172 409 252
+             C411 242 412 232 412 222
+             C412 134 344 66 256 66 Z"
+          fill="url(#pinSpec)" opacity="0.55"/>
 
-  <!-- ═══ ПИН ═══ -->
-  <g filter="url(#shadow)">
-    <!-- Основная форма -->
-    <path d="M256 60
-             C168 60 96 132 96 220
-             C96 318 208 404 256 448
-             C304 404 416 318 416 220
-             C416 132 344 60 256 60 Z"
-          fill="url(#pinGrad)" stroke="#ffffff" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M110 200
+             C116 148 156 108 200 96
+             C158 118 128 158 120 210
+             C116 240 122 270 138 298
+             C122 268 108 236 110 200 Z"
+          fill="#ffffff" opacity="0.35" filter="url(#innerBlur)"/>
+
+    <circle cx="256" cy="210" r="62" fill="url(#innerBg)"/>
+    <circle cx="256" cy="210" r="62" fill="none" stroke="#ffc84a" stroke-opacity="0.7" stroke-width="1.5"/>
+    <circle cx="256" cy="210" r="61" fill="none" stroke="#000000" stroke-opacity="0.5" stroke-width="1"/>
+    <circle cx="256" cy="210" r="48" fill="url(#letterGlow)"/>
+    <ellipse cx="256" cy="178" rx="40" ry="12" fill="#ffffff" opacity="0.12"/>
+
+    <text x="256" y="234"
+          text-anchor="middle"
+          font-family="'Inter', -apple-system, 'SF Pro Display', system-ui, sans-serif"
+          font-size="76"
+          font-weight="900"
+          fill="url(#letterGrad)"
+          letter-spacing="-4">A</text>
+
+    <text x="256" y="233"
+          text-anchor="middle"
+          font-family="'Inter', -apple-system, 'SF Pro Display', system-ui, sans-serif"
+          font-size="76"
+          font-weight="900"
+          fill="none"
+          stroke="#ffffff"
+          stroke-opacity="0.25"
+          stroke-width="0.8"
+          letter-spacing="-4">A</text>
+
+    <line x1="180" y1="416" x2="332" y2="416" stroke="#ffffff" stroke-opacity="0.1" stroke-width="1"/>
+
+    <text x="256" y="466"
+          text-anchor="middle"
+          font-family="'Inter', -apple-system, 'SF Pro Display', system-ui, sans-serif"
+          font-size="28"
+          font-weight="800"
+          fill="#ffffff"
+          fill-opacity="0.35"
+          letter-spacing="12">A5000</text>
+
+    <ellipse cx="256" cy="30" rx="200" ry="40" fill="#ffffff" opacity="0.05"/>
   </g>
 
-  <!-- Верхний блик по контуру пина -->
-  <path d="M256 74
-           C180 74 118 130 110 200
-           C112 148 158 96 256 96
-           C354 96 400 148 402 200
-           C394 130 332 74 256 74 Z"
-        fill="url(#shine)"/>
-
-  <!-- Боковой блик слева -->
-  <path d="M124 200
-           C128 145 172 106 220 100
-           C170 116 140 155 132 210
-           C128 240 132 270 144 296
-           C132 268 122 234 124 200 Z"
-        fill="url(#pinSideLight)" filter="url(#softBlur)"/>
-
-  <!-- Мягкий контурный блик внутри -->
-  <path d="M256 88
-           C186 88 128 146 128 218
-           C128 224 128 230 129 236"
-        fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>
-
-  <!-- ═══ ВНУТРЕННИЙ КРУГ ═══ -->
-  <!-- Тень под кругом (глубина) -->
-  <circle cx="256" cy="216" r="60" fill="#000" opacity="0.35" filter="url(#softBlur)"/>
-
-  <!-- Основной круг -->
-  <circle cx="256" cy="212" r="58" fill="url(#innerCircle)"/>
-
-  <!-- Тонкая золотая обводка -->
-  <circle cx="256" cy="212" r="58" fill="none" stroke="#ffb340" stroke-opacity="0.5" stroke-width="1.5"/>
-
-  <!-- Внутренний ореол вокруг буквы -->
-  <circle cx="256" cy="212" r="44" fill="url(#letterGlow)"/>
-
-  <!-- Верхний отблеск на круге (как на стекле) -->
-  <ellipse cx="256" cy="184" rx="36" ry="10" fill="#ffffff" opacity="0.08"/>
-
-  <!-- ═══ БУКВА A ═══ -->
-  <text x="256" y="234"
-        text-anchor="middle"
-        font-family="Inter, -apple-system, 'SF Pro Display', system-ui, sans-serif"
-        font-size="68"
-        font-weight="900"
-        fill="#ffb340"
-        letter-spacing="-3">A</text>
-
-  <!-- Верхний блик на букве A (металлический эффект) -->
-  <text x="256" y="234"
-        text-anchor="middle"
-        font-family="Inter, -apple-system, 'SF Pro Display', system-ui, sans-serif"
-        font-size="68"
-        font-weight="900"
-        fill="none"
-        stroke="#ffd66b"
-        stroke-opacity="0.35"
-        stroke-width="1"
-        letter-spacing="-3">A</text>
-
-  <!-- ═══ ПОДПИСЬ A5000 ═══ -->
-  <!-- Разделительная линия -->
-  <line x1="196" y1="452" x2="316" y2="452" stroke="#ffffff" stroke-opacity="0.08" stroke-width="1"/>
-
-  <!-- Текст A5000 -->
-  <text x="256" y="484"
-        text-anchor="middle"
-        font-family="Inter, -apple-system, 'SF Pro Display', system-ui, sans-serif"
-        font-size="24"
-        font-weight="800"
-        fill="#7a7a85"
-        letter-spacing="9">A5000</text>
-
-  <!-- ═══ МЕЛКИЕ ДЕТАЛИ ═══ -->
-  <!-- Точка-индикатор (urban accent) -->
-  <circle cx="256" cy="497" r="2" fill="#ff9500" opacity="0.6"/>
-
-  <!-- Угловой микро-блик в верхнем левом углу -->
-  <path d="M 40 90 Q 40 40 90 40" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2" stroke-linecap="round"/>
-
-  <!-- Угловой микро-блик в нижнем правом углу -->
-  <path d="M 472 422 Q 472 472 422 472" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="2" stroke-linecap="round"/>
+  <rect x="1" y="1" width="510" height="510" rx="113" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
 </svg>
