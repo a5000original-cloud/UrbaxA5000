@@ -49,7 +49,7 @@ input,textarea{font-family:inherit}
 @keyframes screenIn{from{opacity:0;transform:translateY(8px) scale(.99)}to{opacity:1;transform:translateY(0) scale(1)}}
 
 /* Премиум фон с эффектом свечения */
-#achScreen::before,#analyticsScreen::before,#statsScreen::before,#listScreen::before,#favScreen::before,#plansScreen::before,#visitedScreen::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 10%, rgba(255,149,0,.07) 0%, transparent 45%),radial-gradient(circle at 15% 90%, rgba(168,85,247,.05) 0%, transparent 45%);z-index:0}
+#achScreen::before,#analyticsScreen::before,#statsScreen::before,#listScreen::before,#favScreen::before,#plansScreen::before,#visitedScreen::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 85% 10%, rgba(255,149,0,.07) 0%, transparent 45%),radial-gradient(circle at 15% 90%, rgba(168,85,247,.05) 0%, transparent 45%)}
 #achScreen::after,#analyticsScreen::after,#statsScreen::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(45deg, transparent 0, transparent 3px, rgba(255,255,255,.008) 3px, rgba(255,255,255,.008) 4px);z-index:0}
 
 /* ═══ КАРТА ═══ */
@@ -59,7 +59,9 @@ input,textarea{font-family:inherit}
 .leaflet-control-attribution a{color:#777!important}
 .leaflet-marker-icon{transition:none!important;will-change:auto}
 .leaflet-zoom-animated{transition:none!important}
-.tiles-satellite{filter:brightness(0.55) saturate(0.75) contrast(1.15) hue-rotate(-8deg)}
+.tiles-satellite img { /* Ограничиваем фильтр только картинками тайлов */
+  filter:brightness(0.55) saturate(0.75) contrast(1.15) hue-rotate(-8deg);
+}
 .leaflet-popup-content-wrapper{background:rgba(20,20,26,.88)!important;backdrop-filter:blur(60px) saturate(200%);-webkit-backdrop-filter:blur(60px) saturate(200%);color:var(--text);border-radius:14px!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:0 24px 70px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.1)!important;padding:0;overflow:hidden}
 .leaflet-popup-content{margin:0;width:auto!important;line-height:1.4}
 .leaflet-popup-tip{background:rgba(20,20,26,.88)!important;border:1px solid rgba(255,255,255,.12)!important}
@@ -69,6 +71,9 @@ input,textarea{font-family:inherit}
 .popup-title{font-size:14.5px;font-weight:700;color:#fff;line-height:1.25;margin-bottom:10px}
 .popup-btn{display:flex;align-items:center;justify-content:center;width:100%;padding:10px;margin-top:4px;background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;font-weight:800;font-size:12px;border-radius:10px;transition:transform .15s var(--ease);box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
 .popup-btn:active{transform:scale(.96)}
+
+/* Исправление читаемости попапа на спутниковом слое */
+
 
 /* ═══ МАРКЕРЫ ═══ */
 .pin{width:34px;height:34px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);transform-origin:center;background:linear-gradient(135deg,var(--c1),var(--c2));border:2.5px solid #fff;box-shadow:0 3px 6px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;contain:layout style}
@@ -206,7 +211,6 @@ input,textarea{font-family:inherit}
 .action-btn.google{background:rgba(10,132,255,.12);border-color:rgba(10,132,255,.3);color:#5ea6ff}
 .action-btn.yandex{background:rgba(252,63,29,.12);border-color:rgba(252,63,29,.3);color:#ff7a5c}
 .action-btn.google:active,.action-btn.yandex:active{box-shadow:0 0 24px rgba(10,132,255,.4)}
-.action-btn.share{background:linear-gradient(180deg,#ffb340,var(--accent));color:#000;border-color:transparent;box-shadow:0 8px 24px rgba(255,149,0,.35),inset 0 1px 0 rgba(255,255,255,.4)}
 .action-btn.share:active{box-shadow:0 8px 24px rgba(255,149,0,.25),inset 0 1px 0 rgba(255,255,255,.2)}
 
 .rating-row{display:flex;align-items:center;gap:6px}
@@ -256,14 +260,13 @@ input,textarea{font-family:inherit}
 .splash-sub{margin-top:10px;font-size:12px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:var(--accent);opacity:0;transform:translateY(20px);animation:splashText .8s .6s var(--ease) forwards}
 .splash-labs{position:absolute;bottom:40px;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--text-3);opacity:0;animation:splashText .8s 1s var(--ease) forwards}
 .splash-progress{position:absolute;bottom:90px;width:60px;height:2px;background:rgba(255,255,255,.1);border-radius:999px;overflow:hidden;opacity:0;animation:splashText .8s .8s var(--ease) forwards}
-.splash-progress::after{content:'';display:block;height:100%;width:100%;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:splashBar 1.6s .8s ease-in-out infinite}
 @keyframes splashBar{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
 
 /* ═══ 3D ИКОНКА В ПРОФИЛЕ ═══ */
 .app-icon-3d-wrap{display:flex;justify-content:center;padding:32px 0 24px;perspective:1000px;position:relative}
 .app-icon-3d-wrap::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:200px;height:200px;border-radius:50%;background:radial-gradient(circle, rgba(255,149,0,.28) 0%, transparent 65%);filter:blur(20px);pointer-events:none;animation:iconGlow 6s ease-in-out infinite}
 @keyframes iconGlow{0%,100%{opacity:.5;transform:translate(-50%,-50%) scale(1)}50%{opacity:.9;transform:translate(-50%,-50%) scale(1.15)}}
-.app-icon-3d-wrap::after{content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:100px;height:14px;border-radius:50%;background:radial-gradient(ellipse, rgba(255,149,0,.35) 0%, transparent 70%);filter:blur(8px);animation:iconShadow 6s ease-in-out infinite}
+.app-icon-3d-wrap::after{content:'';position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:100px;height:14px;border-radius:50%;background:radial-gradient(circle, rgba(255,149,0,.35) 0%, transparent 70%);filter:blur(8px);animation:iconShadow 6s ease-in-out infinite}
 @keyframes iconShadow{0%,100%{opacity:.6;transform:translateX(-50%) scaleX(1)}50%{opacity:.35;transform:translateX(-50%) scaleX(.85)}}
 .app-icon-3d{width:132px;height:132px;border-radius:32px;overflow:hidden;position:relative;box-shadow:0 24px 70px rgba(255,149,0,.4),0 8px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.1),inset 0 1px 0 rgba(255,255,255,.18);animation:iconFloat 6s ease-in-out infinite;transform-style:preserve-3d;will-change:transform}
 .app-icon-3d::after{content:'';position:absolute;top:0;left:0;right:0;height:50%;background:linear-gradient(180deg, rgba(255,255,255,.15) 0%, transparent 100%);pointer-events:none;z-index:2}
@@ -273,7 +276,7 @@ input,textarea{font-family:inherit}
 /* ═══ 3D КАРУСЕЛЬ АЧИВОК ═══ */
 .achievements-carousel-wrap{position:relative;height:260px;perspective:1400px;margin:0 -20px 24px;overflow:hidden;padding:20px 0}
 .achievements-carousel{position:absolute;inset:0;transform-style:preserve-3d;display:flex;align-items:center;justify-content:center}
-.ach-card-3d{position:absolute;width:170px;height:220px;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform-style:preserve-3d;transition:transform .55s var(--ease), opacity .55s var(--ease), box-shadow .3s;will-change:transform, opacity;box-shadow:0 20px 60px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.1);background:linear-gradient(160deg, #22222a 0%, #16161c 100%);border:1px solid rgba(255,255,255,.1);cursor:pointer}
+.ach-card-3d{position:absolute;width:170px;height:220px;border-radius:22px;padding:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transform-style:preserve-3d;transition:transform .55s var(--ease), opacity .55s var(--ease), box-shadow .3s;will-change:transform, opacity;box-shadow:0 20px 60px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.1);background:linear-gradient(160deg, #22222a 0%, #16161c 100%);border:1px solid rgba(255,255,255,.1)}
 .ach-card-3d.center{box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 40px rgba(255,149,0,.15),inset 0 1px 0 rgba(255,255,255,.15)}
 .ach-card-3d.unlocked{background:linear-gradient(160deg, #2f2410 0%, #1a1410 100%);border-color:rgba(255,149,0,.45)}
 .ach-card-3d.unlocked.center{box-shadow:0 30px 80px rgba(0,0,0,.75),0 0 60px rgba(255,149,0,.4),inset 0 1px 0 rgba(255,255,255,.2)}
@@ -292,7 +295,7 @@ input,textarea{font-family:inherit}
 .ach-rarity.rare{background:rgba(192,192,192,.15);color:#c0c0c0}
 .ach-rarity.epic{background:rgba(255,215,0,.15);color:#ffd700}
 .ach-rarity.legendary{background:rgba(229,228,226,.15);color:#e5e4e2}
-.ach-rarity.secret{background:rgba(168,85,247,.2);color:#a855f7}
+.ach-rarity.secret{background:rgba(168,85,247,.15);color:#a855f7}
 
 .ach-nav{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:5px;z-index:5;padding:6px 10px;background:rgba(0,0,0,.5);border-radius:999px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}
 .ach-nav-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.2);transition:all .35s var(--ease);cursor:pointer}
@@ -333,12 +336,12 @@ input,textarea{font-family:inherit}
 
 /* ═══ ОТКРЫТИЕ АЧИВКИ ═══ */
 .ach-unlock-overlay{position:fixed;inset:0;z-index:99999;background:radial-gradient(circle at center,rgba(255,149,0,.15) 0%,rgba(0,0,0,.98) 70%);display:flex;align-items:center;justify-content:center;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.ach-unlock-icon{font-size:120px;filter:drop-shadow(0 20px 60px rgba(255,149,0,.8))}
 .ach-unlock-overlay.show{opacity:1;pointer-events:auto}
-.ach-unlock-icon{font-size:120px;filter:drop-shadow(0 20px 60px rgba(255,149,0,.8));transform:scale(0) rotate(-180deg);transition:transform .8s cubic-bezier(.34,1.56,.64,1)}
+.ach-unlock-title{margin-top:24px;font-size:14px;font-weight:800;letter-spacing:3px;text-transform:uppercase;color:var(--accent);opacity:0;transition:opacity .5s .4s var(--ease)}
+.ach-unlock-name{margin-top:8px;font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;opacity:0;transform:translateY(20px);transition:all .5s .6s var(--ease)}
+.ach-unlock-desc{margin-top:12px;font-size:14px;font-weight:700;letter-spacing:1.8px;text-align:center;padding:0 40px;opacity:0;transition:opacity .5s .9s var(--ease)}
 .ach-unlock-overlay.show .ach-unlock-icon{transform:scale(1) rotate(0deg)}
-.ach-unlock-title{margin-top:24px;font-size:14px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);opacity:0;transition:opacity .5s .4s var(--ease)}
-.ach-unlock-name{margin-top:8px;font-size:36px;font-weight:900;color:#fff;letter-spacing:-1px;opacity:0;transform:translateY(20px);transition:all .5s .6s var(--ease);text-align:center;padding:0 30px}
-.ach-unlock-desc{margin-top:12px;font-size:14px;color:var(--text-2);text-align:center;padding:0 40px;opacity:0;transition:opacity .5s .9s var(--ease)}
 .ach-unlock-overlay.show .ach-unlock-title,.ach-unlock-overlay.show .ach-unlock-name,.ach-unlock-overlay.show .ach-unlock-desc{opacity:1;transform:translateY(0)}
 
 /* ═══ МОДАЛКИ ═══ */
@@ -348,7 +351,7 @@ input,textarea{font-family:inherit}
 .modal-overlay.show .modal-sheet{transform:translateY(0);animation:sheetUp .5s var(--ease)}
 @keyframes sheetUp{from{transform:translateY(20px)}to{transform:translateY(0)}}
 .modal-handle{width:36px;height:4px;border-radius:999px;background:rgba(255,255,255,.2);margin:-12px auto 16px}
-.modal-title{font-size:22px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:8px}
+.modal-title{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:8px}
 .modal-sub{font-size:14px;color:var(--text-2);line-height:1.5;margin-bottom:20px}
 .modal-actions{display:flex;gap:10px;margin-top:20px}
 .modal-btn{flex:1;padding:15px;border-radius:14px;font-size:14px;font-weight:800;text-align:center;transition:transform .15s var(--ease);letter-spacing:-.2px}
@@ -357,8 +360,8 @@ input,textarea{font-family:inherit}
 .modal-btn.secondary{background:rgba(255,255,255,.08);color:var(--text);border:1px solid var(--border-2)}
 
 /* ═══ ЧЕК-ЛИСТ ═══ */
-.checklist{display:flex;flex-direction:column;gap:10px}
-.check-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s var(--ease)}
+.checklist{display:flex;flex-direction:column;gap:10px;padding:14px 16px calc(var(--nav-h) + 24px);-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth}
+.check-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s var(--ease);position:relative}
 .check-item:active{transform:scale(.98)}
 .check-item.checked{background:rgba(52,199,89,.1);border-color:rgba(52,199,89,.4)}
 .check-box{width:24px;height:24px;border-radius:8px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;transition:all .2s var(--ease);flex-shrink:0}
@@ -373,8 +376,8 @@ input,textarea{font-family:inherit}
 .weather-now{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
 .weather-temp{font-size:46px;font-weight:900;color:#fff;letter-spacing:-3px;line-height:1}
 .weather-icon{font-size:44px;filter:drop-shadow(0 4px 12px var(--w-color,#ff9500))}
-.weather-desc{font-size:13px;color:var(--text-2);margin-top:6px;font-weight:600}
-.weather-meta{display:flex;gap:14px;font-size:12px;color:var(--text-3);font-weight:700;margin-top:4px}
+.weather-desc{font-size:13px;color:var(--text-2);margin-top:6px}
+.weather-meta{display:flex;gap:14px;font-size:12px;font-weight:800;margin-top:4px}
 .weather-days{display:flex;gap:8px;padding-top:14px;border-top:1px solid var(--border)}
 .weather-day{flex:1;text-align:center}
 .weather-day-name{font-size:10px;font-weight:800;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
@@ -793,7 +796,7 @@ input,textarea{font-family:inherit}
 </div>
 
 <script>
-  /* ═══════════════════════════════════════════════════════════
+    /* ═══════════════════════════════════════════════════════════
    URBaxA5000 · A5000 Labs · Reloaded
    ═══════════════════════════════════════════════════════════ */
 
@@ -816,55 +819,55 @@ const catOf = c => CATEGORIES[c] || CATEGORIES.default;
 /* ═══ 50 ОБЪЕКТОВ ═══ */
 const places = [
   { name:"Возле старого завода", lat:44.96366, lon:34.04886, category:"Промышленные", desc:"Руины возле бывшего завода. Само промышленное здание снесено, остались только фрагменты строений и бетонные основания.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
-  { name:"Водонапорная башня", lat:44.965817, lon:34.056448, category:"Инфраструктура", desc:"Старая водонапорная башня XIX–XX века. Есть вероятность, что уже снесена — требуется проверка на местности. Объект в прошлом обеспечивал водой весь район.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
-  { name:"Недостроенный комплекс больницы", lat:44.967912, lon:34.092683, category:"Медицинские", desc:"Каркас и перекрытия без отделки. Открытые шахты лифтов, высокая опасность падения с высоты. В подвальных помещениях возможны скопления грунтовых вод.", danger:"Высокая", access:"Сложно", status:"Недострой", image:"" },
-  { name:"Здание возле завода", lat:44.97327, lon:34.09025, category:"Промышленные", desc:"Примыкает к заводской территории. Частично сохранилось, доступ сложный. Остатки промышленной архитектуры советского периода.", danger:"Средняя", access:"Сложно", status:"Заброшено", image:"" },
-  { name:"Усадьба Монжене (Замок графини)", lat:44.87778, lon:34.19477, category:"Исторические", desc:"Неоготический замок, построенный в 1880-х годах архитектором Оскаром Клаузеном для семьи обрусевших немцев Кесслеров. Последней владелицей до 1917 года была графиня Анна Фёдоровна Монжене де-Сен-Моран, славившаяся шумными приёмами и пирами. При ней были устроены фонтаны и пруды. После революции здесь размещался интернат для детей-сирот, затем колхоз предоставлял комнаты нуждающимся. С середины 1960-х годов замок пустует. Лучше всего сохранилась шестиугольная башня, но и ей грозит обрушение.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
-  { name:"Комплекс разрушенных заводов", lat:44.862878, lon:34.046122, category:"Промышленные", desc:"Территория бывшего промышленного комплекса. Остались фрагменты стен и фундаментов, объект постепенно сносится под новую застройку.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
-  { name:"Военный объект, руины", lat:44.84346, lon:34.04080, category:"Военные", desc:"Остатки военного объекта. Состояние нестабильное, возможна уборка территории. Требуется проверка на местности.", danger:"Средняя", access:"Ограничено", status:"Руины", image:"" },
-  { name:"Возможный бункер / руины дачи", lat:44.81748, lon:34.12188, category:"Военные", desc:"Может быть бункером либо руинами дачи. Требуется уточнение на месте. Характер объекта окончательно не установлен.", danger:"Средняя", access:"Неизвестно", status:"Требует проверки", image:"" },
-  { name:"Вертикальная шахта", lat:44.915585, lon:34.113622, category:"Инфраструктура", desc:"Вертикальный ствол шахты. Вход может быть перекрыт, высокая опасность падения. Без специального снаряжения спуск категорически не рекомендуется.", danger:"Высокая", access:"Опасно", status:"Заброшена", image:"" },
-  { name:"Резервуары после колхоза", lat:44.973146, lon:34.034288, category:"Промышленные", desc:"Металлические резервуары на открытой территории. Объект не используется, доступ свободный, опасность низкая.", danger:"Низкая", access:"Свободный", status:"Не используется", image:"" },
+  { name:"Водонапорная башня", lat:44.965817, lon:34.056448, category:"Инфраструктура", desc:"Старая водонапорная башня XIX–XX века. Есть вероятность, что уже снесена — требуется проверка на местности.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
+  { name:"Недостроенный комплекс больницы", lat:44.967912, lon:34.092683, category:"Медицинские", desc:"Каркас и перекрытия без отделки. Открытые шахты лифтов, высокая опасность падения с высоты.", danger:"Высокая", access:"Сложно", status:"Недострой", image:"" },
+  { name:"Здание возле завода", lat:44.97327, lon:34.09025, category:"Промышленные", desc:"Примыкает к заводской территории. Частично сохранилось, доступ сложный.", danger:"Средняя", access:"Сложно", status:"Заброшено", image:"" },
+  { name:"Усадьба Монжене (Замок графини)", lat:44.87778, lon:34.19477, category:"Исторические", desc:"Неоготический замок 1880-х годов, построенный для семьи Кесслеров. Последняя владелица — графиня Монжене де-Сен-Моран. С 1960-х годов пустует. Хорошо сохранилась шестиугольная башня.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
+  { name:"Комплекс разрушенных заводов", lat:44.862878, lon:34.046122, category:"Промышленные", desc:"Территория бывшего промышленного комплекса. Остались фрагменты стен и фундаментов.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
+  { name:"Военный объект, руины", lat:44.84346, lon:34.04080, category:"Военные", desc:"Остатки военного объекта. Состояние нестабильное, требуется проверка.", danger:"Средняя", access:"Ограничено", status:"Руины", image:"" },
+  { name:"Возможный бункер / руины дачи", lat:44.81748, lon:34.12188, category:"Военные", desc:"Может быть бункером либо руинами дачи. Требуется уточнение на месте.", danger:"Средняя", access:"Неизвестно", status:"Требует проверки", image:"" },
+  { name:"Вертикальная шахта", lat:44.915585, lon:34.113622, category:"Инфраструктура", desc:"Вертикальный ствол шахты. Вход может быть перекрыт, высокая опасность падения.", danger:"Высокая", access:"Опасно", status:"Заброшена", image:"" },
+  { name:"Резервуары после колхоза", lat:44.973146, lon:34.034288, category:"Промышленные", desc:"Металлические резервуары на открытой территории. Объект не используется.", danger:"Низкая", access:"Свободный", status:"Не используется", image:"" },
   { name:"Разрушенная автомойка", lat:44.973972, lon:34.034062, category:"Промышленные", desc:"Бывшая автомойка. Остались только фрагменты стен, доступ свободный.", danger:"Низкая", access:"Свободный", status:"Руины", image:"" },
-  { name:"Птицекомбинат", lat:44.962926, lon:34.046303, category:"Промышленные", desc:"Бывший птицекомбинат. Сохранились остатки корпусов и хозяйственных построек, территория частично заросла деревьями и кустарником.", danger:"Средняя", access:"Свободный", status:"Заброшен", image:"" },
-  { name:"Кинотеатр «Симферополь»", lat:44.952629, lon:34.103489, category:"Культурные", desc:"Знаковый кинотеатр города с узнаваемым фасадом. Охраняется, возможна реставрация. Один из немногих сохранившихся объектов советского модернизма в центре города.", danger:"Низкая", access:"Охрана", status:"Охраняется", image:"" },
-  { name:"Дом, сильно разрушен и зарос", lat:44.960202, lon:33.967056, category:"Жилые", desc:"Дом почти полностью разрушен, территория сильно заросла травой и кустарником. Проходимость крайне затруднена, рекомендуется плотная одежда.", danger:"Средняя", access:"Очень сложно", status:"Руины", image:"" },
-  { name:"Руины", lat:44.962217, lon:33.945275, category:"Жилые", desc:"Остатки строений, назначение не установлено. Требует проверки на местности.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
-  { name:"Возможно заброшенный самолёт", lat:44.962241, lon:35.252233, category:"Транспортные", desc:"Объект может отсутствовать или быть вывезен. Требуется выездная проверка. В прошлом здесь могли размещаться списанные воздушные суда.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
-  { name:"Руины дома", lat:44.863009, lon:34.247229, category:"Жилые", desc:"Остатки жилого дома. Доступ свободный, опасность низкая.", danger:"Низкая", access:"Свободный", status:"Руины", image:"" },
-  { name:"Недостроенный замок", lat:44.914372, lon:34.150359, category:"Исторические", desc:"Неоконченное строение с элементами замковой архитектуры. Частично возведено, стоит в живописном месте. Заброшено много лет назад.", danger:"Средняя", access:"Сложно", status:"Недострой", image:"" },
-  { name:"Сильно разрушенный склад/завод", lat:44.924591, lon:34.139754, category:"Промышленные", desc:"Остатки производственного здания. Стены частично обрушены, доступ свободный. Металлические конструкции проржавели.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
-  { name:"Склад/дом", lat:44.928434, lon:34.132577, category:"Промышленные", desc:"Заброшенное строение смешанного назначения. Частично сохранилось, доступ средней сложности.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
-  { name:"Недостроенный склад/дом", lat:44.937517, lon:34.131993, category:"Промышленные", desc:"Недостроенное здание. Каркас без отделки, открытые проёмы.", danger:"Средняя", access:"Средне", status:"Недострой", image:"" },
-  { name:"Заброшенная стройка", lat:44.946488, lon:34.120455, category:"Недострои", desc:"Открытая площадка с бетонными конструкциями. Каркас без отделки. Один из многих недостроев Симферополя.", danger:"Средняя", access:"Свободный", status:"Брошена", image:"" },
-  { name:"Старый Телеграф", lat:44.954202, lon:34.094673, category:"Исторические", desc:"Здание, связанное с телеграфной сетью. Принимало важные исторические сообщения. Свидетель эпохи, когда телеграф был главным средством связи.", danger:"Средняя", access:"Сложно", status:"Частично сохранился", image:"" },
-  { name:"Усадьба Арендтов-Ребец", lat:44.954188, lon:34.094748, category:"Исторические", desc:"Памятник архитектуры на ул. Карла Маркса / Долгоруковская. Находится в реставрации. Историческое здание XIX века, связанное с известной семьёй врачей Арендтов.", danger:"Низкая", access:"Ограничен", status:"Реставрация", image:"" },
-  { name:"Котельная", lat:44.941227, lon:34.083173, category:"Промышленные", desc:"Старая котельная. Сохранились кирпичные стены и дымоход. Внутри возможны обвалы перекрытий.", danger:"Средняя", access:"Сложно", status:"Заброшена", image:"" },
-  { name:"Бетонный дом", lat:44.965474, lon:34.110088, category:"Жилые", desc:"Монолитное бетонное здание без отделки. Частично сохранилось. Заброшено на стадии строительства.", danger:"Средняя", access:"Сложно", status:"Заброшен", image:"" },
-  { name:"Недостроенное крыло больницы", lat:44.967835, lon:34.092533, category:"Медицинские", desc:"Недостроенное крыло с признаками подвальных и защитных помещений. Возможно, бомбоубежище. Требует осторожности — открытые проёмы и шахты.", danger:"Высокая", access:"Сложно", status:"Недострой", image:"" },
-  { name:"Многоэтажное индустриальное строение", lat:44.937837, lon:34.067297, category:"Промышленные", desc:"Крупное многоэтажное здание с открытыми пролётами между этажами. Остатки промышленного комплекса. Перекрытия частично обрушены, возможны провалы.", danger:"Высокая", access:"Сложно", status:"Заброшено", image:"" },
-  { name:"Бетонное строение (возможно, снесено)", lat:44.944639, lon:34.052186, category:"Промышленные", desc:"Простое бетонное строение. Возможно, уже снесено — требуется проверка. Данные о состоянии устаревшие.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
-  { name:"Двухэтажное бетонное здание", lat:45.017935, lon:34.057360, category:"Промышленные", desc:"Простое бетонное здание без отделки. Заброшено. Внутри пустые помещения, местами строительный мусор.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
-  { name:"Заброшенное здание возле ж/д путей", lat:45.043498, lon:34.028511, category:"Транспортные", desc:"Находится рядом с железнодорожными путями. Частично сохранилось. В прошлом могло быть связано с обслуживанием железной дороги.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
-  { name:"Телезавод «Фотон»", lat:44.926170, lon:34.077074, category:"Промышленные", desc:"В 1964 году началось строительство завода телевизоров. Уже в 1966 году коллектив выпустил первые 500 телевизоров «Лотос». В 1972 году завод получил имя 50-летия СССР, а в 1977 году на его базе создано ПО «Фотон». Всего предприятие выпустило 13,4 миллиона телевизоров. В 1997 году производство остановилось.", danger:"Средняя", access:"Охрана", status:"Охраняется", image:"" },
-  { name:"Завод аэропланов «Анатра»", lat:44.941220, lon:34.083315, category:"Промышленные", desc:"В 1914 году одесский банкир Артур Анатра купил земли к западу от Симферополя для постройки авиационного завода. Уже в 1915 году завод начал выпускать самолёты «Ньюпор-4». Аэродром «Заводское» был построен в 1915–1916 годах специально для испытаний этих самолётов. В 1931 году здесь создана первая в СССР школа гражданских лётчиков.", danger:"Средняя", access:"Сложно", status:"Ветхий", image:"" },
-  { name:"Завод «НИТИФМ»", lat:44.935801, lon:34.125676, category:"Промышленные", desc:"Большой химический завод рядом с Неаполем Скифским. Частично охраняется. В советское время — один из ключевых объектов электронной промышленности Крыма.", danger:"Средняя", access:"Охрана", status:"Охраняется", image:"" },
-  { name:"Стеклотарный завод", lat:44.944000, lon:34.061000, category:"Промышленные", desc:"Территория завода на ул. Индустриальной. Снос ведётся с 2014 года. Один из старейших промышленных объектов города.", danger:"Средняя", access:"Ограничен", status:"Сносится", image:"" },
-  { name:"Заброшенная пожарная часть, ул. Речная 3", lat:44.959336, lon:34.093751, category:"Инфраструктура", desc:"4 этажа, лестница на крышу, охраны нет. Есть выход на крышу с хорошим обзором города. Здание бывшей пожарной части.", danger:"Средняя", access:"Свободный", status:"Заброшена", image:"" },
-  { name:"Долгострой, пр. Вернадского 97", lat:44.937526, lon:34.132046, category:"Недострои", desc:"Подвал и 2 этажа. Вид на Парк Сити, граффити на стенах. Местные художники облюбовали это место для стрит-арта.", danger:"Средняя", access:"Средне", status:"Недострой", image:"" },
-  { name:"Заброшка на ул. Радищева", lat:44.931815, lon:34.131229, category:"Жилые", desc:"2–3 этажа, есть выход на крышу, рядом озеро. Хороший вид. В прошлом — жилой дом или общежитие.", danger:"Средняя", access:"Средне", status:"Заброшена", image:"" },
-  { name:"Неаполь Скифский", lat:44.943000, lon:34.133000, category:"Исторические", desc:"Руины древнего города III века до н.э., основанного скифским царём Скилуром. Столица позднескифского государства. Археологический парк под открытым небом.", danger:"Низкая", access:"Свободный", status:"Музей", image:"" },
-  { name:"Артиллерийские склады", lat:44.945000, lon:34.155000, category:"Военные", desc:"Бывшие склады ракетно-артиллерийского вооружения на окраине Симферополя. Огромная территория с 23 зданиями складов, разделёнными трёхметровыми земляными валами. Заброшены в конце 1990-х. Охрана отсутствует.", danger:"Средняя", access:"Свободный", status:"Заброшены", image:"" },
-  { name:"Птицефабрика «Южная»", lat:44.908000, lon:34.028000, category:"Промышленные", desc:"Бывшая птицефабрика в селе Перово. Официально закрыта с 2013 года. Большинство птичников разрушается, территория постепенно зарастает.", danger:"Средняя", access:"Свободный", status:"Заброшена", image:"" },
-  { name:"Хлебозавод на ул. Дыбенко", lat:44.957142, lon:34.097380, category:"Промышленные", desc:"Хлебозавод функционировал в прошлом веке на набережной реки Салгир. Сейчас в заброшенном и практически аварийном состоянии, выставлен на продажу.", danger:"Средняя", access:"Средне", status:"Заброшен", image:"" },
-  { name:"Симферопольский завод пластмасс", lat:44.950000, lon:34.130000, category:"Промышленные", desc:"Производство полимерных материалов, упаковки, труб и бытовых товаров. Организация ликвидирована в августе 2024 года.", danger:"Средняя", access:"Ограничен", status:"Ликвидирован", image:"" },
-  { name:"Недостроенный кукольный театр", lat:44.952000, lon:34.100500, category:"Недострои", desc:"Строительство началось в 2018 году после сноса старого аварийного здания. Проект — пятиэтажный детский театральный центр стоимостью 930 млн рублей. Подрядчик нарушил сроки, договор расторгли. Стройка возобновилась в 2023 году.", danger:"Средняя", access:"Охрана", status:"Недострой", image:"" },
-  { name:"Дом Арендта («Симферопольская стена плача»)", lat:44.954000, lon:34.096000, category:"Исторические", desc:"Руины элегантного особняка дореволюционной постройки на ул. Карла Маркса, 25. В 90-е здание передали организации, планировавшей построить многоэтажку — исчезла крыша, прохудился водопровод. Дом чудом выстоял, и горожане добились признания его объектом культурного наследия. В 2023 году продан для реконструкции под офисное здание.", danger:"Средняя", access:"Средне", status:"Реставрация", image:"" },
-  { name:"Дом Черчилля (особняк Ракова)", lat:44.950000, lon:34.095000, category:"Исторические", desc:"Объект культурного наследия на ул. Шмидта, 15. В плачевном состоянии, но в нём до сих пор живут люди. Прозвище «Дом Черчилля» получил в народе за характерный облик.", danger:"Низкая", access:"Ограничен", status:"Жилой", image:"" },
-  { name:"Симферопольский ЗПУ (бункер)", lat:44.960000, lon:34.090000, category:"Подземные", desc:"Запасной пункт управления Симферополем, построенный в Петровских скалах. Двухъярусное сооружение считалось одним из лучших бомбоубежищ СССР. Действовал до 2007 года, заброшен из-за нарушения гидроизоляции. Внутри сохранились уникальные гермодвери.", danger:"Высокая", access:"Сложно", status:"Заброшен", image:"" },
-  { name:"Бункер на ул. Воровского", lat:44.958000, lon:34.092000, category:"Подземные", desc:"Двухъярусное бомбоубежище под скалой. Считалось одним из лучших в СССР, надёжно замуровано. Внутри могло размещаться несколько сотен человек.", danger:"Высокая", access:"Замурован", status:"Замурован", image:"" },
-  { name:"НИП-10 (Школьное)", lat:44.887000, lon:33.910000, category:"Военные", desc:"Бывший гарнизон РВСН СССР в посёлке Школьное, в 18 км от Симферополя. Известен как заброшенный центр космической связи и «лунодром».", danger:"Высокая", access:"Сложно", status:"Заброшен", image:"" },
-  { name:"Кинотеатр «Космос» (снесён)", lat:44.952000, lon:34.100000, category:"Культурные", desc:"Кинотеатр открыт в 1967 году, был визитной карточкой города. Фасад декорирован уникальной мозаикой в космической тематике. Продан за 73 млн рублей и снесён в 2025 году вместе с мозаичным панно.", danger:"Низкая", access:"Снесён", status:"Снесён", image:"" }
+  { name:"Птицекомбинат", lat:44.962926, lon:34.046303, category:"Промышленные", desc:"Бывший птицекомбинат. Сохранились остатки корпусов, территория частично заросла.", danger:"Средняя", access:"Свободный", status:"Заброшен", image:"" },
+  { name:"Кинотеатр «Симферополь»", lat:44.952629, lon:34.103489, category:"Культурные", desc:"Знаковый кинотеатр города. Охраняется, возможна реставрация.", danger:"Низкая", access:"Охрана", status:"Охраняется", image:"" },
+  { name:"Дом, сильно разрушен и зарос", lat:44.960202, lon:33.967056, category:"Жилые", desc:"Дом почти полностью разрушен, территория сильно заросла. Проходимость затруднена.", danger:"Средняя", access:"Очень сложно", status:"Руины", image:"" },
+  { name:"Руины", lat:44.962217, lon:33.945275, category:"Жилые", desc:"Остатки строений, назначение не установлено.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
+  { name:"Возможно заброшенный самолёт", lat:44.962241, lon:35.252233, category:"Транспортные", desc:"Объект может отсутствовать. Требуется выездная проверка.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
+  { name:"Руины дома", lat:44.863009, lon:34.247229, category:"Жилые", desc:"Остатки жилого дома. Доступ свободный.", danger:"Низкая", access:"Свободный", status:"Руины", image:"" },
+  { name:"Недостроенный замок", lat:44.914372, lon:34.150359, category:"Исторические", desc:"Неоконченное строение с элементами замковой архитектуры. Заброшено много лет назад.", danger:"Средняя", access:"Сложно", status:"Недострой", image:"" },
+  { name:"Сильно разрушенный склад/завод", lat:44.924591, lon:34.139754, category:"Промышленные", desc:"Остатки производственного здания. Стены частично обрушены.", danger:"Средняя", access:"Свободный", status:"Руины", image:"" },
+  { name:"Склад/дом", lat:44.928434, lon:34.132577, category:"Промышленные", desc:"Заброшенное строение смешанного назначения.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
+  { name:"Недостроенный склад/дом", lat:44.937517, lon:34.131993, category:"Промышленные", desc:"Недостроенное здание. Каркас без отделки.", danger:"Средняя", access:"Средне", status:"Недострой", image:"" },
+  { name:"Заброшенная стройка", lat:44.946488, lon:34.120455, category:"Недострои", desc:"Открытая площадка с бетонными конструкциями.", danger:"Средняя", access:"Свободный", status:"Брошена", image:"" },
+  { name:"Старый Телеграф", lat:44.954202, lon:34.094673, category:"Исторические", desc:"Здание, связанное с телеграфной сетью. Принимало важные исторические сообщения.", danger:"Средняя", access:"Сложно", status:"Частично сохранился", image:"" },
+  { name:"Усадьба Арендтов-Ребец", lat:44.954188, lon:34.094748, category:"Исторические", desc:"Памятник архитектуры XIX века. В реставрации.", danger:"Низкая", access:"Ограничен", status:"Реставрация", image:"" },
+  { name:"Котельная", lat:44.941227, lon:34.083173, category:"Промышленные", desc:"Старая котельная. Сохранились кирпичные стены и дымоход.", danger:"Средняя", access:"Сложно", status:"Заброшена", image:"" },
+  { name:"Бетонный дом", lat:44.965474, lon:34.110088, category:"Жилые", desc:"Монолитное бетонное здание без отделки.", danger:"Средняя", access:"Сложно", status:"Заброшен", image:"" },
+  { name:"Недостроенное крыло больницы", lat:44.967835, lon:34.092533, category:"Медицинские", desc:"Признаки подвальных и защитных помещений. Возможно, бомбоубежище.", danger:"Высокая", access:"Сложно", status:"Недострой", image:"" },
+  { name:"Многоэтажное индустриальное строение", lat:44.937837, lon:34.067297, category:"Промышленные", desc:"Крупное многоэтажное здание с открытыми пролётами. Перекрытия частично обрушены.", danger:"Высокая", access:"Сложно", status:"Заброшено", image:"" },
+  { name:"Бетонное строение (возможно, снесено)", lat:44.944639, lon:34.052186, category:"Промышленные", desc:"Простое бетонное строение. Возможно, уже снесено.", danger:"Неизвестно", access:"Неизвестно", status:"Требует проверки", image:"" },
+  { name:"Двухэтажное бетонное здание", lat:45.017935, lon:34.057360, category:"Промышленные", desc:"Простое бетонное здание без отделки. Заброшено.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
+  { name:"Заброшенное здание возле ж/д путей", lat:45.043498, lon:34.028511, category:"Транспортные", desc:"Частично сохранилось. В прошлом связано с обслуживанием железной дороги.", danger:"Средняя", access:"Средне", status:"Заброшено", image:"" },
+  { name:"Телезавод «Фотон»", lat:44.926170, lon:34.077074, category:"Промышленные", desc:"Завод телевизоров. Выпустил 13,4 миллиона телевизоров, остановлен в 1997 году.", danger:"Средняя", access:"Охрана", status:"Охраняется", image:"" },
+  { name:"Завод аэропланов «Анатра»", lat:44.941220, lon:34.083315, category:"Промышленные", desc:"Исторический авиазавод 1914 года. Выпускал самолёты «Ньюпор-4».", danger:"Средняя", access:"Сложно", status:"Ветхий", image:"" },
+  { name:"Завод «НИТИФМ»", lat:44.935801, lon:34.125676, category:"Промышленные", desc:"Большой химический завод рядом с Неаполем Скифским.", danger:"Средняя", access:"Охрана", status:"Охраняется", image:"" },
+  { name:"Стеклотарный завод", lat:44.944000, lon:34.061000, category:"Промышленные", desc:"Территория завода на ул. Индустриальной. Снос ведётся с 2014 года.", danger:"Средняя", access:"Ограничен", status:"Сносится", image:"" },
+  { name:"Заброшенная пожарная часть, ул. Речная 3", lat:44.959336, lon:34.093751, category:"Инфраструктура", desc:"4 этажа, лестница на крышу, охраны нет.", danger:"Средняя", access:"Свободный", status:"Заброшена", image:"" },
+  { name:"Долгострой, пр. Вернадского 97", lat:44.937526, lon:34.132046, category:"Недострои", desc:"Подвал и 2 этажа. Вид на Парк Сити.", danger:"Средняя", access:"Средне", status:"Недострой", image:"" },
+  { name:"Заброшка на ул. Радищева", lat:44.931815, lon:34.131229, category:"Жилые", desc:"2–3 этажа, есть выход на крышу, рядом озеро.", danger:"Средняя", access:"Средне", status:"Заброшена", image:"" },
+  { name:"Неаполь Скифский", lat:44.943000, lon:34.133000, category:"Исторические", desc:"Руины древнего города III века до н.э. Археологический парк.", danger:"Низкая", access:"Свободный", status:"Музей", image:"" },
+  { name:"Артиллерийские склады", lat:44.945000, lon:34.155000, category:"Военные", desc:"Бывшие склады ракетно-артиллерийского вооружения. 23 здания, разделённых валами.", danger:"Средняя", access:"Свободный", status:"Заброшены", image:"" },
+  { name:"Птицефабрика «Южная»", lat:44.908000, lon:34.028000, category:"Промышленные", desc:"Бывшая птицефабрика в селе Перово. Закрыта с 2013 года.", danger:"Средняя", access:"Свободный", status:"Заброшена", image:"" },
+  { name:"Хлебозавод на ул. Дыбенко", lat:44.957142, lon:34.097380, category:"Промышленные", desc:"Бывший хлебозавод. Сейчас в аварийном состоянии.", danger:"Средняя", access:"Средне", status:"Заброшен", image:"" },
+  { name:"Симферопольский завод пластмасс", lat:44.950000, lon:34.130000, category:"Промышленные", desc:"Ликвидирован в августе 2024 года.", danger:"Средняя", access:"Ограничен", status:"Ликвидирован", image:"" },
+  { name:"Недостроенный кукольный театр", lat:44.952000, lon:34.100500, category:"Недострои", desc:"Пятиэтажный детский театральный центр. Стройка возобновилась в 2023 году.", danger:"Средняя", access:"Охрана", status:"Недострой", image:"" },
+  { name:"Дом Арендта («Симферопольская стена плача»)", lat:44.954000, lon:34.096000, category:"Исторические", desc:"Руины особняка на ул. Карла Маркса, 25. Продан под реконструкцию в 2023.", danger:"Средняя", access:"Средне", status:"Реставрация", image:"" },
+  { name:"Дом Черчилля (особняк Ракова)", lat:44.950000, lon:34.095000, category:"Исторические", desc:"Объект культурного наследия на ул. Шмидта, 15.", danger:"Низкая", access:"Ограничен", status:"Жилой", image:"" },
+  { name:"Симферопольский ЗПУ (бункер)", lat:44.960000, lon:34.090000, category:"Подземные", desc:"Запасной пункт управления в Петровских скалах. Действовал до 2007 года. Уникальные гермодвери.", danger:"Высокая", access:"Сложно", status:"Заброшен", image:"" },
+  { name:"Бункер на ул. Воровского", lat:44.958000, lon:34.092000, category:"Подземные", desc:"Двухъярусное бомбоубежище под скалой. Надёжно замуровано.", danger:"Высокая", access:"Замурован", status:"Замурован", image:"" },
+  { name:"НИП-10 (Школьное)", lat:44.887000, lon:33.910000, category:"Военные", desc:"Бывший гарнизон РВСН СССР. Заброшенный центр космической связи.", danger:"Высокая", access:"Сложно", status:"Заброшен", image:"" },
+  { name:"Кинотеатр «Космос» (снесён)", lat:44.952000, lon:34.100000, category:"Культурные", desc:"Кинотеатр 1967 года с уникальной мозаикой. Снесён в 2025 году.", danger:"Низкая", access:"Снесён", status:"Снесён", image:"" }
 ];
 
 /* ═══ СОСТОЯНИЕ ═══ */
@@ -1369,6 +1372,7 @@ function checkAchievements(){
   }
 }
 
+/* ═══ ЗВУК ОТКРЫТИЯ АЧИВКИ ═══ */
 let audioCtx = null;
 function playAchievementSound(){
   try {
@@ -1390,14 +1394,16 @@ function playAchievementSound(){
     });
   } catch(e){}
 }
-function showAchUnlock(a)
-playAchievementSound();{
+
+/* ═══ ПОКАЗ ОТКРЫТИЯ АЧИВКИ ═══ */
+function showAchUnlock(a){
   const ov = document.getElementById('achUnlockOverlay');
   if (!ov) return;
   document.getElementById('achUnlockIcon').textContent = a.icon;
   document.getElementById('achUnlockName').textContent = a.name;
   document.getElementById('achUnlockDesc').textContent = a.desc;
   ov.classList.add('show');
+  playAchievementSound();
   if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 100]);
   setTimeout(() => hideAchUnlock(), 3200);
 }
@@ -1482,8 +1488,6 @@ function positionCarousel(){
   document.querySelectorAll('.ach-nav-dot').forEach((d, i) => {
     d.classList.toggle('active', i === currentAchIndex);
   });
-  const activeDot = document.querySelector('.ach-nav-dot.active');
-  if (activeDot) activeDot.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
 }
 
 function gotoAch(i){
@@ -2083,7 +2087,6 @@ setTimeout(() => {
   updateAchProgress();
 }, 2500);
 
-// Отслеживание использования обоих навигаторов
 document.addEventListener('click', (e) => {
   const a = e.target.closest('a');
   if (!a) return;
