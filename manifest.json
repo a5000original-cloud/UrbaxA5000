@@ -1,17 +1,48 @@
 {
-  "name": "UrbaxA5000",
+  "name": "UrbaxA5000 — Карта заброшек",
   "short_name": "UrbaxA5000",
-  "description": "Карта заброшенных мест. Исследуй. Находи. Помни. · A5000 Labs",
-  "start_url": "/UrbaxA5000/",
-  "scope": "/UrbaxA5000/",
+  "description": "Карта заброшенных мест Симферополя. Исследуй. Находи. Помни. · A5000 Labs",
+  "start_url": "./?source=pwa",
+  "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait-primary",
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "ru",
-  "categories": ["travel", "navigation", "lifestyle"],
+  "dir": "ltr",
+  "categories": ["travel", "navigation", "lifestyle", "utilities"],
+  "prefer_related_applications": false,
   "icons": [
-    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Карта", "short_name": "Карта", "url": "./?screen=map", "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Объекты", "short_name": "Объекты", "url": "./?screen=list", "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Планы", "short_name": "Планы", "url": "./?screen=plans", "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Ачивки", "short_name": "Ачивки", "url": "./?screen=ach", "icons": [{ "src": "./icon-192.png", "sizes": "192x192", "type": "image/png" }] }
   ]
 }
