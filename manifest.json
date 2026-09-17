@@ -1,160 +1,17 @@
 {
-  "name": "UrbaxA5000 — Карта заброшек",
+  "name": "UrbaxA5000",
   "short_name": "UrbaxA5000",
-  "description": "Карта заброшенных мест Симферополя. Исследуй. Находи. Помни. · A5000 Labs",
-  "id": "/UrbaxA5000/",
-  "start_url": "/UrbaxA5000/?source=pwa",
+  "description": "Карта заброшенных мест. Исследуй. Находи. Помни. · A5000 Labs",
+  "start_url": "/UrbaxA5000/",
   "scope": "/UrbaxA5000/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
   "lang": "ru",
-  "dir": "ltr",
-  "scope_extensions": [
-    { "origin": "https://urbaxa5000.github.io" }
-  ],
-  "categories": ["travel", "navigation", "lifestyle", "utilities"],
-  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
-  "prefer_related_applications": false,
-  "launch_handler": {
-    "client_mode": ["navigate-existing", "auto"]
-  },
-  "handle_links": "preferred",
-
+  "categories": ["travel", "navigation", "lifestyle"],
   "icons": [
-    {
-      "src": "/UrbaxA5000/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/UrbaxA5000/icon-maskable.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/UrbaxA5000/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/UrbaxA5000/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/UrbaxA5000/icon-maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ],
-
-  "shortcuts": [
-    {
-      "name": "Карта объектов",
-      "short_name": "Карта",
-      "description": "Открыть карту всех заброшек",
-      "url": "/UrbaxA5000/?screen=map",
-      "icons": [
-        {
-          "src": "/UrbaxA5000/shortcut-map.svg",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Все объекты",
-      "short_name": "Объекты",
-      "description": "Список всех 50 заброшенных мест",
-      "url": "/UrbaxA5000/?screen=list",
-      "icons": [
-        {
-          "src": "/UrbaxA5000/shortcut-list.svg",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Мои планы",
-      "short_name": "Планы",
-      "description": "Список запланированных вылазок",
-      "url": "/UrbaxA5000/?screen=plans",
-      "icons": [
-        {
-          "src": "/UrbaxA5000/shortcut-plans.svg",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    },
-    {
-      "name": "Мои ачивки",
-      "short_name": "Ачивки",
-      "description": "Прогресс и достижения",
-      "url": "/UrbaxA5000/?screen=ach",
-      "icons": [
-        {
-          "src": "/UrbaxA5000/shortcut-ach.svg",
-          "sizes": "96x96",
-          "type": "image/svg+xml"
-        }
-      ]
-    }
-  ],
-
-  "screenshots": [
-    {
-      "src": "/UrbaxA5000/screenshot-map.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Карта заброшек с маркерами по категориям"
-    },
-    {
-      "src": "/UrbaxA5000/screenshot-detail.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Карточка объекта с историей и погодой"
-    },
-    {
-      "src": "/UrbaxA5000/screenshot-ach.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "3D-карусель достижений"
-    },
-    {
-      "src": "/UrbaxA5000/screenshot-wide.png",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Обзорный вид карты"
-    }
-  ],
-
-  "file_handlers": [],
-  "protocol_handlers": [],
-  "edge_side_panel": {
-    "preferred_width": 400
-  },
-
-  "share_target": {
-    "action": "/UrbaxA5000/share",
-    "method": "GET",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  }
+    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/UrbaxA5000/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
 }
