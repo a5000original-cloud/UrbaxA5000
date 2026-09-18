@@ -1482,19 +1482,11 @@
         inset: -20%;
         background-color: #050507;
         background-image:
-          linear-gradient(rgba(160, 160, 170, 0.07) 1px, transparent 1px),
-          linear-gradient(
-            90deg,
-            rgba(160, 160, 170, 0.07) 1px,
-            transparent 1px
-          ),
-          linear-gradient(rgba(200, 200, 210, 0.11) 2px, transparent 2px),
-          linear-gradient(90deg, rgba(200, 200, 210, 0.11) 2px, transparent 2px);
+          linear-gradient(rgba(180, 180, 190, 0.09) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(180, 180, 190, 0.09) 1px, transparent 1px);
         background-size:
-          40px 40px,
-          40px 40px,
-          200px 200px,
-          200px 200px;
+          60px 60px,
+          60px 60px;
         transform: perspective(500px) rotateX(64deg) translate3d(0, 0, 0);
         transform-origin: center 75%;
         animation: gridScroll 2.4s linear infinite;
@@ -1514,14 +1506,6 @@
           black 60%,
           transparent 90%
         );
-      }
-      @keyframes gridScroll {
-        from {
-          transform: perspective(500px) rotateX(64deg) translate3d(0, 0, 0);
-        }
-        to {
-          transform: perspective(500px) rotateX(64deg) translate3d(0, 40px, 0);
-        }
       }
       /* Сканлайн */
       #splash::after {
