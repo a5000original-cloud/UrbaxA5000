@@ -2,7 +2,7 @@
    URBaxA5000 · Service Worker · A5000 Labs
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v11';
+const CACHE_VERSION = 'v12';
 const CACHE_NAME    = `urbaxa-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `urbaxa-runtime-${CACHE_VERSION}`;
 const TILES_CACHE   = `urbaxa-tiles-${CACHE_VERSION}`;
