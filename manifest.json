@@ -15,15 +15,27 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMCIgZmlsbD0iIzBhMGEwYyIvPjxwYXRoIGQ9Ik0yNTYgNzZDMTc2IDc2IDExNiAxMzYgMTE2IDIxNkMxMTYgMzAwIDIwMCAzODQgMjU2IDQzNkMzMTIgMzg0IDM5NiAzMDAgMzk2IDIxNkMzOTYgMTM2IDMzNiA3NiAyNTYgNzZaIiBmaWxsPSIjZmY5NTAwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMTQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyMDYiIHI9IjU2IiBmaWxsPSIjMGEwYTBjIi8+PHRleHQgeD0iMjU2IiB5PSIyMzIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJJbnRlcixzYW5zLXNlcmlmIiBmb250LXNpemU9IjcyIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmY5NTAwIj5BPC90ZXh0Pjwvc3ZnPg==",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgcng9IjExMCIgZmlsbD0iIzBhMGEwYyIvPjxwYXRoIGQ9Ik0yNTYgNzZDMTc2IDc2IDExNiAxMzYgMTE2IDIxNkMxMTYgMzAwIDIwMCAzODQgMjU2IDQzNkMzMTIgMzg0IDM5NiAzMDAgMzk2IDIxNkMzOTYgMTM2IDMzNiA3NiAyNTYgNzZaIiBmaWxsPSIjZmY5NTAwIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMTQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyMDYiIHI9IjU2IiBmaWxsPSIjMGEwYTBjIi8+PHRleHQgeD0iMjU2IiB5PSIyMzIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJJbnRlcixzYW5zLXNlcmlmIiBmb250LXNpemU9IjcyIiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmY5NTAwIj5BPC90ZXh0Pjwvc3ZnPg==",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
