@@ -5129,7 +5129,7 @@
           <h3>Установка</h3>
           <button
             class="action-btn share"
-            style="width: 100%"
+            style="width: 100%; margin-bottom: 10px"
             onclick="installPWA()"
           >
             <svg
@@ -5148,6 +5148,60 @@
             </svg>
             Установить приложение
           </button>
+          <button
+            class="action-btn"
+            style="width: 100%; margin-bottom: 10px"
+            onclick="generatePngIcons()"
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="M7 10l5 5 5-5" />
+              <path d="M12 15V3" />
+            </svg>
+            Скачать PNG-иконки
+          </button>
+          <button
+            class="action-btn"
+            style="width: 100%"
+            onclick="showInstallHelp()"
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            Как установить вручную
+          </button>
+          <p
+            style="
+              font-size: 11.5px;
+              color: var(--text-3);
+              line-height: 1.5;
+              margin-top: 10px;
+            "
+          >
+            Если установка не появляется — нажми «Скачать PNG-иконки», загрузи
+            файлы в репозиторий рядом с
+            <code style="color: var(--accent)">index.html</code> и замени SVG на
+            PNG в <code style="color: var(--accent)">manifest.json</code>.
+          </p>
         </div>
 
         <div class="detail-section" id="iosInstall" style="display: none">
@@ -9862,6 +9916,134 @@
         }
         /* Нет prompt — показываем диагностику */
         diagnosePWA();
+      }
+
+      /* ═══ ГЕНЕРАТОР PNG-ИКОНОК ═══
+         Chrome/Yandex не принимают SVG в манифесте для установки.
+         Рисуем текущую SVG-иконку на canvas и скачиваем PNG 192 и 512. */
+      async function generatePngIcons() {
+        try {
+          const svgEl = document.querySelector(".app-icon-3d svg");
+          if (!svgEl) {
+            toast("❌ SVG-иконка не найдена");
+            return;
+          }
+
+          /* Клонируем и делаем standalone */
+          const clone = svgEl.cloneNode(true);
+          clone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+          clone.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+          clone.setAttribute("width", "512");
+          clone.setAttribute("height", "512");
+          clone.setAttribute("viewBox", "0 0 120 120");
+
+          const svgStr =
+            '<?xml version="1.0" encoding="UTF-8"?>' +
+            new XMLSerializer().serializeToString(clone);
+          const blob = new Blob([svgStr], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          const url = URL.createObjectURL(blob);
+
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = url;
+          });
+
+          const sizes = [192, 512];
+          for (const size of sizes) {
+            const canvas = document.createElement("canvas");
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+            /* Фон — тёмный, чтобы alpha-каналы не давали прозрачность */
+            ctx.fillStyle = "#0a0a0c";
+            ctx.fillRect(0, 0, size, size);
+            ctx.drawImage(img, 0, 0, size, size);
+
+            const pngBlob = await new Promise((res) =>
+              canvas.toBlob(res, "image/png"),
+            );
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(pngBlob);
+            link.download = `icon-${size}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(link.href), 1500);
+            /* Пауза — иначе второй файл может не скачаться */
+            await new Promise((res) => setTimeout(res, 500));
+          }
+
+          URL.revokeObjectURL(url);
+
+          if (navigator.vibrate) navigator.vibrate([20, 40, 20]);
+          alert(
+            "✅ Иконки icon-192.png и icon-512.png сохранены.\n\n" +
+              "Что делать дальше:\n" +
+              "1. Загрузи оба PNG в репозиторий рядом с index.html.\n" +
+              "2. Открой manifest.json — замени блок icons на PNG-версии " +
+              "(образец покажу сейчас).\n" +
+              "3. Открой sw.js — подними CACHE_VERSION до v50.\n" +
+              "4. Обнови страницу → Профиль → Проверить обновления.",
+          );
+        } catch (e) {
+          console.error("PNG generate:", e);
+          toast("❌ Не удалось создать PNG");
+        }
+      }
+
+      /* ═══ ИНСТРУКЦИЯ ПО РУЧНОЙ УСТАНОВКЕ ═══ */
+      function showInstallHelp() {
+        const ua = navigator.userAgent;
+        const isYandex = /YaBrowser/.test(ua);
+        const isChrome = /Chrome\//.test(ua) && !isYandex;
+        const isFirefox = /Firefox\//.test(ua);
+        const isIOS = /iPad|iPhone|iPod/.test(ua);
+
+        let txt = "Как установить приложение:\n\n";
+
+        if (isIOS) {
+          txt +=
+            "📱 iPhone (Safari):\n" +
+            "1. Нажми «Поделиться» (квадрат со стрелкой).\n" +
+            "2. Выбери «На экран Домой».\n" +
+            "3. Нажми «Добавить».";
+        } else if (isYandex) {
+          txt +=
+            "📱 Яндекс.Браузер (Android):\n" +
+            "1. Открой меню ⋮ (три точки вверху справа).\n" +
+            "2. Выбери «Установить приложение».\n" +
+            "3. Подтверди.\n\n" +
+            "Если пункта нет — Яндекс иногда скрывает его, пока не " +
+            "откроешь сайт 2–3 раза.";
+        } else if (isChrome) {
+          txt +=
+            "📱 Chrome (Android):\n" +
+            "1. Открой меню ⋮ вверху справа.\n" +
+            "2. Выбери «Установить приложение» или «Добавить на главный экран».\n" +
+            "3. Подтверди.\n\n" +
+            "Если пункта нет:\n" +
+            "• Закрой вкладку и открой заново — Chrome иногда даёт промпт " +
+            "не сразу.\n" +
+            "• Проверь, что в манифесте PNG-иконки 192 и 512.";
+        } else if (isFirefox) {
+          txt +=
+            "⚠️ Firefox на Android НЕ умеет устанавливать PWA.\n\n" +
+            "Открой сайт в Chrome или Яндекс.Браузере — там установка работает.";
+        } else {
+          txt +=
+            "1. Открой меню браузера (⋮ или ☰).\n" +
+            "2. Найди «Установить приложение» или «Добавить на главный экран».\n" +
+            "3. Подтверди.";
+        }
+
+        alert(txt);
       }
 
       /* Диагностика PWA — покажет, что мешает установке */
