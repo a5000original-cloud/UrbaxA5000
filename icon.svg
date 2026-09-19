@@ -1,64 +1,124 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#1c1c1e"/>
-      <stop offset="1" stop-color="#08080a"/>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1c22"/>
+      <stop offset="0.5" stop-color="#0f0f13"/>
+      <stop offset="1" stop-color="#050507"/>
     </linearGradient>
-    <linearGradient id="pinGrad" x1="0.15" y1="0" x2="0.85" y2="1">
-      <stop offset="0" stop-color="#ffd27a"/>
-      <stop offset="0.35" stop-color="#ffb340"/>
-      <stop offset="0.75" stop-color="#ff9500"/>
-      <stop offset="1" stop-color="#d97a00"/>
-    </linearGradient>
-    <radialGradient id="pinHighlight" cx="0.35" cy="0.2" r="0.55">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="innerCircle" cx="0.5" cy="0.35" r="0.65">
-      <stop offset="0" stop-color="#2a2a2c"/>
-      <stop offset="0.6" stop-color="#0d0d0f"/>
-      <stop offset="1" stop-color="#000000"/>
-    </radialGradient>
-    <linearGradient id="letterGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#ffd27a"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#ff9500" stop-opacity="0.35"/>
+    <radialGradient id="bgGlow" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#ff9500" stop-opacity="0.4"/>
+      <stop offset="0.35" stop-color="#ff9500" stop-opacity="0.12"/>
       <stop offset="1" stop-color="#ff9500" stop-opacity="0"/>
     </radialGradient>
+    <linearGradient id="pinGrad" x1="0.15" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#ffdc7a"/>
+      <stop offset="0.25" stop-color="#ffb340"/>
+      <stop offset="0.6" stop-color="#ff9500"/>
+      <stop offset="1" stop-color="#b85f00"/>
+    </linearGradient>
+    <radialGradient id="pinSpec" cx="35%" cy="22%" r="58%">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.35" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="innerCircle" cx="50%" cy="36%" r="66%">
+      <stop offset="0" stop-color="#25252c"/>
+      <stop offset="0.6" stop-color="#0a0a10"/>
+      <stop offset="1" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="letterGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffdc7a"/>
+      <stop offset="0.5" stop-color="#ffb340"/>
+      <stop offset="1" stop-color="#e07d00"/>
+    </linearGradient>
+    <filter id="pinGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="14" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
   </defs>
 
-  <!-- Squircle-фон -->
-  <rect width="512" height="512" rx="115" fill="url(#bg)"/>
+  <!-- Фон: скруглённый квадрат -->
+  <rect width="512" height="512" rx="116" ry="116" fill="url(#bgGrad)"/>
+  <rect width="512" height="512" rx="116" ry="116" fill="url(#bgGlow)"/>
 
-  <!-- Мягкое свечение за пином -->
-  <ellipse cx="256" cy="280" rx="200" ry="200" fill="url(#glow)"/>
+  <!-- Тонкая внутренняя обводка -->
+  <rect x="2" y="2" width="508" height="508" rx="114" ry="114"
+        fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="2"/>
+
+  <!-- Верхний блик стекла -->
+    <!-- Силуэт города вдали (Apple-style) -->
+  <g opacity="0.85">
+    <!-- Дальний слой — размытый, светлее -->
+    <g opacity="0.35" filter="url(#softGlow)">
+      <path d="M60 340 L80 340 L80 315 L100 315 L100 330 L120 330 L120 300
+               L140 300 L140 325 L160 325 L160 310 L180 310 L180 335 L200 335
+               L200 295 L220 295 L220 320 L240 320 L240 305 L260 305 L260 330
+               L280 330 L280 290 L300 290 L300 315 L320 315 L320 300 L340 300
+               L340 325 L360 325 L360 310 L380 325 L380 305 L400 305 L400 330
+               L420 330 L420 300 L440 300 L440 315 L452 315 L452 340 Z"
+            fill="#3a3630"/>
+    </g>
+    <!-- Средний слой — чуть темнее -->
+    <g opacity="0.65">
+      <path d="M40 340 L60 340 L60 320 L85 320 L85 300 L110 300 L110 325
+               L135 325 L135 305 L160 305 L160 315 L185 315 L185 290 L210 290
+               L210 310 L235 310 L235 295 L260 295 L260 315 L285 315 L285 300
+               L310 300 L310 320 L335 320 L335 305 L360 305 L360 315 L385 315
+               L385 295 L410 295 L410 315 L435 315 L435 300 L460 300 L460 320
+               L472 320 L472 340 Z"
+            fill="#221f1a"/>
+    </g>
+  </g>
+
+
+  <path d="M 116 2 Q 256 2 396 2 L 396 130 Q 256 162 116 130 Z"
+        fill="rgba(255,255,255,0.05)"/>
 
   <!-- Тень под пином -->
-  <ellipse cx="256" cy="440" rx="90" ry="16" fill="#000" opacity="0.55"/>
+  <ellipse cx="256" cy="458" rx="92" ry="14"
+           fill="#ff9500" opacity="0.3" filter="url(#softGlow)"/>
 
-  <!-- Пин — тень контуром -->
-  <path d="M256 82 C176 82 116 142 116 222 C116 306 200 390 256 442 C312 390 396 306 396 222 C396 142 336 82 256 82 Z" fill="#000" opacity="0.4"/>
+  <!-- Пин с премиум-градиентом -->
+  <g filter="url(#pinGlow)">
+    <path d="M256 62
+             C160 62 82 140 82 236
+             C82 320 180 410 256 468
+             C332 410 430 320 430 236
+             C430 140 352 62 256 62 Z"
+          fill="url(#pinGrad)" stroke="#ffffff" stroke-width="13" stroke-linejoin="round"/>
+  </g>
 
-  <!-- Пин — основной -->
-  <path d="M256 76 C176 76 116 136 116 216 C116 300 200 384 256 436 C312 384 396 300 396 216 C396 136 336 76 256 76 Z"
-        fill="url(#pinGrad)"
-        stroke="#ffffff"
-        stroke-width="12"
-        stroke-linejoin="round"/>
+  <!-- Спекулярный блик на пине -->
+  <path d="M256 80
+           C178 80 110 148 110 224
+           C110 234 111 244 113 254
+           C130 168 188 116 256 116
+           C324 116 382 168 399 254
+           C401 244 402 234 402 224
+           C402 148 334 80 256 80 Z"
+        fill="url(#pinSpec)" opacity="0.75"/>
 
-  <!-- Блик сверху пина -->
-  <ellipse cx="220" cy="140" rx="70" ry="35" fill="url(#pinHighlight)"/>
+  <!-- Внутренний тёмный круг -->
+  <circle cx="256" cy="222" r="72" fill="url(#innerCircle)"/>
+  <circle cx="256" cy="222" r="72" fill="none"
+          stroke="#ffc84a" stroke-opacity="0.7" stroke-width="3"/>
 
-  <!-- Внутренний круг -->
-  <circle cx="256" cy="206" r="72" fill="url(#innerCircle)"/>
-  <circle cx="256" cy="206" r="72" fill="none" stroke="#ffd27a" stroke-opacity="0.4" stroke-width="2"/>
-  <ellipse cx="256" cy="180" rx="40" ry="12" fill="#ffffff" opacity="0.06"/>
+  <!-- Верхний блик на круге -->
+  <ellipse cx="256" cy="184" rx="46" ry="12"
+           fill="#ffffff" opacity="0.12"/>
 
   <!-- Буква A -->
-  <text x="256" y="234" text-anchor="middle"
-        font-family="Inter, SF Pro Display, -apple-system, Arial, sans-serif"
-        font-size="82" font-weight="900"
-        fill="url(#letterGrad)" letter-spacing="-3">A</text>
+  <text x="256" y="258"
+        text-anchor="middle"
+        font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif"
+        font-size="92"
+        font-weight="900"
+        fill="url(#letterGrad)"
+        letter-spacing="-4">A</text>
 </svg>
