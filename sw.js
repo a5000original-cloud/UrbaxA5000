@@ -2,7 +2,7 @@
    URBaxA5000 · Service Worker · A5000 Labs
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v50';
+const CACHE_VERSION = 'v52';
 const CACHE_NAME    = `urbaxa-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `urbaxa-runtime-${CACHE_VERSION}`;
 const TILES_CACHE   = `urbaxa-tiles-${CACHE_VERSION}`;
@@ -14,8 +14,6 @@ const PRECACHE = [
   './index.html',
   './manifest.json',
   './icon.svg',
-  './icon-192.png',
-  './icon-512.png',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
   'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
   'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'
