@@ -6,7 +6,8 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     />
-    <meta name="theme-color" content="#000000" />
+
+    <meta id="themeColorMeta" name="theme-color" content="#000000" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta
       name="apple-mobile-web-app-status-bar-style"
@@ -19,15 +20,46 @@
     <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://unpkg.com" crossorigin />
+
+    <!-- Google Fonts: не блокирует рендер -->
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
-      rel="stylesheet"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
     />
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      />
+    </noscript>
+
+    <!-- Leaflet CSS: тоже не блокирует — карта всё равно не видна пока идёт сплэш -->
     <link
-      rel="stylesheet"
+      rel="preload"
+      as="style"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      onload="
+        this.onload = null;
+        this.rel = 'stylesheet';
+      "
     />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <noscript>
+      <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      />
+    </noscript>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      defer
+    ></script>
     <style>
       :root {
         --bg: #000;
@@ -39,11 +71,19 @@
         --text-3: #5a5a60;
         --accent: #ff9500;
         --accent-2: #f59e0b;
+        --accent-light: #ffb340;
+        --accent-rgb: 255, 149, 0;
         --green: #34c759;
         --nav-h: 68px;
         --ease: cubic-bezier(0.32, 0.72, 0, 1);
         --ease-spring: cubic-bezier(0.34, 1.2, 0.64, 1);
         --solid-panel: rgba(14, 14, 17, 0.94);
+      }
+      html.night {
+        --accent: #a855f7;
+        --accent-2: #7c3aed;
+        --accent-light: #c084fc;
+        --accent-rgb: 168, 85, 247;
       }
       * {
         box-sizing: border-box;
@@ -106,16 +146,31 @@
         animation: screenIn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
       }
       .screen.detail-active {
-        animation: slideIn 0.35s var(--ease);
+        animation: detailIn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
       }
-      @keyframes slideIn {
+      @keyframes detailIn {
         from {
-          transform: translateX(24px);
           opacity: 0;
+          transform: translateY(24px) scale(0.94);
         }
         to {
-          transform: translateX(0);
           opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      /* FLIP: если знаем координаты маркера — карточка «вылетает» от него */
+      .screen.detail-active.flip-in {
+        animation: flipIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      @keyframes flipIn {
+        from {
+          opacity: 0;
+          transform: translate3d(var(--flip-x, 0px), var(--flip-y, 40px), 0)
+            scale(0.85);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0) scale(1);
         }
       }
       @keyframes screenIn {
@@ -144,7 +199,7 @@
         background:
           radial-gradient(
             circle at 85% 10%,
-            rgba(255, 149, 0, 0.07) 0%,
+            rgba(var(--accent-rgb), 0.07) 0%,
             transparent 45%
           ),
           radial-gradient(
@@ -182,15 +237,18 @@
         outline: none;
         -webkit-tap-highlight-color: transparent;
       }
-      .leaflet-control-attribution {
-        background: rgba(0, 0, 0, 0.55) !important;
-        color: #555 !important;
-        font-size: 9px !important;
-        padding: 2px 6px !important;
-        border-radius: 8px 0 0 0 !important;
-      }
-      .leaflet-control-attribution a {
-        color: #777 !important;
+      /* Attribution отключён полностью (attributionControl: false).
+         Упоминание источников — в разделе «О приложении» профиля. */
+      .leaflet-control-attribution,
+      .leaflet-control-attribution a,
+      .leaflet-attribution-flag {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        overflow: hidden !important;
+        pointer-events: none !important;
       }
       .leaflet-marker-icon {
         transition: none !important;
@@ -258,7 +316,7 @@
         width: 100%;
         padding: 10px;
         margin-top: 4px;
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         color: #000;
         font-weight: 800;
         font-size: 12px;
@@ -371,10 +429,10 @@
           transform 0.25s var(--ease);
       }
       .search-wrap:focus-within {
-        border-color: rgba(255, 149, 0, 0.55);
+        border-color: rgba(var(--accent-rgb), 0.55);
         box-shadow:
           0 8px 32px rgba(0, 0, 0, 0.5),
-          0 0 0 4px rgba(255, 149, 0, 0.08),
+          0 0 0 4px rgba(var(--accent-rgb), 0.08),
           inset 0 1px 0 rgba(255, 255, 255, 0.08);
         transform: translateY(-1px);
       }
@@ -433,11 +491,11 @@
         transform: scale(0.94);
       }
       .chip.active {
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         color: #000;
         border-color: transparent;
         box-shadow:
-          0 4px 16px rgba(255, 149, 0, 0.45),
+          0 4px 16px rgba(var(--accent-rgb), 0.45),
           inset 0 1px 0 rgba(255, 255, 255, 0.4);
         transform: scale(1.02);
       }
@@ -496,7 +554,7 @@
         transform: scale(0.9);
       }
       .fab.primary {
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         color: #000;
         border-color: transparent;
         animation: fabPulse 3s ease-in-out infinite;
@@ -512,13 +570,13 @@
         0%,
         100% {
           box-shadow:
-            0 8px 24px rgba(255, 149, 0, 0.5),
+            0 8px 24px rgba(var(--accent-rgb), 0.5),
             inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
         50% {
           box-shadow:
-            0 12px 32px rgba(255, 149, 0, 0.7),
-            0 0 40px rgba(255, 149, 0, 0.3),
+            0 12px 32px rgba(var(--accent-rgb), 0.7),
+            0 0 40px rgba(var(--accent-rgb), 0.3),
             inset 0 1px 0 rgba(255, 255, 255, 0.4);
         }
       }
@@ -553,7 +611,7 @@
         transform: scale(0.9);
       }
       .layer-btn.active {
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         color: #000;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
       }
@@ -598,8 +656,8 @@
         color: var(--accent);
       }
       .nav-btn.active svg {
-        filter: drop-shadow(0 0 8px rgba(255, 149, 0, 0.9))
-          drop-shadow(0 0 16px rgba(255, 149, 0, 0.5));
+        filter: drop-shadow(0 0 8px rgba(var(--accent-rgb), 0.9))
+          drop-shadow(0 0 16px rgba(var(--accent-rgb), 0.5));
       }
       .nav-btn:active svg {
         transform: scale(0.88);
@@ -614,7 +672,7 @@
         height: 3px;
         border-radius: 0 0 4px 4px;
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
-        box-shadow: 0 2px 10px rgba(255, 149, 0, 0.7);
+        box-shadow: 0 2px 10px rgba(var(--accent-rgb), 0.7);
       }
       .nav-badge {
         position: absolute;
@@ -633,7 +691,7 @@
         justify-content: center;
         border: 2px solid #000;
         box-shadow:
-          0 0 12px rgba(255, 149, 0, 0.7),
+          0 0 12px rgba(var(--accent-rgb), 0.7),
           0 2px 6px rgba(0, 0, 0, 0.5);
         animation: badgePop 0.4s var(--ease-spring);
       }
@@ -667,19 +725,23 @@
         font-weight: 900;
         letter-spacing: -1px;
         line-height: 1;
-        background: linear-gradient(135deg, #fff 0%, #ff9500 200%);
+        background: linear-gradient(135deg, #fff 0%, var(--accent) 200%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        text-shadow: 0 0 40px rgba(255, 149, 0, 0.15);
+        text-shadow: 0 0 40px rgba(var(--accent-rgb), 0.15);
       }
       .scr-header h1 em {
         font-style: normal;
-        background: linear-gradient(180deg, #ffb340 0%, #ff9500 100%);
+        background: linear-gradient(
+          180deg,
+          var(--accent-light) 0%,
+          var(--accent) 100%
+        );
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        filter: drop-shadow(0 0 20px rgba(255, 149, 0, 0.5));
+        filter: drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.5));
       }
       .scr-counter {
         font-size: 11px;
@@ -725,7 +787,7 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(255, 149, 0, 0.25) 0%,
+          rgba(var(--accent-rgb), 0.25) 0%,
           transparent 60%
         );
         transform: translate(-50%, -50%);
@@ -740,10 +802,10 @@
       @media (hover: hover) {
         .card:hover {
           transform: translateY(-2px);
-          border-color: rgba(255, 149, 0, 0.25);
+          border-color: rgba(var(--accent-rgb), 0.25);
           box-shadow:
             0 12px 32px rgba(0, 0, 0, 0.5),
-            0 0 0 1px rgba(255, 149, 0, 0.08);
+            0 0 0 1px rgba(var(--accent-rgb), 0.08);
         }
       }
       .card:active::after {
@@ -839,7 +901,7 @@
         color: #ff6b6b;
       }
       .badge.d-mid {
-        background: rgba(255, 149, 0, 0.15);
+        background: rgba(var(--accent-rgb), 0.15);
         color: var(--accent);
       }
       .badge.d-low {
@@ -851,7 +913,7 @@
         color: #4ade80;
       }
       .badge.fav {
-        background: rgba(255, 149, 0, 0.15);
+        background: rgba(var(--accent-rgb), 0.15);
         color: var(--accent);
       }
 
@@ -861,6 +923,29 @@
         padding: 80px 30px;
         font-size: 13.5px;
         line-height: 1.6;
+        animation: emptyFade 0.6s var(--ease);
+      }
+      @keyframes emptyFade {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .empty .ic {
+        animation: emptyIcon 3.5s ease-in-out infinite;
+      }
+      @keyframes emptyIcon {
+        0%,
+        100% {
+          transform: scale(1) rotate(0);
+        }
+        50% {
+          transform: scale(1.1) rotate(-6deg);
+        }
       }
       .empty .ic {
         font-size: 56px;
@@ -879,6 +964,7 @@
       /* ═══ КАРТОЧКА ОБЪЕКТА ═══ */
       #detailScreen {
         overflow-y: auto;
+        will-change: transform, opacity;
         -webkit-overflow-scrolling: touch;
         background: var(--bg);
         scroll-behavior: smooth;
@@ -1094,7 +1180,7 @@
         height: 2px;
         background: linear-gradient(90deg, var(--accent), transparent);
         border-radius: 2px;
-        box-shadow: 0 0 8px rgba(255, 149, 0, 0.5);
+        box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.5);
       }
       .detail-desc {
         font-size: 15px;
@@ -1128,7 +1214,7 @@
       .coords-copy {
         padding: 9px 13px;
         border-radius: 10px;
-        background: rgba(255, 149, 0, 0.15);
+        background: rgba(var(--accent-rgb), 0.15);
         color: var(--accent);
         font-size: 11.5px;
         font-weight: 800;
@@ -1186,11 +1272,11 @@
         flex-shrink: 0;
       }
       .action-btn.fav-on {
-        background: rgba(255, 149, 0, 0.15);
-        border-color: rgba(255, 149, 0, 0.5);
+        background: rgba(var(--accent-rgb), 0.15);
+        border-color: rgba(var(--accent-rgb), 0.5);
         color: var(--accent);
         box-shadow:
-          0 8px 24px rgba(255, 149, 0, 0.25),
+          0 8px 24px rgba(var(--accent-rgb), 0.25),
           inset 0 1px 0 rgba(255, 255, 255, 0.2);
       }
       .action-btn.vis-on {
@@ -1228,7 +1314,7 @@
       }
       .action-btn.share:active {
         box-shadow:
-          0 8px 24px rgba(255, 149, 0, 0.25),
+          0 8px 24px rgba(var(--accent-rgb), 0.25),
           inset 0 1px 0 rgba(255, 255, 255, 0.2);
       }
 
@@ -1251,7 +1337,7 @@
       }
       .star.on {
         color: var(--accent);
-        text-shadow: 0 0 16px rgba(255, 149, 0, 0.6);
+        text-shadow: 0 0 16px rgba(var(--accent-rgb), 0.6);
         transform: scale(1.08);
       }
       .star:active {
@@ -1278,7 +1364,7 @@
         min-height: 90px;
       }
       .notes-area:focus {
-        border-color: rgba(255, 149, 0, 0.5);
+        border-color: rgba(var(--accent-rgb), 0.5);
       }
       .notes-area::placeholder {
         color: var(--text-3);
@@ -1327,6 +1413,1356 @@
         font-size: 11px;
         color: var(--text-3);
         font-weight: 700;
+      }
+
+      /* ═══ НИК ═══ */
+      .nick-card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 16px 18px;
+        margin-bottom: 14px;
+      }
+      .nick-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 10px;
+      }
+      .nick-row {
+        display: flex;
+        gap: 8px;
+      }
+      .nick-input {
+        flex: 1;
+        min-width: 0;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px 14px;
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 700;
+        outline: none;
+        transition: border-color 0.2s var(--ease);
+      }
+      .nick-input:focus {
+        border-color: rgba(var(--accent-rgb), 0.55);
+      }
+      .nick-save {
+        padding: 0 20px;
+        border-radius: 12px;
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
+        color: #000;
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 0.4px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: transform 0.15s var(--ease);
+      }
+      .nick-save:active {
+        transform: scale(0.95);
+      }
+      .nick-hint {
+        font-size: 11px;
+        color: var(--text-3);
+        margin-top: 8px;
+        font-weight: 600;
+      }
+      .nick-qr-btn {
+        width: 100%;
+        margin-top: 12px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: rgba(var(--accent-rgb), 0.12);
+        border: 1px solid rgba(var(--accent-rgb), 0.4);
+        color: var(--accent);
+        font-size: 13px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition:
+          transform 0.15s var(--ease),
+          background 0.2s;
+      }
+      .nick-qr-btn:active {
+        transform: scale(0.97);
+        background: rgba(var(--accent-rgb), 0.2);
+      }
+      .qr-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: #0a0a0c;
+        border-radius: 18px;
+        margin-bottom: 12px;
+        border: 1px solid var(--border);
+      }
+      #qrCanvas {
+        display: block;
+        width: 260px;
+        height: 260px;
+        max-width: 100%;
+      }
+      .qr-loading {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-3);
+        font-size: 13px;
+        font-weight: 700;
+        background: rgba(10, 10, 12, 0.85);
+        border-radius: 18px;
+      }
+      .qr-loading.hide {
+        display: none;
+      }
+      .qr-nick {
+        text-align: center;
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: -0.4px;
+        background: linear-gradient(180deg, #fff 0%, var(--accent) 130%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 4px;
+      }
+
+      /* ═══ ГОСТЕВОЙ ПРОФИЛЬ (по QR) ═══ */
+      #guestScreen {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        background: var(--bg);
+      }
+      .guest-bg {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            circle at 50% 0%,
+            rgba(var(--accent-rgb), 0.22) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            circle at 15% 100%,
+            rgba(168, 85, 247, 0.12) 0%,
+            transparent 45%
+          );
+      }
+      .guest-body {
+        position: relative;
+        z-index: 1;
+        padding: 0 18px 40px;
+        padding-top: calc(24px + env(safe-area-inset-top));
+        min-height: 100%;
+      }
+      .guest-hero {
+        text-align: center;
+        padding: 18px 0 22px;
+      }
+      .guest-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        margin: 0 auto 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 42px;
+        font-weight: 900;
+        color: #000;
+        background: linear-gradient(160deg, var(--accent-light), var(--accent));
+        box-shadow:
+          0 20px 60px rgba(var(--accent-rgb), 0.5),
+          0 0 0 4px rgba(var(--accent-rgb), 0.15),
+          inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        letter-spacing: -2px;
+        animation: guestAvatarIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes guestAvatarIn {
+        0% {
+          transform: scale(0) rotate(-180deg);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
+      }
+      .guest-nick {
+        font-size: 32px;
+        font-weight: 900;
+        letter-spacing: -1.2px;
+        line-height: 1.1;
+        background: linear-gradient(180deg, #fff 0%, #c8c8d0 130%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        word-break: break-word;
+      }
+      .guest-rank-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        margin-top: 12px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(var(--accent-rgb), 0.12);
+        border: 1px solid rgba(var(--accent-rgb), 0.4);
+        color: var(--accent);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.2);
+      }
+      .guest-rank-badge .ic {
+        font-size: 16px;
+      }
+
+      .guest-ring-card {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 20px 20px;
+        margin-bottom: 14px;
+        border-radius: 22px;
+        background: linear-gradient(
+          160deg,
+          rgba(30, 30, 36, 0.92) 0%,
+          rgba(18, 18, 22, 0.92) 100%
+        );
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      }
+      .guest-ring-card::before {
+        content: "";
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(var(--accent-rgb), 0.28) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .guest-ring-wrap {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        flex-shrink: 0;
+      }
+      .guest-ring-svg {
+        width: 120px;
+        height: 120px;
+        display: block;
+      }
+      .guest-ring-bg {
+        stroke: rgba(255, 255, 255, 0.06);
+      }
+      .guest-ring-fill {
+        transition: stroke-dashoffset 1.4s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .guest-ring-fill.r1 {
+        stroke: var(--accent);
+        filter: drop-shadow(0 0 5px rgba(var(--accent-rgb), 0.6));
+      }
+      .guest-ring-fill.r2 {
+        stroke: #34c759;
+        filter: drop-shadow(0 0 5px rgba(52, 199, 89, 0.5));
+      }
+      .guest-ring-fill.r3 {
+        stroke: #ff375f;
+        filter: drop-shadow(0 0 5px rgba(255, 55, 95, 0.5));
+      }
+      .guest-ring-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -1px;
+        pointer-events: none;
+      }
+      .guest-ring-info {
+        flex: 1;
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+      }
+      .guest-ring-lbl {
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 6px;
+      }
+      .guest-ring-title {
+        font-size: 18px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -0.5px;
+        line-height: 1.15;
+        margin-bottom: 6px;
+      }
+      .guest-ring-sub {
+        font-size: 12px;
+        color: var(--text-2);
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .guest-ring-legend {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .guest-legend {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--text-2);
+        letter-spacing: 0.3px;
+      }
+      .guest-legend i {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-shadow: 0 0 6px currentColor;
+      }
+
+      .guest-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+      .guest-stat {
+        padding: 18px 14px;
+        border-radius: 18px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        position: relative;
+        overflow: hidden;
+      }
+      .guest-stat::before {
+        content: "";
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          var(--sc, var(--accent)) 0%,
+          transparent 70%
+        );
+        opacity: 0.18;
+        pointer-events: none;
+      }
+      .guest-stat .ic {
+        font-size: 22px;
+        display: block;
+        margin-bottom: 8px;
+        opacity: 0.9;
+      }
+      .guest-stat .val {
+        font-size: 30px;
+        font-weight: 900;
+        letter-spacing: -1.4px;
+        line-height: 1;
+        color: #fff;
+        margin-bottom: 4px;
+        font-variant-numeric: tabular-nums;
+      }
+      .guest-stat .lbl {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.9px;
+        text-transform: uppercase;
+        color: var(--text-3);
+      }
+
+      .guest-progress {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px;
+        margin-bottom: 14px;
+      }
+      .guest-progress-title {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 12px;
+      }
+      .guest-progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 13px;
+        color: var(--text-2);
+        font-weight: 700;
+        margin-bottom: 10px;
+      }
+      .guest-progress-row strong {
+        color: #fff;
+        font-weight: 900;
+      }
+      .guest-progress-bar {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+      }
+      .guest-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        border-radius: 999px;
+        box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.6);
+        transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      .guest-progress-fill::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        animation: shimmer 2.5s linear infinite;
+      }
+
+      .guest-cta {
+        width: 100%;
+        padding: 18px;
+        margin-top: 8px;
+        border-radius: 18px;
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
+        color: #000;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow:
+          0 16px 40px rgba(var(--accent-rgb), 0.45),
+          inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: transform 0.15s var(--ease);
+      }
+      .guest-cta:active {
+        transform: scale(0.97);
+      }
+
+      .guest-footer {
+        text-align: center;
+        margin-top: 22px;
+        font-size: 11px;
+        color: var(--text-3);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+      }
+
+      /* ═══ РЕЛИКТЫ (валюта) ═══ */
+      .relic-card {
+        background: linear-gradient(
+          160deg,
+          rgba(168, 85, 247, 0.18) 0%,
+          rgba(255, 149, 0, 0.12) 100%
+        );
+        border: 1px solid rgba(255, 215, 0, 0.28);
+        border-radius: 20px;
+        padding: 22px 20px;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .relic-card::before {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 160px;
+        height: 160px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 215, 0, 0.28) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .relic-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.25),
+          transparent
+        );
+      }
+      .relic-icon {
+        font-size: 44px;
+        line-height: 1;
+        filter: drop-shadow(0 4px 16px rgba(255, 215, 0, 0.55));
+        flex-shrink: 0;
+      }
+      .relic-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .relic-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 4px;
+      }
+      .relic-count {
+        font-size: 40px;
+        font-weight: 900;
+        letter-spacing: -2px;
+        line-height: 1;
+        background: linear-gradient(180deg, #fff 0%, #ffd700 130%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-variant-numeric: tabular-nums;
+      }
+      .relic-sub {
+        font-size: 11.5px;
+        color: var(--text-2);
+        margin-top: 6px;
+        font-weight: 600;
+      }
+      .relic-pop {
+        position: fixed;
+        top: calc(20px + env(safe-area-inset-top));
+        right: 16px;
+        z-index: 99998;
+        background: rgba(24, 24, 30, 0.92);
+        backdrop-filter: blur(60px) saturate(200%);
+        -webkit-backdrop-filter: blur(60px) saturate(200%);
+        border: 1px solid rgba(255, 215, 0, 0.4);
+        color: #ffd700;
+        padding: 10px 16px;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 900;
+        letter-spacing: 0.3px;
+        box-shadow:
+          0 16px 44px rgba(0, 0, 0, 0.6),
+          0 0 24px rgba(255, 215, 0, 0.25);
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-16px) scale(0.9);
+        transition:
+          opacity 0.35s var(--ease),
+          transform 0.35s var(--ease-spring);
+      }
+      .relic-pop.show {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      /* ═══ РЕЛИКТЫ — расширенная аналитика ═══ */
+      .relic-card.gain {
+        animation: relicGain 0.7s var(--ease);
+      }
+      @keyframes relicGain {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+        }
+        100% {
+          box-shadow: 0 0 0 24px rgba(255, 215, 0, 0);
+        }
+      }
+      .relic-icon {
+        animation: relicIcon 3.5s ease-in-out infinite;
+      }
+      @keyframes relicIcon {
+        0%,
+        100% {
+          transform: scale(1) rotate(0deg);
+        }
+        50% {
+          transform: scale(1.08) rotate(-4deg);
+        }
+      }
+      .relic-count.bump {
+        animation: relicBump 0.5s var(--ease-spring);
+      }
+      @keyframes relicBump {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.18);
+          filter: brightness(1.4);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+      .relic-spark {
+        position: fixed;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ffd700;
+        box-shadow:
+          0 0 12px #ffd700,
+          0 0 24px rgba(255, 215, 0, 0.6);
+        pointer-events: none;
+        z-index: 99998;
+        will-change: transform, opacity;
+      }
+
+      .relic-stats-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+      .relic-stat {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 14px 8px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+      .relic-stat::before {
+        content: "";
+        position: absolute;
+        top: -20px;
+        right: -20px;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(255, 215, 0, 0.2) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .relic-stat-val {
+        font-size: 22px;
+        font-weight: 900;
+        color: #fff;
+        letter-spacing: -1.2px;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+      .relic-stat-lbl {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-top: 6px;
+      }
+      .relic-chart-wrap {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px 14px 28px;
+        margin-bottom: 18px;
+        position: relative;
+      }
+      .relic-chart-title {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.4px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 14px;
+      }
+      .relic-chart {
+        display: flex;
+        align-items: flex-end;
+        gap: 5px;
+        height: 72px;
+      }
+      .relic-chart-bar {
+        flex: 1;
+        background: linear-gradient(180deg, #ffd700, rgba(255, 215, 0, 0.25));
+        border-radius: 4px 4px 2px 2px;
+        min-height: 3px;
+        position: relative;
+        transition: height 0.5s var(--ease);
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.25);
+      }
+      .relic-chart-bar.zero {
+        background: rgba(255, 255, 255, 0.06);
+        box-shadow: none;
+      }
+      .relic-chart-bar-lbl {
+        position: absolute;
+        bottom: -18px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8px;
+        font-weight: 700;
+        color: var(--text-3);
+        white-space: nowrap;
+      }
+      .relic-chart-bar-val {
+        position: absolute;
+        top: -14px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 8px;
+        font-weight: 800;
+        color: #ffd700;
+        white-space: nowrap;
+      }
+      .relic-breakdown {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 18px;
+      }
+      .relic-bd-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .relic-bd-row:last-child {
+        border-bottom: none;
+      }
+      .relic-bd-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .relic-bd-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-shadow: 0 0 8px currentColor;
+      }
+      .relic-bd-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-2);
+      }
+      .relic-bd-bar-wrap {
+        flex: 1;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        margin: 0 12px;
+        overflow: hidden;
+        max-width: 80px;
+      }
+      .relic-bd-bar {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.7s var(--ease);
+      }
+      .relic-bd-val {
+        font-size: 13px;
+        font-weight: 900;
+        color: #ffd700;
+        font-variant-numeric: tabular-nums;
+        min-width: 40px;
+        text-align: right;
+      }
+      .relic-history-btn {
+        width: 100%;
+        padding: 15px;
+        border-radius: 14px;
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.32);
+        color: #ffd700;
+        font-size: 13px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 18px;
+        transition: transform 0.15s var(--ease);
+        letter-spacing: 0.2px;
+      }
+      .relic-history-btn:active {
+        transform: scale(0.97);
+      }
+      .relic-history-btn svg {
+        width: 16px;
+        height: 16px;
+      }
+      .relic-empty {
+        text-align: center;
+        padding: 28px 20px;
+        color: var(--text-3);
+        font-size: 12.5px;
+        line-height: 1.6;
+      }
+      .relic-h-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .relic-h-item:last-child {
+        border-bottom: none;
+      }
+      .relic-h-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        background: rgba(255, 215, 0, 0.12);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        flex-shrink: 0;
+        border: 1px solid rgba(255, 215, 0, 0.2);
+      }
+      .relic-h-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .relic-h-reason {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+        line-height: 1.2;
+        margin-bottom: 3px;
+      }
+      .relic-h-time {
+        font-size: 10.5px;
+        color: var(--text-3);
+        font-weight: 600;
+      }
+      .relic-h-delta {
+        font-size: 14px;
+        font-weight: 900;
+        font-variant-numeric: tabular-nums;
+        flex-shrink: 0;
+      }
+      .relic-h-delta.plus {
+        color: #ffd700;
+      }
+      .relic-h-delta.minus {
+        color: #a855f7;
+      }
+      html.night .relic-icon {
+        filter: drop-shadow(0 4px 16px rgba(168, 85, 247, 0.6));
+      }
+      html.night .relic-count {
+        background: linear-gradient(180deg, #fff 0%, #c084fc 130%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      html.night .relic-bd-val,
+      html.night .relic-h-delta.plus,
+      html.night .relic-chart-bar-val {
+        color: #c084fc;
+      }
+      html.night .relic-chart-bar {
+        background: linear-gradient(180deg, #c084fc, rgba(168, 85, 247, 0.25));
+        box-shadow: 0 0 8px rgba(168, 85, 247, 0.3);
+      }
+      html.night .relic-history-btn {
+        background: rgba(168, 85, 247, 0.12);
+        border-color: rgba(168, 85, 247, 0.35);
+        color: #c084fc;
+      }
+
+      /* ═══ РУЛЕТКА ЗАБРОШЕК ═══ */
+      .roulette-pill {
+        position: absolute;
+        left: 14px;
+        bottom: calc(var(--nav-h) + 24px + env(safe-area-inset-bottom));
+        z-index: 400;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px 12px 14px;
+        border-radius: 999px;
+        background: linear-gradient(
+          180deg,
+          rgba(var(--accent-rgb), 0.22) 0%,
+          rgba(var(--accent-rgb), 0.08) 100%
+        );
+        border: 1px solid rgba(var(--accent-rgb), 0.45);
+        color: var(--accent-light);
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0.2px;
+        box-shadow:
+          0 8px 24px rgba(0, 0, 0, 0.5),
+          0 0 22px rgba(var(--accent-rgb), 0.25),
+          inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        transition:
+          transform 0.18s var(--ease-spring),
+          box-shadow 0.25s var(--ease);
+        will-change: transform;
+      }
+      .roulette-pill:active {
+        transform: scale(0.92);
+      }
+      .roulette-pill .ic {
+        font-size: 18px;
+        line-height: 1;
+        display: inline-block;
+        animation: rouletteIdle 6s ease-in-out infinite;
+      }
+      @keyframes rouletteIdle {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        25% {
+          transform: rotate(-12deg);
+        }
+        75% {
+          transform: rotate(12deg);
+        }
+      }
+
+      /* Оверлей «крутим кубик» */
+      .roulette-spin-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99998;
+        background: radial-gradient(
+          circle at center,
+          rgba(var(--accent-rgb), 0.18) 0%,
+          rgba(0, 0, 0, 0.94) 60%
+        );
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s var(--ease);
+      }
+      .roulette-spin-overlay.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .roulette-cube-wrap {
+        width: 108px;
+        height: 108px;
+        perspective: 520px;
+        perspective-origin: 50% 42%;
+        margin-bottom: 32px;
+        position: relative;
+      }
+      /* Мягкая пол-тень под кубом (заменяет filter: drop-shadow) */
+      .roulette-cube-wrap::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        bottom: -32px;
+        transform: translateX(-50%);
+        width: 104px;
+        height: 20px;
+        border-radius: 50%;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(var(--accent-rgb), 0.65) 0%,
+          rgba(var(--accent-rgb), 0.22) 42%,
+          transparent 78%
+        );
+        pointer-events: none;
+      }
+      .roulette-cube {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transform-style: preserve-3d;
+        animation: cubeSpin3D 3.8s linear infinite;
+        will-change: transform;
+        backface-visibility: hidden;
+      }
+      .roulette-cube-face {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        line-height: 1;
+        border-radius: 14px;
+        overflow: hidden;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        /* Одна многослойная тень — тонкая кромка + блик сверху + глубина снизу */
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, 0.09),
+          inset 0 2px 0 rgba(255, 255, 255, 0.55),
+          inset 0 -5px 12px rgba(0, 0, 0, 0.65),
+          inset 0 0 32px rgba(0, 0, 0, 0.35);
+      }
+
+      /* ── 6 граней — 4-stop градиенты для мягкого эппловского перехода ── */
+      /* Front — light source, самая светлая «стена» */
+      .roulette-cube-face.f1 {
+        transform: translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #ffe9a3 0%,
+          #ffca5e 28%,
+          #ff9a1a 65%,
+          #c66800 100%
+        );
+      }
+      /* Right — затенённый тёплый */
+      .roulette-cube-face.f2 {
+        transform: rotateY(90deg) translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #c97c1c 0%,
+          #a75f0e 30%,
+          #6e3b05 68%,
+          #2e1700 100%
+        );
+      }
+      /* Back — самая тёмная (против света) */
+      .roulette-cube-face.f3 {
+        transform: rotateY(180deg) translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #6b3d0a 0%,
+          #4a2600 32%,
+          #201000 70%,
+          #0a0400 100%
+        );
+      }
+      /* Left — средний, чуть холоднее */
+      .roulette-cube-face.f4 {
+        transform: rotateY(-90deg) translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #ffb340 0%,
+          #d2830f 28%,
+          #8a4a00 66%,
+          #3a1e00 100%
+        );
+      }
+      /* Top — акцентный блик сверху */
+      .roulette-cube-face.f5 {
+        transform: rotateX(90deg) translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #fff4d0 0%,
+          #ffdc7a 30%,
+          #ffb340 68%,
+          #d18900 100%
+        );
+      }
+      /* Bottom — глубокий тёмный низ */
+      .roulette-cube-face.f6 {
+        transform: rotateX(-90deg) translateZ(54px);
+        background: linear-gradient(
+          165deg,
+          #2e1700 0%,
+          #1a0d00 32%,
+          #0a0400 70%,
+          #000 100%
+        );
+      }
+
+      @keyframes cubeSpin3D {
+        from {
+          transform: rotateX(-22deg) rotateY(28deg);
+        }
+        to {
+          transform: rotateX(-22deg) rotateY(388deg);
+        }
+      }
+
+      .roulette-spin-title {
+        margin-top: 26px;
+        font-size: 15px;
+        font-weight: 900;
+        letter-spacing: 2.4px;
+        text-transform: uppercase;
+        background: linear-gradient(
+          180deg,
+          #ffffff 0%,
+          var(--accent-light) 55%,
+          var(--accent) 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        position: relative;
+        z-index: 1;
+      }
+      .roulette-spin-sub {
+        margin-top: 10px;
+        font-size: 12px;
+        color: var(--text-2);
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Модалка выбора радиуса */
+      .roulette-radius-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-bottom: 8px;
+      }
+      .roulette-radius-btn {
+        padding: 16px 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 14px;
+        font-weight: 800;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        transition:
+          transform 0.15s var(--ease),
+          background 0.2s var(--ease),
+          border-color 0.2s var(--ease);
+        position: relative;
+        overflow: hidden;
+      }
+      .roulette-radius-btn:active {
+        transform: scale(0.96);
+        background: rgba(var(--accent-rgb), 0.12);
+        border-color: rgba(var(--accent-rgb), 0.5);
+      }
+      .roulette-radius-btn .r-icon {
+        font-size: 22px;
+        line-height: 1;
+      }
+      .roulette-radius-btn .r-name {
+        font-size: 13px;
+        color: #fff;
+      }
+      .roulette-radius-btn .r-sub {
+        font-size: 10px;
+        color: var(--text-3);
+        font-weight: 700;
+        letter-spacing: 0.3px;
+      }
+      .roulette-radius-btn.wide {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: center;
+        gap: 10px;
+        padding: 14px;
+      }
+      .roulette-radius-btn.wide .r-icon {
+        font-size: 20px;
+      }
+      .roulette-radius-btn[disabled] {
+        opacity: 0.35;
+        pointer-events: none;
+      }
+
+      /* ═══ РАНГ ═══ */
+      .rank-card {
+        background: linear-gradient(
+          160deg,
+          rgba(var(--accent-rgb), 0.16) 0%,
+          rgba(255, 255, 255, 0.02) 100%
+        );
+        border: 1px solid rgba(var(--accent-rgb), 0.28);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 18px;
+        position: relative;
+        overflow: hidden;
+      }
+      .rank-card::before {
+        content: "";
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 170px;
+        height: 170px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(var(--accent-rgb), 0.28) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+      .rank-top {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+      }
+      .rank-medal {
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        flex-shrink: 0;
+        background: radial-gradient(
+          circle at 50% 32%,
+          rgba(255, 255, 255, 0.15) 0%,
+          rgba(var(--accent-rgb), 0.35) 45%,
+          rgba(0, 0, 0, 0.6) 100%
+        );
+        border: 2px solid rgba(var(--accent-rgb), 0.55);
+        box-shadow:
+          0 8px 24px rgba(var(--accent-rgb), 0.4),
+          inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        animation: rankFloat 5s ease-in-out infinite;
+        will-change: transform;
+      }
+      @keyframes rankFloat {
+        0%,
+        100% {
+          transform: translateY(0) rotate(-3deg);
+        }
+        50% {
+          transform: translateY(-3px) rotate(3deg);
+        }
+      }
+      .rank-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .rank-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        color: var(--text-3);
+        margin-bottom: 4px;
+      }
+      .rank-name {
+        font-size: 24px;
+        font-weight: 900;
+        letter-spacing: -1px;
+        line-height: 1.1;
+        background: linear-gradient(180deg, #fff 0%, var(--accent-light) 130%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .rank-progress-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        font-size: 11.5px;
+        color: var(--text-3);
+        font-weight: 700;
+        margin-bottom: 8px;
+        position: relative;
+        z-index: 1;
+      }
+      .rank-progress-row strong {
+        color: #fff;
+        font-weight: 900;
+      }
+      .rank-bar {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+        overflow: hidden;
+        position: relative;
+        z-index: 1;
+      }
+      .rank-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-light));
+        border-radius: 999px;
+        box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.6);
+        transition: width 0.9s var(--ease);
+        position: relative;
+        overflow: hidden;
+      }
+      .rank-bar-fill::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.35),
+          transparent
+        );
+        animation: shimmer 2.5s linear infinite;
+      }
+      .rank-next {
+        margin-top: 12px;
+        font-size: 11.5px;
+        color: var(--text-2);
+        font-weight: 700;
+        position: relative;
+        z-index: 1;
+      }
+      .rank-next strong {
+        color: var(--accent);
+        font-weight: 900;
       }
 
       /* ═══ СТАТИСТИКА ═══ */
@@ -1421,7 +2857,7 @@
         font-weight: 700;
         box-shadow:
           0 20px 60px rgba(0, 0, 0, 0.7),
-          0 0 0 1px rgba(255, 149, 0, 0.08),
+          0 0 0 1px rgba(var(--accent-rgb), 0.08),
           inset 0 1px 0 rgba(255, 255, 255, 0.1);
         z-index: 9999;
         opacity: 0;
@@ -1444,7 +2880,7 @@
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
         z-index: 99999;
         width: 0;
-        box-shadow: 0 0 10px rgba(255, 149, 0, 0.7);
+        box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.7);
       }
 
       /* ═══ 3D СПЛЭШ ═══ */
@@ -1454,9 +2890,9 @@
         z-index: 999999;
         background: radial-gradient(
           circle at 50% 40%,
-          #14141a 0%,
-          #0a0a0d 40%,
-          #000 100%
+          #22222c 0%,
+          #121218 40%,
+          #050508 100%
         );
         display: flex;
         flex-direction: column;
@@ -1476,57 +2912,28 @@
 
       /* Сетка urban на фоне */
       /* Ночной город сверху — «летим над заброшками» */
-      /* Сетка-город — анимация через GPU */
-      .splash-grid {
-        position: absolute;
-        inset: -20%;
-        background-color: #050507;
-        background-image:
-          linear-gradient(rgba(180, 180, 190, 0.09) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(180, 180, 190, 0.09) 1px, transparent 1px);
-        background-size:
-          60px 60px,
-          60px 60px;
-        transform: perspective(500px) rotateX(64deg) translate3d(0, 0, 0);
-        transform-origin: center 75%;
-        animation: gridScroll 2.4s linear infinite;
-        pointer-events: none;
-        will-change: transform;
-        mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          black 22%,
-          black 60%,
-          transparent 90%
-        );
-        -webkit-mask-image: linear-gradient(
-          to bottom,
-          transparent 0%,
-          black 22%,
-          black 60%,
-          transparent 90%
-        );
-      }
+
       /* Сканлайн */
       #splash::after {
         content: "";
         position: absolute;
         left: 0;
         right: 0;
+        top: 0;
         height: 2px;
         background: linear-gradient(
           90deg,
           transparent,
-          rgba(255, 149, 0, 0.5),
+          rgba(var(--accent-rgb), 0.5),
           transparent
         );
-
         animation: scanline 3s linear infinite;
         pointer-events: none;
+        will-change: transform, opacity;
       }
       @keyframes scanline {
         0% {
-          top: -10%;
+          transform: translate3d(0, -10vh, 0);
           opacity: 0;
         }
         10% {
@@ -1536,7 +2943,7 @@
           opacity: 1;
         }
         100% {
-          top: 110%;
+          transform: translate3d(0, 110vh, 0);
           opacity: 0;
         }
       }
@@ -1567,8 +2974,7 @@
         position: absolute;
         inset: 0;
         border-radius: 50%;
-        border: 1px solid rgba(255, 180, 64, 0.22);
-        box-shadow: 0 0 18px rgba(255, 149, 0, 0.25);
+        border: 1.5px solid rgba(255, 180, 64, 0.55);
         transform-style: preserve-3d;
         will-change: transform;
       }
@@ -1588,20 +2994,20 @@
           rgba(255, 180, 64, 0) 70%
         );
         box-shadow:
-          0 0 10px #ffd27a,
-          0 0 20px rgba(255, 180, 64, 0.55);
+          0 0 8px #ffd27a,
+          0 0 18px rgba(255, 180, 64, 0.6);
       }
       .splash-ring.r1 {
         animation: ringSpin1 6s linear infinite;
       }
       .splash-ring.r2 {
         inset: 30px;
-        border-color: rgba(255, 149, 0, 0.18);
+        border-color: rgba(var(--accent-rgb), 0.42);
         animation: ringSpin2 9s linear infinite reverse;
       }
       .splash-ring.r3 {
         inset: 60px;
-        border-color: rgba(255, 220, 122, 0.15);
+        border-color: rgba(255, 220, 122, 0.38);
         animation: ringSpin3 12s linear infinite;
       }
       @keyframes ringSpin1 {
@@ -1664,13 +3070,14 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(255, 149, 0, 0.35) 0%,
-          rgba(255, 149, 0, 0.08) 35%,
-          transparent 70%
+          rgba(var(--accent-rgb), 0.45) 0%,
+          rgba(var(--accent-rgb), 0.14) 35%,
+          transparent 72%
         );
-        animation: glowPulse 2.5s ease-in-out infinite;
+        animation: glowPulse 3.5s ease-in-out infinite;
         pointer-events: none;
         will-change: transform, opacity;
+        contain: layout paint;
       }
       @keyframes glowPulse {
         0%,
@@ -1694,10 +3101,28 @@
         justify-content: center;
         transform-style: preserve-3d;
         animation:
-          pinIntro 1.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-          pinFloat 4s ease-in-out 1.4s infinite;
+          pinIntro 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
+          pinFloat 4s ease-in-out 0.9s infinite;
         transform: scale(0) rotateY(-180deg);
         z-index: 2;
+      }
+      .splash-pin::after {
+        content: "";
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 140px;
+        height: 36px;
+        border-radius: 50%;
+        background: radial-gradient(
+          ellipse at center,
+          rgba(var(--accent-rgb), 0.55) 0%,
+          rgba(var(--accent-rgb), 0.15) 40%,
+          transparent 75%
+        );
+        pointer-events: none;
+        z-index: -1;
       }
       @keyframes pinIntro {
         0% {
@@ -1715,25 +3140,23 @@
       @keyframes pinFloat {
         0%,
         100% {
-          transform: rotateY(-15deg) rotateX(8deg) translateY(0) scale(1);
+          transform: rotateY(0deg) rotateX(0) translateY(0) scale(1);
         }
         25% {
-          transform: rotateY(0deg) rotateX(0) translateY(-6px) scale(1.02);
+          transform: rotateY(-8deg) rotateX(4deg) translateY(-4px) scale(1.01);
         }
         50% {
-          transform: rotateY(15deg) rotateX(-8deg) translateY(-10px) scale(1.03);
+          transform: rotateY(0deg) rotateX(0) translateY(-8px) scale(1.02);
         }
         75% {
-          transform: rotateY(0deg) rotateX(0) translateY(-6px) scale(1.02);
+          transform: rotateY(8deg) rotateX(-4deg) translateY(-4px) scale(1.01);
         }
       }
       .splash-pin svg {
         width: 100%;
         height: 100%;
-        filter: drop-shadow(0 18px 30px rgba(255, 149, 0, 0.55));
         transform: translateZ(0);
         backface-visibility: hidden;
-        shape-rendering: geometricPrecision;
       }
 
       /* Название */
@@ -1743,14 +3166,15 @@
         font-weight: 900;
         letter-spacing: -2px;
         color: #ffffff;
-        text-shadow:
-          0 0 20px rgba(255, 149, 0, 0.6),
-          0 0 40px rgba(255, 149, 0, 0.35),
-          0 2px 4px rgba(0, 0, 0, 0.6);
+        text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.7);
         opacity: 1;
         transform: none;
         z-index: 2;
         text-align: center;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        white-space: nowrap;
         position: relative;
       }
       @keyframes titleIn {
@@ -1765,6 +3189,7 @@
         opacity: 0;
         animation: letterIn 0.7s cubic-bezier(0.34, 1.4, 0.64, 1) forwards;
       }
+
       @keyframes letterIn {
         0% {
           opacity: 0;
@@ -1787,7 +3212,7 @@
         opacity: 0;
         transform: translateY(20px);
         animation: titleIn 0.8s 1s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
-        text-shadow: 0 0 20px rgba(255, 149, 0, 0.6);
+        text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.6);
         z-index: 2;
       }
 
@@ -1853,10 +3278,10 @@
         width: 3px;
         height: 3px;
         border-radius: 50%;
-        background: #ff9500;
+        background: var(--accent);
         box-shadow:
-          0 0 8px rgba(255, 149, 0, 0.9),
-          0 0 16px rgba(255, 149, 0, 0.5);
+          0 0 8px rgba(var(--accent-rgb), 0.9),
+          0 0 16px rgba(var(--accent-rgb), 0.5);
         opacity: 0;
         animation: particleFloat linear infinite;
       }
@@ -1896,7 +3321,7 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(255, 149, 0, 0.28) 0%,
+          rgba(var(--accent-rgb), 0.28) 0%,
           transparent 65%
         );
         filter: blur(20px);
@@ -1925,7 +3350,7 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(255, 149, 0, 0.35) 0%,
+          rgba(var(--accent-rgb), 0.35) 0%,
           transparent 70%
         );
         filter: blur(8px);
@@ -1949,13 +3374,15 @@
         overflow: hidden;
         position: relative;
         box-shadow:
-          0 24px 70px rgba(255, 149, 0, 0.4),
+          0 24px 70px rgba(var(--accent-rgb), 0.4),
           0 8px 24px rgba(0, 0, 0, 0.5),
           0 0 0 1px rgba(255, 255, 255, 0.1),
           inset 0 1px 0 rgba(255, 255, 255, 0.18);
         animation: iconFloat 6s ease-in-out infinite;
         transform-style: preserve-3d;
         will-change: transform;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
       }
       .app-icon-3d::after {
         content: "";
@@ -2030,17 +3457,17 @@
       .ach-card-3d.center {
         box-shadow:
           0 30px 80px rgba(0, 0, 0, 0.75),
-          0 0 40px rgba(255, 149, 0, 0.15),
+          0 0 40px rgba(var(--accent-rgb), 0.15),
           inset 0 1px 0 rgba(255, 255, 255, 0.15);
       }
       .ach-card-3d.unlocked {
         background: linear-gradient(160deg, #2f2410 0%, #1a1410 100%);
-        border-color: rgba(255, 149, 0, 0.45);
+        border-color: rgba(var(--accent-rgb), 0.45);
       }
       .ach-card-3d.unlocked.center {
         box-shadow:
           0 30px 80px rgba(0, 0, 0, 0.75),
-          0 0 60px rgba(255, 149, 0, 0.4),
+          0 0 60px rgba(var(--accent-rgb), 0.4),
           inset 0 1px 0 rgba(255, 255, 255, 0.2);
       }
       .ach-card-3d.secret {
@@ -2050,7 +3477,7 @@
       .ach-card-3d .ach-icon {
         font-size: 62px;
         margin-bottom: 14px;
-        filter: drop-shadow(0 8px 24px rgba(255, 149, 0, 0.5));
+        filter: drop-shadow(0 8px 24px rgba(var(--accent-rgb), 0.5));
         transition: transform 0.4s var(--ease);
       }
       .ach-card-3d.center .ach-icon {
@@ -2097,7 +3524,7 @@
         height: 100%;
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
         border-radius: 999px;
-        box-shadow: 0 0 10px rgba(255, 149, 0, 0.6);
+        box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.6);
       }
 
       /* Редкости */
@@ -2148,7 +3575,7 @@
         background: var(--accent);
         width: 18px;
         border-radius: 3px;
-        box-shadow: 0 0 12px rgba(255, 149, 0, 0.8);
+        box-shadow: 0 0 12px rgba(var(--accent-rgb), 0.8);
       }
 
       /* ═══ СЕТКА АЧИВОК ═══ */
@@ -2175,14 +3602,14 @@
         transform: scale(0.95);
       }
       .ach-tile.unlocked {
-        border-color: rgba(255, 149, 0, 0.4);
+        border-color: rgba(var(--accent-rgb), 0.4);
         background: linear-gradient(160deg, #2a2010 0%, #1a1410 100%);
-        box-shadow: inset 0 0 30px rgba(255, 149, 0, 0.1);
+        box-shadow: inset 0 0 30px rgba(var(--accent-rgb), 0.1);
       }
       .ach-tile .ach-icon {
         font-size: 30px;
         margin-bottom: 6px;
-        filter: drop-shadow(0 4px 12px rgba(255, 149, 0, 0.5));
+        filter: drop-shadow(0 4px 12px rgba(var(--accent-rgb), 0.5));
       }
       .ach-tile.locked .ach-icon {
         filter: grayscale(1) brightness(0.3);
@@ -2271,7 +3698,7 @@
         border-radius: 50%;
         background: radial-gradient(
           circle,
-          rgba(255, 149, 0, 0.25) 0%,
+          rgba(var(--accent-rgb), 0.25) 0%,
           transparent 70%
         );
         pointer-events: none;
@@ -2308,7 +3735,7 @@
         font-weight: 900;
         color: var(--accent);
         letter-spacing: -1px;
-        text-shadow: 0 0 20px rgba(255, 149, 0, 0.5);
+        text-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5);
       }
       .ach-progress-bar {
         height: 10px;
@@ -2321,7 +3748,7 @@
         height: 100%;
         background: linear-gradient(90deg, var(--accent), var(--accent-2));
         border-radius: 999px;
-        box-shadow: 0 0 20px rgba(255, 149, 0, 0.5);
+        box-shadow: 0 0 20px rgba(var(--accent-rgb), 0.5);
         transition: width 1s var(--ease);
         position: relative;
         overflow: hidden;
@@ -2379,7 +3806,7 @@
         z-index: 99999;
         background: radial-gradient(
           circle at center,
-          rgba(255, 149, 0, 0.15) 0%,
+          rgba(var(--accent-rgb), 0.15) 0%,
           rgba(0, 0, 0, 0.98) 70%
         );
         display: flex;
@@ -2392,7 +3819,7 @@
       }
       .ach-unlock-icon {
         font-size: 120px;
-        filter: drop-shadow(0 20px 60px rgba(255, 149, 0, 0.8));
+        filter: drop-shadow(0 20px 60px rgba(var(--accent-rgb), 0.8));
       }
       .ach-unlock-overlay.show {
         opacity: 1;
@@ -2436,6 +3863,63 @@
       .ach-unlock-overlay.show .ach-unlock-desc {
         opacity: 1;
         transform: translateY(0);
+      }
+      /* Конфетти на ачивке */
+      .ach-confetti {
+        position: fixed;
+        pointer-events: none;
+        z-index: 100000;
+        will-change: transform, opacity;
+        border-radius: 2px;
+        box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+      }
+      /* Кольцо-вспышка вокруг иконки */
+      .ach-unlock-icon::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 3px solid var(--accent);
+        transform: translate(-50%, -50%) scale(0.3);
+        opacity: 0;
+        pointer-events: none;
+      }
+      .ach-unlock-overlay.show .ach-unlock-icon {
+        position: relative;
+      }
+      .ach-unlock-overlay.show .ach-unlock-icon::before {
+        animation: achRing 1.1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      }
+      @keyframes achRing {
+        0% {
+          opacity: 0.9;
+          transform: translate(-50%, -50%) scale(0.4);
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -50%) scale(4);
+        }
+      }
+      /* Иконка — пружинный вход */
+      .ach-unlock-overlay.show .ach-unlock-icon {
+        animation: achIconPop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      }
+      @keyframes achIconPop {
+        0% {
+          transform: scale(0.2) rotate(-25deg);
+          opacity: 0;
+        }
+        55% {
+          transform: scale(1.18) rotate(6deg);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1) rotate(0);
+          opacity: 1;
+        }
       }
 
       /* ═══ МОДАЛКИ ═══ */
@@ -2525,7 +4009,7 @@
         transform: scale(0.97);
       }
       .modal-btn.primary {
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         color: #000;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4);
       }
@@ -2686,17 +4170,17 @@
         background: rgba(255, 255, 255, 0.05);
       }
       .heat-cell.l1 {
-        background: rgba(255, 149, 0, 0.25);
+        background: rgba(var(--accent-rgb), 0.25);
       }
       .heat-cell.l2 {
-        background: rgba(255, 149, 0, 0.5);
+        background: rgba(var(--accent-rgb), 0.5);
       }
       .heat-cell.l3 {
-        background: rgba(255, 149, 0, 0.75);
+        background: rgba(var(--accent-rgb), 0.75);
       }
       .heat-cell.l4 {
-        background: #ff9500;
-        box-shadow: 0 0 8px rgba(255, 149, 0, 0.6);
+        background: var(--accent);
+        box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.6);
       }
       .activity-chart {
         display: flex;
@@ -2710,7 +4194,7 @@
         background: linear-gradient(
           180deg,
           var(--accent),
-          rgba(255, 149, 0, 0.3)
+          rgba(var(--accent-rgb), 0.3)
         );
         border-radius: 6px 6px 3px 3px;
         min-height: 4px;
@@ -2796,7 +4280,7 @@
         align-items: center;
         box-shadow:
           0 20px 60px rgba(0, 0, 0, 0.6),
-          0 0 0 1px rgba(255, 149, 0, 0.15);
+          0 0 0 1px rgba(var(--accent-rgb), 0.15);
         transform: translateY(-120%);
         transition: transform 0.4s var(--ease);
       }
@@ -2807,7 +4291,7 @@
         width: 42px;
         height: 42px;
         border-radius: 12px;
-        background: linear-gradient(180deg, #ffb340, var(--accent));
+        background: linear-gradient(180deg, var(--accent-light), var(--accent));
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2841,6 +4325,216 @@
           transition-duration: 0.01ms !important;
         }
       }
+      /* ═══ НОЧНАЯ ТЕМА (после 22:00) ═══ */
+      html.night #splash {
+        background: radial-gradient(
+          circle at 50% 40%,
+          #221630 0%,
+          #12101a 40%,
+          #050308 100%
+        );
+      }
+      html.night #spPin1 {
+        stop-color: #e9d5ff;
+      }
+      html.night #spPin2 {
+        stop-color: #c084fc;
+      }
+      html.night #spPin3 {
+        stop-color: #a855f7;
+      }
+      html.night #spPin4 {
+        stop-color: #6d28d9;
+      }
+      html.night #spLet1 {
+        stop-color: #e9d5ff;
+      }
+      html.night #spLet2 {
+        stop-color: #c084fc;
+      }
+      html.night #spLet3 {
+        stop-color: #7c3aed;
+      }
+      html.night #spRingStroke {
+        stroke: #c084fc;
+      }
+      html.night #appIcon1 {
+        stop-color: #c084fc;
+      }
+      html.night #appIcon2 {
+        stop-color: #a855f7;
+      }
+      html.night #appIconLetter {
+        fill: #a855f7;
+      }
+      /* Кольца сплэша */
+      html.night .splash-ring {
+        border-color: rgba(192, 132, 252, 0.55);
+      }
+      html.night .splash-ring.r2 {
+        border-color: rgba(168, 85, 247, 0.42);
+      }
+      html.night .splash-ring.r3 {
+        border-color: rgba(233, 213, 255, 0.38);
+      }
+      html.night .splash-ring::before {
+        background: radial-gradient(
+          circle,
+          #ffffff 0%,
+          #c084fc 35%,
+          rgba(192, 132, 252, 0) 70%
+        );
+        box-shadow:
+          0 0 8px #c084fc,
+          0 0 18px rgba(168, 85, 247, 0.6);
+      }
+      html.night .splash-glow {
+        background: radial-gradient(
+          circle,
+          rgba(168, 85, 247, 0.5) 0%,
+          rgba(168, 85, 247, 0.16) 35%,
+          transparent 72%
+        );
+      }
+      html.night .splash-pin::after {
+        background: radial-gradient(
+          ellipse at center,
+          rgba(168, 85, 247, 0.6) 0%,
+          rgba(168, 85, 247, 0.18) 40%,
+          transparent 75%
+        );
+      }
+      html.night #splash::after {
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(168, 85, 247, 0.55),
+          transparent
+        );
+      }
+      html.night .particle {
+        background: #a855f7;
+        box-shadow:
+          0 0 8px rgba(168, 85, 247, 0.9),
+          0 0 16px rgba(168, 85, 247, 0.5);
+      }
+      /* 3D-иконка в профиле */
+      html.night .app-icon-3d-wrap::before {
+        background: radial-gradient(
+          circle,
+          rgba(168, 85, 247, 0.35) 0%,
+          transparent 65%
+        );
+      }
+      html.night .app-icon-3d-wrap::after {
+        background: radial-gradient(
+          circle,
+          rgba(168, 85, 247, 0.4) 0%,
+          transparent 70%
+        );
+      }
+      /* Ачивки: открытые карточки */
+      html.night .ach-card-3d.unlocked {
+        background: linear-gradient(160deg, #251033 0%, #150a1e 100%);
+        border-color: rgba(168, 85, 247, 0.5);
+      }
+      html.night .ach-card-3d.unlocked.center {
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.75),
+          0 0 60px rgba(168, 85, 247, 0.5),
+          inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      }
+      html.night .ach-card-3d .ach-icon {
+        filter: drop-shadow(0 8px 24px rgba(168, 85, 247, 0.5));
+      }
+      html.night .ach-tile.unlocked {
+        border-color: rgba(168, 85, 247, 0.45);
+        background: linear-gradient(160deg, #1e1030 0%, #120a1c 100%);
+        box-shadow: inset 0 0 30px rgba(168, 85, 247, 0.12);
+      }
+      html.night .ach-tile .ach-icon {
+        filter: drop-shadow(0 4px 12px rgba(168, 85, 247, 0.5));
+      }
+      html.night .ach-progress-block::before {
+        background: radial-gradient(
+          circle,
+          rgba(168, 85, 247, 0.3) 0%,
+          transparent 70%
+        );
+      }
+      html.night .ach-unlock-overlay {
+        background: radial-gradient(
+          circle at center,
+          rgba(168, 85, 247, 0.2) 0%,
+          rgba(0, 0, 0, 0.98) 70%
+        );
+      }
+      html.night .ach-unlock-icon {
+        filter: drop-shadow(0 20px 60px rgba(168, 85, 247, 0.85));
+      }
+      /* SVG иконки профиля: первый/второй stop градиента */
+      html.night #appIconGrad stop:first-child {
+        stop-color: #c084fc;
+      }
+      html.night #appIconGrad stop:last-child {
+        stop-color: #a855f7;
+      }
+      /* Пин в профиле/карте: жёлтая заливка "избранного" оставляем — это семантика */
+      /* Грани куба рулетки в ночной теме */
+      html.night .roulette-cube-face.f1 {
+        background: linear-gradient(
+          165deg,
+          #f3e8ff 0%,
+          #e9d5ff 28%,
+          #c084fc 65%,
+          #7c3aed 100%
+        );
+      }
+      html.night .roulette-cube-face.f2 {
+        background: linear-gradient(
+          165deg,
+          #a855f7 0%,
+          #8b5cf6 30%,
+          #5b21b6 68%,
+          #2e1065 100%
+        );
+      }
+      html.night .roulette-cube-face.f3 {
+        background: linear-gradient(
+          165deg,
+          #4c1d95 0%,
+          #2e1065 32%,
+          #150a2e 70%,
+          #0a0318 100%
+        );
+      }
+      html.night .roulette-cube-face.f4 {
+        background: linear-gradient(
+          165deg,
+          #c084fc 0%,
+          #a855f7 28%,
+          #7c3aed 66%,
+          #4c1d95 100%
+        );
+      }
+      html.night .roulette-cube-face.f5 {
+        background: linear-gradient(
+          165deg,
+          #faf5ff 0%,
+          #e9d5ff 30%,
+          #c084fc 68%,
+          #a855f7 100%
+        );
+      }
+      html.night .roulette-cube-face.f6 {
+        background: linear-gradient(
+          165deg,
+          #2e1065 0%,
+          #1a0a3a 32%,
+          #0a0318 70%,
+          #000 100%
+        );
+      }
     </style>
   </head>
   <body>
@@ -2848,11 +4542,11 @@
     <!-- ═══ 3D СПЛЭШ ═══ -->
     <div id="splash">
       <div class="splash-glow"></div>
-      <div class="splash-grid"></div>
+
       <div class="splash-skyline">
         <svg
           viewBox="0 0 1600 240"
-          preserveAspectRatio="xMidYEnd slice"
+          preserveAspectRatio="xMidYMax slice"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
@@ -2880,17 +4574,13 @@
           <div class="splash-ring r3"></div>
         </div>
         <div class="splash-pin">
-          <svg
-            viewBox="0 0 200 200"
-            xmlns="http://www.w3.org/2000/svg"
-            shape-rendering="geometricPrecision"
-          >
+          <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <linearGradient id="spPin" x1="0.2" y1="0" x2="0.8" y2="1">
-                <stop offset="0" stop-color="#ffdc7a" />
-                <stop offset="0.3" stop-color="#ffb340" />
-                <stop offset="0.7" stop-color="#ff9500" />
-                <stop offset="1" stop-color="#c66a00" />
+                <stop id="spPin1" offset="0" stop-color="#ffdc7a" />
+                <stop id="spPin2" offset="0.3" stop-color="#ffb340" />
+                <stop id="spPin3" offset="0.7" stop-color="#ff9500" />
+                <stop id="spPin4" offset="1" stop-color="#c66a00" />
               </linearGradient>
               <radialGradient id="spInner" cx="50%" cy="38%" r="65%">
                 <stop offset="0" stop-color="#1a1a22" />
@@ -2903,9 +4593,9 @@
                 <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
               </radialGradient>
               <linearGradient id="spLetter" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#ffdc7a" />
-                <stop offset="0.5" stop-color="#ffb340" />
-                <stop offset="1" stop-color="#e07d00" />
+                <stop id="spLet1" offset="0" stop-color="#ffdc7a" />
+                <stop id="spLet2" offset="0.5" stop-color="#ffb340" />
+                <stop id="spLet3" offset="1" stop-color="#e07d00" />
               </linearGradient>
             </defs>
 
@@ -2923,6 +4613,7 @@
             />
             <circle cx="100" cy="86" r="30" fill="url(#spInner)" />
             <circle
+              id="spRingStroke"
               cx="100"
               cy="86"
               r="30"
@@ -3030,6 +4721,11 @@
           </svg>
         </button>
       </div>
+      <button class="roulette-pill" onclick="openRoulette()" id="roulettePill">
+        <span class="ic">🎲</span>
+        <span>Рулетка</span>
+      </button>
+
       <div class="map-fabs">
         <button class="fab primary" onclick="locateMe()">
           <svg
@@ -3105,6 +4801,106 @@
         <h1>Моя <em>статистика</em></h1>
       </div>
       <div class="list">
+        <div class="nick-card" id="nickCard">
+          <div class="nick-label">Твой позывной</div>
+          <div class="nick-row">
+            <input
+              id="nickInput"
+              class="nick-input"
+              type="text"
+              maxlength="24"
+              placeholder="Например, Диггер_2077"
+              autocomplete="off"
+            />
+            <button class="nick-save" onclick="saveNickname()">OK</button>
+          </div>
+          <div class="nick-hint">Показывается в QR-карточке профиля</div>
+          <button class="nick-qr-btn" onclick="openProfileQR()">
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <path d="M14 14h3v3h-3zM21 14v3M14 21h3M21 21h.01" />
+            </svg>
+            Показать мой QR
+          </button>
+        </div>
+        <div class="relic-card" id="relicCard">
+          <div class="relic-icon">💎</div>
+          <div class="relic-info">
+            <div class="relic-label">Реликты</div>
+            <div class="relic-count" id="relicCount">0</div>
+            <div class="relic-sub" id="relicHint">
+              Исследуй — копи сокровища
+            </div>
+          </div>
+        </div>
+
+        <div class="rank-card" id="rankCard">
+          <div class="rank-top">
+            <div class="rank-medal" id="rankMedal">🌱</div>
+            <div class="rank-info">
+              <div class="rank-label">Ранг</div>
+              <div class="rank-name" id="rankName">Новичок</div>
+            </div>
+          </div>
+          <div class="rank-progress-row">
+            <span>Прогресс: <strong id="rankProgress">0 / 5</strong></span>
+            <span id="rankPercent">0%</span>
+          </div>
+          <div class="rank-bar">
+            <div class="rank-bar-fill" id="rankBar" style="width: 0%"></div>
+          </div>
+          <div class="rank-next" id="rankNext">
+            До следующего ранга: <strong>5 мест</strong>
+          </div>
+        </div>
+
+        <div class="relic-stats-row">
+          <div class="relic-stat">
+            <div class="relic-stat-val" id="relicTotalEarned">0</div>
+            <div class="relic-stat-lbl">Всего</div>
+          </div>
+          <div class="relic-stat">
+            <div class="relic-stat-val" id="relicToday">0</div>
+            <div class="relic-stat-lbl">Сегодня</div>
+          </div>
+          <div class="relic-stat">
+            <div class="relic-stat-val" id="relicBestDay">0</div>
+            <div class="relic-stat-lbl">Рекорд</div>
+          </div>
+        </div>
+
+        <div class="relic-chart-wrap">
+          <div class="relic-chart-title">💎 Заработок · 7 дней</div>
+          <div class="relic-chart" id="relicChart"></div>
+        </div>
+
+        <div class="relic-breakdown" id="relicBreakdown"></div>
+
+        <button class="relic-history-btn" onclick="openRelicHistory()">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 8v4l3 3M3.05 11a9 9 0 1 1 .5 4M3 3v6h6" />
+          </svg>
+          <span id="relicHistoryBtnText">История начислений</span>
+        </button>
+
         <div class="stat-grid">
           <div class="stat-card" style="--sc: #ff9500">
             <span class="stat-icon">📍</span>
@@ -3208,6 +5004,7 @@
               />
               <circle cx="60" cy="48" r="12" fill="#000" opacity="0.85" />
               <text
+                id="appIconLetter"
                 x="60"
                 y="54"
                 text-anchor="middle"
@@ -3376,6 +5173,82 @@
         </div>
 
         <div class="detail-section">
+          <h3>Оформление</h3>
+          <div
+            style="
+              background: var(--card);
+              border: 1px solid var(--border);
+              border-radius: 16px;
+              padding: 6px 16px;
+            "
+          >
+            <div class="toggle-row">
+              <div>
+                <div class="toggle-label" id="nightLabel">🌙 Ночной режим</div>
+                <div class="toggle-desc">
+                  Авто с 22:00 до 06:00 · можно вручную
+                </div>
+              </div>
+              <button
+                class="toggle-switch"
+                id="tgNight"
+                onclick="toggleNightTheme(this)"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <h3>Резервная копия</h3>
+          <div class="actions-grid">
+            <button class="action-btn" onclick="exportAllData()">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M12 15V3" />
+              </svg>
+              Сохранить в файл
+            </button>
+            <button class="action-btn" onclick="importAllData()">
+              <svg
+                width="17"
+                height="17"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M17 8l-5-5-5 5" />
+                <path d="M12 3v12" />
+              </svg>
+              Загрузить из файла
+            </button>
+          </div>
+          <p
+            style="
+              font-size: 12px;
+              color: var(--text-3);
+              line-height: 1.5;
+              margin-top: 8px;
+            "
+          >
+            Бэкап избранного, посещений, заметок, оценок, планов, ачивок и
+            реликтов. Пригодится, если почистишь данные браузера.
+          </p>
+        </div>
+        <div class="detail-section">
           <h3>Обновление</h3>
           <button
             class="action-btn"
@@ -3415,6 +5288,19 @@
             <span style="color: var(--text-3); font-size: 11px"
               >© A5000 Labs · UrbaxA5000</span
             >
+            <br />
+            <span
+              style="
+                color: var(--text-3);
+                font-size: 10.5px;
+                line-height: 1.6;
+                display: block;
+                margin-top: 6px;
+                opacity: 0.8;
+              "
+            >
+              Картография: © OpenStreetMap · © CARTO · © Esri · Maxar
+            </span>
           </div>
           <button
             class="action-btn"
@@ -3694,6 +5580,165 @@
       </div>
     </div>
 
+    <!-- ═══ ГОСТЕВОЙ ПРОФИЛЬ (по QR) ═══ -->
+    <div id="guestScreen" class="screen">
+      <div class="guest-bg"></div>
+      <div class="guest-body">
+        <div class="guest-hero">
+          <div class="guest-avatar" id="guestAvatar">A</div>
+          <div class="guest-nick" id="guestNick">Игрок</div>
+          <div class="guest-rank-badge" id="guestRankBadge">
+            <span class="ic">🌱</span><span id="guestRankName">Новичок</span>
+          </div>
+        </div>
+
+        <div class="guest-ring-card">
+          <div class="guest-ring-wrap">
+            <svg class="guest-ring-svg" viewBox="0 0 120 120">
+              <circle
+                class="guest-ring-bg"
+                cx="60"
+                cy="60"
+                r="52"
+                stroke-width="8"
+                fill="none"
+              />
+              <circle
+                class="guest-ring-bg"
+                cx="60"
+                cy="60"
+                r="40"
+                stroke-width="8"
+                fill="none"
+              />
+              <circle
+                class="guest-ring-bg"
+                cx="60"
+                cy="60"
+                r="28"
+                stroke-width="8"
+                fill="none"
+              />
+              <circle
+                class="guest-ring-fill r1"
+                id="guestRing1"
+                cx="60"
+                cy="60"
+                r="52"
+                stroke-width="8"
+                fill="none"
+                stroke-linecap="round"
+                stroke-dasharray="326.7"
+                stroke-dashoffset="326.7"
+                transform="rotate(-90 60 60)"
+              />
+              <circle
+                class="guest-ring-fill r2"
+                id="guestRing2"
+                cx="60"
+                cy="60"
+                r="40"
+                stroke-width="8"
+                fill="none"
+                stroke-linecap="round"
+                stroke-dasharray="251.3"
+                stroke-dashoffset="251.3"
+                transform="rotate(-90 60 60)"
+              />
+              <circle
+                class="guest-ring-fill r3"
+                id="guestRing3"
+                cx="60"
+                cy="60"
+                r="28"
+                stroke-width="8"
+                fill="none"
+                stroke-linecap="round"
+                stroke-dasharray="175.9"
+                stroke-dashoffset="175.9"
+                transform="rotate(-90 60 60)"
+              />
+            </svg>
+            <div class="guest-ring-center" id="guestRingPct">0%</div>
+          </div>
+          <div class="guest-ring-info">
+            <div class="guest-ring-lbl">Прогресс</div>
+            <div class="guest-ring-title">Исследование карты</div>
+            <div class="guest-ring-sub" id="guestRingSub">0 из 60 мест</div>
+            <div class="guest-ring-legend">
+              <span class="guest-legend"
+                ><i style="background: var(--accent)"></i>Посещено</span
+              >
+              <span class="guest-legend"
+                ><i style="background: #34c759"></i>Избранное</span
+              >
+              <span class="guest-legend"
+                ><i style="background: #ff375f"></i>Ачивки</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <div class="guest-stats">
+          <div class="guest-stat" style="--sc: #ff9500">
+            <span class="ic">🏚</span>
+            <div class="val" id="guestStatVisits">0</div>
+            <div class="lbl">Посещено</div>
+          </div>
+          <div class="guest-stat" style="--sc: #ffd700">
+            <span class="ic">💎</span>
+            <div class="val" id="guestStatRelics">0</div>
+            <div class="lbl">Реликты</div>
+          </div>
+          <div class="guest-stat" style="--sc: #ffcc00">
+            <span class="ic">⭐</span>
+            <div class="val" id="guestStatFav">0</div>
+            <div class="lbl">В избранном</div>
+          </div>
+          <div class="guest-stat" style="--sc: #bf5af2">
+            <span class="ic">🏆</span>
+            <div class="val" id="guestStatAch">0</div>
+            <div class="lbl">Ачивок</div>
+          </div>
+        </div>
+
+        <div class="guest-progress">
+          <div class="guest-progress-title">Прогресс ранга</div>
+          <div class="guest-progress-row">
+            <span>До <strong id="guestNextRankName">—</strong></span>
+            <span id="guestRankPct">0%</span>
+          </div>
+          <div class="guest-progress-bar">
+            <div
+              class="guest-progress-fill"
+              id="guestRankFill"
+              style="width: 0%"
+            ></div>
+          </div>
+        </div>
+
+        <button class="guest-cta" onclick="openAppFromGuest()">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+            />
+          </svg>
+          Открыть UrbaxA5000
+        </button>
+
+        <div class="guest-footer">© A5000 Labs · UrbaxA5000</div>
+      </div>
+    </div>
+
     <!-- ═══ КАРТОЧКА ОБЪЕКТА ═══ -->
     <div id="detailScreen" class="screen">
       <div id="detailContent"></div>
@@ -3841,6 +5886,76 @@
       </div>
     </div>
 
+    <!-- ═══ ОВЕРЛЕЙ: КРУТИМ КУБИК ═══ -->
+    <div class="roulette-spin-overlay" id="rouletteSpinOverlay">
+      <div class="roulette-cube-wrap">
+        <div class="roulette-cube">
+          <div class="roulette-cube-face f1">🏭</div>
+          <div class="roulette-cube-face f2">🏥</div>
+          <div class="roulette-cube-face f3">🏛</div>
+          <div class="roulette-cube-face f4">🕳</div>
+          <div class="roulette-cube-face f5">🏗</div>
+          <div class="roulette-cube-face f6">🏚</div>
+        </div>
+      </div>
+      <div class="roulette-spin-title">Бросаем кости судьбы</div>
+      <div class="roulette-spin-sub" id="rouletteSpinSub">Ищем заброшку…</div>
+    </div>
+
+    <!-- ═══ МОДАЛКА: РУЛЕТКА ═══ -->
+    <div class="modal-overlay" id="rouletteModal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">🎲 Рулетка заброшек</div>
+        <div class="modal-sub" id="rouletteOriginSub">
+          Выбери радиус — бросим кубик и откроем случайное место.
+        </div>
+        <div class="roulette-radius-grid" id="rouletteRadiusGrid"></div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="closeRoulette()">
+            Отмена
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ МОДАЛКА: QR-КОД ПРОФИЛЯ ═══ -->
+    <div class="modal-overlay" id="qrModal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">📱 Мой QR</div>
+        <div class="modal-sub">
+          Друг сканирует — попадает в UrbaxA5000 и видит твой позывной.
+        </div>
+        <div class="qr-wrap">
+          <canvas id="qrCanvas" width="260" height="260"></canvas>
+          <div class="qr-loading" id="qrLoading">Генерирую…</div>
+        </div>
+        <div class="qr-nick" id="qrNick">—</div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="shareQR()">
+            Поделиться
+          </button>
+          <button class="modal-btn primary" onclick="closeQR()">Готово</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ МОДАЛКА: ИСТОРИЯ РЕЛИКТОВ ═══ -->
+    <div class="modal-overlay" id="relicHistoryModal">
+      <div class="modal-sheet">
+        <div class="modal-handle"></div>
+        <div class="modal-title">💎 История реликтов</div>
+        <div class="modal-sub" id="relicHistorySub">Последние начисления</div>
+        <div id="relicHistoryList"></div>
+        <div class="modal-actions">
+          <button class="modal-btn secondary" onclick="closeRelicHistory()">
+            Закрыть
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ OVERLAY АЧИВКИ ═══ -->
     <div
       class="ach-unlock-overlay"
@@ -3852,6 +5967,9 @@
       <div class="ach-unlock-name" id="achUnlockName">—</div>
       <div class="ach-unlock-desc" id="achUnlockDesc">—</div>
     </div>
+
+    <!-- ═══ ПАСХАЛКА ═══ -->
+    <div class="easter-hint" id="easterHint">A5000 доволен 🎉</div>
 
     <!-- ═══ PUSH БАННЕР ═══ -->
     <div class="push-banner" id="pushBanner" onclick="hidePushBanner()">
@@ -3866,6 +5984,792 @@
       /* ═══════════════════════════════════════════════════════════
          URBaxA5000 · A5000 Labs · Reloaded
          ═══════════════════════════════════════════════════════════ */
+
+      /* ═══ НОЧНАЯ ТЕМА ═══ */
+      function __nightTick() {
+        const manual = localStorage.getItem("urbex_night_manual");
+        let isNight;
+        if (manual === "on") isNight = true;
+        else if (manual === "off") isNight = false;
+        else {
+          const h = new Date().getHours();
+          isNight = h >= 22 || h < 6;
+        }
+        document.documentElement.classList.toggle("night", isNight);
+        const meta = document.getElementById("themeColorMeta");
+        if (meta) meta.setAttribute("content", isNight ? "#0a0a0c" : "#000000");
+        const tgl = document.getElementById("tgNight");
+        if (tgl) tgl.classList.toggle("on", isNight);
+        const lbl = document.getElementById("nightLabel");
+        if (lbl)
+          lbl.textContent = isNight
+            ? "🌙 Ночной режим: вкл"
+            : "☀️ Ночной режим";
+      }
+      (function applyNightTheme() {
+        __nightTick();
+        setInterval(__nightTick, 5 * 60 * 1000);
+      })();
+
+      function toggleNightTheme(el) {
+        const isNight = document.documentElement.classList.contains("night");
+        localStorage.setItem("urbex_night_manual", isNight ? "off" : "on");
+        __nightTick();
+        if (navigator.vibrate) navigator.vibrate(8);
+      }
+
+      /* ═══ РЕЛИКТЫ (валюта) ═══ */
+      const RELIC_RARITY_BONUS = {
+        common: 20,
+        rare: 50,
+        epic: 100,
+        legendary: 250,
+        secret: 200,
+      };
+      const RELIC_STREAK_CAP = 50;
+
+      function getRelics() {
+        return parseInt(localStorage.getItem("urbex_relics") || "0", 10) || 0;
+      }
+      function getRelicsLog() {
+        try {
+          return JSON.parse(localStorage.getItem("urbex_relics_log") || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+      function getRelicsDone() {
+        try {
+          return JSON.parse(localStorage.getItem("urbex_relics_done") || "[]");
+        } catch (e) {
+          return [];
+        }
+      }
+      function relicCanReward(key) {
+        return !getRelicsDone().includes(key);
+      }
+      function relicMarkDone(key) {
+        const done = getRelicsDone();
+        if (!done.includes(key)) {
+          done.push(key);
+          localStorage.setItem("urbex_relics_done", JSON.stringify(done));
+        }
+      }
+      function addRelics(delta, reason, placeIndex, key) {
+        if (!delta || delta <= 0) return;
+        const balance = getRelics() + delta;
+        localStorage.setItem("urbex_relics", String(balance));
+        const log = getRelicsLog();
+        log.push({
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          key: key || null,
+          delta,
+          reason,
+          ts: Date.now(),
+          placeIndex: typeof placeIndex === "number" ? placeIndex : null,
+        });
+        if (log.length > 500) log.splice(0, log.length - 500);
+        localStorage.setItem("urbex_relics_log", JSON.stringify(log));
+        updateRelicsUI();
+        showRelicPop(delta);
+      }
+      function tryReward(key, delta, reason, placeIndex) {
+        if (!relicCanReward(key)) return false;
+        relicMarkDone(key);
+        addRelics(delta, reason, placeIndex, key);
+        return true;
+      }
+      function undoReward(key) {
+        if (!key) return false;
+        const done = getRelicsDone();
+        const idxDone = done.indexOf(key);
+        if (idxDone === -1) return false;
+        done.splice(idxDone, 1);
+        localStorage.setItem("urbex_relics_done", JSON.stringify(done));
+        const log = getRelicsLog();
+        for (let i = log.length - 1; i >= 0; i--) {
+          if (log[i].key === key) {
+            const delta = log[i].delta;
+            log.splice(i, 1);
+            localStorage.setItem("urbex_relics_log", JSON.stringify(log));
+            const balance = Math.max(0, getRelics() - delta);
+            localStorage.setItem("urbex_relics", String(balance));
+            updateRelicsUI();
+            showRelicPop(-delta);
+            return true;
+          }
+        }
+        return false;
+      }
+      function updateRelicsUI() {
+        const el = document.getElementById("relicCount");
+        const prev = el ? parseInt(el.textContent.replace(/\s/g, ""), 10) : 0;
+        const now = getRelics();
+        if (el) el.textContent = now.toLocaleString("ru-RU");
+        if (el && now !== prev) {
+          el.classList.remove("bump");
+          void el.offsetWidth;
+          el.classList.add("bump");
+        }
+        const hint = document.getElementById("relicHint");
+        if (hint) {
+          const total = getRelicsLog().length;
+          hint.textContent =
+            total === 0
+              ? "Исследуй — копи сокровища"
+              : `${total} ${plural(total, "начисление", "начисления", "начислений")}`;
+        }
+        renderRelicAnalytics();
+      }
+
+      /* ═══ РЕЛИКТЫ: аналитика ═══ */
+      const RELIC_SOURCES = {
+        visit: { icon: "🏚", label: "Посещения", color: "#ff9500" },
+        visit_repeat: { icon: "🔄", label: "Повторные", color: "#ffb340" },
+        streak: { icon: "🔥", label: "Серии", color: "#ff6b6b" },
+        rating: { icon: "⭐", label: "Оценки", color: "#ffcc00" },
+        note: { icon: "📝", label: "Заметки", color: "#bf5af2" },
+        plan: { icon: "📅", label: "Планы", color: "#5ea6ff" },
+        ach: { icon: "🏆", label: "Ачивки", color: "#ffd700" },
+        other: { icon: "❓", label: "Прочее", color: "#8e8e93" },
+      };
+
+      function relicSourceOf(key) {
+        if (!key) return "other";
+        if (key.startsWith("visit_repeat_")) return "visit_repeat";
+        if (key.startsWith("visit_")) return "visit";
+        if (key.startsWith("streak_")) return "streak";
+        if (key.startsWith("rating_")) return "rating";
+        if (key.startsWith("note_")) return "note";
+        if (key.startsWith("plan_")) return "plan";
+        if (key.startsWith("ach_")) return "ach";
+        return "other";
+      }
+
+      function getRelicAnalytics() {
+        const log = getRelicsLog();
+        const today = new Date().toISOString().slice(0, 10);
+        const bySource = {};
+        const byDay = {};
+        let totalEarned = 0,
+          totalSpent = 0,
+          todayEarned = 0;
+        log.forEach((e) => {
+          const dayKey = new Date(e.ts).toISOString().slice(0, 10);
+          if (e.delta > 0) {
+            totalEarned += e.delta;
+            if (dayKey === today) todayEarned += e.delta;
+            byDay[dayKey] = (byDay[dayKey] || 0) + e.delta;
+            const src = relicSourceOf(e.key);
+            bySource[src] = (bySource[src] || 0) + e.delta;
+          } else if (e.delta < 0) {
+            totalSpent += -e.delta;
+          }
+        });
+        let bestDay = 0;
+        Object.values(byDay).forEach((v) => {
+          if (v > bestDay) bestDay = v;
+        });
+        return {
+          totalEarned,
+          totalSpent,
+          todayEarned,
+          bestDay,
+          bySource,
+          byDay,
+        };
+      }
+
+      function renderRelicAnalytics() {
+        const a = getRelicAnalytics();
+
+        /* Три карточки-статистики */
+        const elTotal = document.getElementById("relicTotalEarned");
+        const elToday = document.getElementById("relicToday");
+        const elBest = document.getElementById("relicBestDay");
+        if (elTotal)
+          elTotal.textContent = a.totalEarned.toLocaleString("ru-RU");
+        if (elToday)
+          elToday.textContent = a.todayEarned.toLocaleString("ru-RU");
+        if (elBest) elBest.textContent = a.bestDay.toLocaleString("ru-RU");
+
+        /* График за 7 дней */
+        const chart = document.getElementById("relicChart");
+        if (chart) {
+          const dayLabels = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+          let max = 1;
+          const days = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date();
+            d.setDate(d.getDate() - i);
+            const k = d.toISOString().slice(0, 10);
+            const v = a.byDay[k] || 0;
+            if (v > max) max = v;
+            days.push({ label: dayLabels[d.getDay()], value: v });
+          }
+          chart.innerHTML = days
+            .map((d) => {
+              const h = Math.max(3, (d.value / max) * 62);
+              const cls =
+                d.value === 0 ? "relic-chart-bar zero" : "relic-chart-bar";
+              const valTag =
+                d.value > 0
+                  ? `<div class="relic-chart-bar-val">${d.value}</div>`
+                  : "";
+              return `<div class="${cls}" style="height:${h}px">${valTag}<div class="relic-chart-bar-lbl">${d.label}</div></div>`;
+            })
+            .join("");
+        }
+
+        /* Разбивка по источникам */
+        const bd = document.getElementById("relicBreakdown");
+        if (bd) {
+          const entries = Object.entries(a.bySource)
+            .filter(([, v]) => v > 0)
+            .sort((x, y) => y[1] - x[1]);
+          if (!entries.length) {
+            bd.innerHTML =
+              '<div class="relic-empty">Пока пусто.<br>Исследуй места, ставь оценки, пиши заметки — и здесь появятся источники заработка.</div>';
+          } else {
+            const maxVal = entries[0][1];
+            bd.innerHTML = entries
+              .map(([src, val]) => {
+                const meta = RELIC_SOURCES[src] || RELIC_SOURCES.other;
+                const w = (val / maxVal) * 100;
+                return `<div class="relic-bd-row">
+                  <div class="relic-bd-left">
+                    <span class="relic-bd-dot" style="background:${meta.color};color:${meta.color}"></span>
+                    <span class="relic-bd-name">${meta.icon} ${meta.label}</span>
+                  </div>
+                  <div class="relic-bd-bar-wrap">
+                    <div class="relic-bd-bar" style="width:${w}%;background:${meta.color}"></div>
+                  </div>
+                  <span class="relic-bd-val">${val}</span>
+                </div>`;
+              })
+              .join("");
+          }
+        }
+
+        /* Кнопка-история */
+        const btnTxt = document.getElementById("relicHistoryBtnText");
+        if (btnTxt) {
+          const cnt = getRelicsLog().length;
+          btnTxt.textContent =
+            cnt === 0
+              ? "История пуста"
+              : `История · ${cnt} ${plural(cnt, "запись", "записи", "записей")}`;
+        }
+      }
+
+      function openRelicHistory() {
+        const log = getRelicsLog().slice().reverse();
+        const list = document.getElementById("relicHistoryList");
+        const sub = document.getElementById("relicHistorySub");
+        const a = getRelicAnalytics();
+        if (sub) {
+          sub.textContent = `${log.length} ${plural(log.length, "запись", "записи", "записей")} · +${a.totalEarned} / −${a.totalSpent}`;
+        }
+        if (list) {
+          if (!log.length) {
+            list.innerHTML =
+              '<div class="relic-empty">Ещё нет ни одного начисления.<br>Отметь место, поставь оценку — начнём.</div>';
+          } else {
+            const now = Date.now();
+            list.innerHTML = log
+              .slice(0, 100)
+              .map((e) => {
+                const src = relicSourceOf(e.key);
+                const meta = RELIC_SOURCES[src] || RELIC_SOURCES.other;
+                const d = new Date(e.ts);
+                const diff = now - e.ts;
+                let timeStr;
+                if (diff < 60000) timeStr = "только что";
+                else if (diff < 3600000)
+                  timeStr = Math.floor(diff / 60000) + " мин назад";
+                else if (diff < 86400000)
+                  timeStr = Math.floor(diff / 3600000) + " ч назад";
+                else
+                  timeStr =
+                    d.toLocaleDateString("ru-RU", {
+                      day: "numeric",
+                      month: "short",
+                    }) +
+                    ", " +
+                    d.toLocaleTimeString("ru-RU", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    });
+                const sign = e.delta > 0 ? "+" : "";
+                const cls = e.delta > 0 ? "plus" : "minus";
+                return `<div class="relic-h-item">
+                  <div class="relic-h-icon">${meta.icon}</div>
+                  <div class="relic-h-body">
+                    <div class="relic-h-reason">${e.reason}</div>
+                    <div class="relic-h-time">${timeStr}</div>
+                  </div>
+                  <div class="relic-h-delta ${cls}">${sign}${e.delta}💎</div>
+                </div>`;
+              })
+              .join("");
+          }
+        }
+        const ov = document.getElementById("relicHistoryModal");
+        if (ov) ov.classList.add("show");
+      }
+
+      function closeRelicHistory() {
+        const ov = document.getElementById("relicHistoryModal");
+        if (ov) ov.classList.remove("show");
+      }
+      function showRelicPop(delta) {
+        let pop = document.getElementById("relicPop");
+        if (!pop) {
+          pop = document.createElement("div");
+          pop.id = "relicPop";
+          pop.className = "relic-pop";
+          document.body.appendChild(pop);
+        }
+        if (delta > 0) {
+          pop.textContent = "💎 +" + delta;
+          pop.style.color = "#ffd700";
+          pop.style.borderColor = "rgba(255, 215, 0, 0.4)";
+        } else {
+          pop.textContent = "💎 " + delta;
+          pop.style.color = "#a855f7";
+          pop.style.borderColor = "rgba(168, 85, 247, 0.45)";
+        }
+        pop.classList.add("show");
+        clearTimeout(pop._t);
+        pop._t = setTimeout(() => pop.classList.remove("show"), 1800);
+        if (navigator.vibrate) navigator.vibrate(6);
+
+        /* Премиум: пульс карточки реликтов */
+        const card = document.getElementById("relicCard");
+        if (card && delta > 0) {
+          card.classList.remove("gain");
+          void card.offsetWidth;
+          card.classList.add("gain");
+        }
+
+        /* Премиум: spark-частицы при крупном заработке */
+        if (delta >= 10) {
+          const isNight = document.documentElement.classList.contains("night");
+          const color = isNight ? "#c084fc" : "#ffd700";
+          const glow = isNight ? "#a855f7" : "#ffd700";
+          const count = Math.min(14, 4 + Math.floor(delta / 5));
+          for (let i = 0; i < count; i++) {
+            const s = document.createElement("div");
+            s.className = "relic-spark";
+            s.style.background = color;
+            s.style.boxShadow = `0 0 12px ${glow}, 0 0 24px ${glow}88`;
+            const startX = window.innerWidth - 40;
+            const startY = 80;
+            s.style.left = startX + "px";
+            s.style.top = startY + "px";
+            document.body.appendChild(s);
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 80 + Math.random() * 120;
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist + 40;
+            requestAnimationFrame(() => {
+              s.style.transition =
+                "transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.9s ease-out";
+              s.style.transform = `translate(${tx}px, ${ty}px) scale(0.3)`;
+              s.style.opacity = "0";
+            });
+            setTimeout(() => s.remove(), 1000);
+          }
+        }
+      }
+      /* Звук перекатывания кубика — 3 «стука» затухающих */
+      function playDiceSound() {
+        try {
+          if (!audioCtx)
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+          const ctx = audioCtx;
+          /* Три удара — как будто кубик скачет по столу */
+          const hits = [
+            { t: 0, freq: 220, dur: 0.06 },
+            { t: 0.18, freq: 180, dur: 0.07 },
+            { t: 0.42, freq: 140, dur: 0.09 },
+            { t: 0.7, freq: 110, dur: 0.12 },
+          ];
+          hits.forEach((h) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "square";
+            osc.frequency.value = h.freq;
+            const t = ctx.currentTime + h.t;
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.08, t + 0.005);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + h.dur);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + h.dur + 0.02);
+          });
+        } catch (e) {}
+      }
+
+      function calcStreak() {
+        const dates = [
+          ...new Set(visitHistory.map((v) => new Date(v.date).toDateString())),
+        ];
+        const sorted = dates.map((d) => new Date(d)).sort((a, b) => b - a);
+        let streak = 0;
+        if (!sorted.length) return 0;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const check = new Date(sorted[0]);
+        check.setHours(0, 0, 0, 0);
+        if (Math.round((today - check) / 86400000) <= 1) {
+          streak = 1;
+          for (let i = 1; i < sorted.length; i++) {
+            const prev = new Date(sorted[i - 1]);
+            prev.setHours(0, 0, 0, 0);
+            const cur = new Date(sorted[i]);
+            cur.setHours(0, 0, 0, 0);
+            if (Math.round((prev - cur) / 86400000) === 1) streak++;
+            else break;
+          }
+        }
+        return streak;
+      }
+
+      /* ═══ РАНГИ ═══ */
+      const RANKS = [
+        { id: "novice", min: 0, icon: "🌱", name: "Новичок", color: "#8e8e93" },
+        {
+          id: "explorer",
+          min: 5,
+          icon: "🧭",
+          name: "Исследователь",
+          color: "#34c759",
+        },
+        { id: "digger", min: 10, icon: "🕳", name: "Диггер", color: "#5ac8fa" },
+        {
+          id: "veteran",
+          min: 18,
+          icon: "🎖",
+          name: "Ветеран",
+          color: "#ff9500",
+        },
+        { id: "master", min: 25, icon: "⚔️", name: "Мастер", color: "#bf5af2" },
+        {
+          id: "legend",
+          min: 30,
+          icon: "👑",
+          name: "Легенда A5000",
+          color: "#ffd700",
+        },
+      ];
+
+      function getRank(count) {
+        let current = RANKS[0];
+        let next = null;
+        for (let i = 0; i < RANKS.length; i++) {
+          if (count >= RANKS[i].min) current = RANKS[i];
+          else {
+            next = RANKS[i];
+            break;
+          }
+        }
+        return { current, next };
+      }
+
+      function renderRank() {
+        const count = visited.length;
+        const { current, next } = getRank(count);
+
+        const medal = document.getElementById("rankMedal");
+        const name = document.getElementById("rankName");
+        const progressEl = document.getElementById("rankProgress");
+        const percentEl = document.getElementById("rankPercent");
+        const barEl = document.getElementById("rankBar");
+        const nextEl = document.getElementById("rankNext");
+
+        if (medal) medal.textContent = current.icon;
+        if (name) {
+          name.textContent = current.name;
+          name.style.background = `linear-gradient(180deg, #fff 0%, ${current.color} 130%)`;
+          name.style.webkitBackgroundClip = "text";
+          name.style.backgroundClip = "text";
+          name.style.webkitTextFillColor = "transparent";
+        }
+
+        if (!next) {
+          /* Максимальный ранг */
+          if (progressEl) progressEl.textContent = `${count} мест`;
+          if (percentEl) percentEl.textContent = "MAX";
+          if (barEl) barEl.style.width = "100%";
+          if (nextEl)
+            nextEl.innerHTML =
+              "🏆 <strong>Максимальный ранг достигнут</strong>";
+          return;
+        }
+
+        const from = current.min;
+        const to = next.min;
+        const span = to - from;
+        const inRank = count - from;
+        const percent = Math.min(100, Math.round((inRank / span) * 100));
+
+        if (progressEl) progressEl.textContent = `${inRank} / ${span}`;
+        if (percentEl) percentEl.textContent = percent + "%";
+        if (barEl) barEl.style.width = percent + "%";
+        const remain = to - count;
+        if (nextEl)
+          nextEl.innerHTML = `До <strong>${next.name}</strong>: ${remain} ${plural(remain, "место", "места", "мест")}`;
+      }
+
+      /* ═══ РУЛЕТКА ЗАБРОШЕК ═══ */
+      const ROULETTE_RADII = [
+        { id: "r5", km: 5, icon: "🚶", name: "5 км", sub: "пешком" },
+        { id: "r10", km: 10, icon: "🚲", name: "10 км", sub: "велосипед" },
+        { id: "r25", km: 25, icon: "🚗", name: "25 км", sub: "полдня" },
+        { id: "r50", km: 50, icon: "🛣", name: "50 км", sub: "поездка" },
+        { id: "r100", km: 100, icon: "⛰", name: "100 км", sub: "выходной" },
+        {
+          id: "crimea",
+          km: 300,
+          icon: "🏝",
+          name: "Весь Крым",
+          sub: "полуостров",
+        },
+        {
+          id: "all",
+          km: Infinity,
+          icon: "🌍",
+          name: "Планета",
+          sub: "без границ",
+          wide: true,
+        },
+      ];
+
+      let rouletteBusy = false;
+      let rouletteOpening = false;
+
+      function getRouletteOriginAsync() {
+        /* 1) Уже есть метка пользователя — берём её */
+        if (userMarker) {
+          const ll = userMarker.getLatLng();
+          return Promise.resolve({ lat: ll.lat, lon: ll.lng, hasUser: true });
+        }
+        /* 2) Пробуем геолокацию с таймаутом */
+        if (navigator.geolocation) {
+          return new Promise((resolve) => {
+            let done = false;
+            const fallback = () => {
+              if (done) return;
+              done = true;
+              if (map) {
+                const c = map.getCenter();
+                resolve({ lat: c.lat, lon: c.lng, hasUser: false });
+              } else {
+                resolve({ lat: 44.952, lon: 34.1, hasUser: false });
+              }
+            };
+            const timer = setTimeout(fallback, 3500);
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                if (done) return;
+                done = true;
+                clearTimeout(timer);
+                resolve({
+                  lat: pos.coords.latitude,
+                  lon: pos.coords.longitude,
+                  hasUser: true,
+                });
+              },
+              () => {
+                clearTimeout(timer);
+                fallback();
+              },
+              { enableHighAccuracy: false, timeout: 3000, maximumAge: 60000 },
+            );
+          });
+        }
+        /* 3) Фолбэк */
+        if (map) {
+          const c = map.getCenter();
+          return Promise.resolve({ lat: c.lat, lon: c.lng, hasUser: false });
+        }
+        return Promise.resolve({ lat: 44.952, lon: 34.1, hasUser: false });
+      }
+
+      async function openRoulette() {
+        if (rouletteBusy || rouletteOpening) return;
+        rouletteOpening = true;
+
+        /* Модалку открываем сразу — показываем статус */
+        const ov0 = document.getElementById("rouletteModal");
+        if (ov0) ov0.classList.add("show");
+        if (navigator.vibrate) navigator.vibrate(8);
+
+        const gridLoading = document.getElementById("rouletteRadiusGrid");
+        if (gridLoading) {
+          gridLoading.innerHTML =
+            '<div style="grid-column:1/-1;text-align:center;padding:24px 12px;color:var(--text-3);font-size:13px;font-weight:700">📍 Определяем местоположение…</div>';
+        }
+
+        const origin = await getRouletteOriginAsync();
+        window.__rouletteOrigin = origin;
+
+        /* Индикатор источника */
+        const subEl = document.getElementById("rouletteOriginSub");
+        if (subEl) {
+          if (origin.hasUser) {
+            subEl.textContent =
+              "📍 Ищем рядом с твоим местоположением — километры честные.";
+          } else {
+            subEl.textContent =
+              "🗺 Не удалось получить геолокацию — ищем от центра карты. Разреши доступ к местоположению, чтобы искать рядом с собой.";
+          }
+        }
+
+        const grid = document.getElementById("rouletteRadiusGrid");
+        if (grid) {
+          grid.innerHTML = ROULETTE_RADII.map((r) => {
+            let count = places.length;
+            if (r.km !== Infinity) {
+              count = places.filter(
+                (p) => haversine(origin.lat, origin.lon, p.lat, p.lon) <= r.km,
+              ).length;
+            }
+            const wide = r.wide ? " wide" : "";
+            const dis = count === 0 ? " disabled" : "";
+            const subText = r.wide
+              ? `${count} ${plural(count, "место", "места", "мест")}`
+              : `${r.sub} · ${count}`;
+            return `<button class="roulette-radius-btn${wide}${dis}" onclick="spinRoulette('${r.id}')"${count === 0 ? " disabled" : ""}>
+              <span class="r-icon">${r.icon}</span>
+              <span class="r-name">${r.name}</span>
+              <span class="r-sub">${subText}</span>
+            </button>`;
+          }).join("");
+        }
+        rouletteOpening = false;
+      }
+
+      function closeRoulette() {
+        const ov = document.getElementById("rouletteModal");
+        if (ov) ov.classList.remove("show");
+        rouletteOpening = false;
+      }
+
+      function getRouletteOrigin() {
+        /* База для радиуса: местоположение пользователя, если есть, иначе центр карты */
+        if (userMarker) {
+          const ll = userMarker.getLatLng();
+          return { lat: ll.lat, lon: ll.lng, hasUser: true };
+        }
+        if (map) {
+          const c = map.getCenter();
+          return { lat: c.lat, lon: c.lng, hasUser: false };
+        }
+        return { lat: 44.952, lon: 34.1, hasUser: false };
+      }
+
+      function spinRoulette(radiusId) {
+        if (rouletteBusy) return;
+        const radius = ROULETTE_RADII.find((r) => r.id === radiusId);
+        if (!radius) return;
+
+        /* Закрываем модалку — но rouletteBusy НЕ трогаем из closeRoulette */
+        const ov = document.getElementById("rouletteModal");
+        if (ov) ov.classList.remove("show");
+        rouletteOpening = false;
+        rouletteBusy = true;
+
+        const origin = window.__rouletteOrigin || getRouletteOrigin();
+
+        /* Отбираем пул объектов по радиусу */
+        let pool = places.map((p, i) => ({ i, p }));
+        if (radius.km !== Infinity) {
+          pool = pool.filter(
+            ({ p }) =>
+              haversine(origin.lat, origin.lon, p.lat, p.lon) <= radius.km,
+          );
+        }
+        if (!pool.length) {
+          rouletteBusy = false;
+          toast(`В радиусе ${radius.name} нет заброшек`);
+          return;
+        }
+
+        /* Крутим кубик */
+        const overlay = document.getElementById("rouletteSpinOverlay");
+        const sub = document.getElementById("rouletteSpinSub");
+        if (sub)
+          sub.textContent = `Радиус: ${radius.name} · ${pool.length} ${plural(pool.length, "место", "места", "мест")}`;
+        if (overlay) overlay.classList.add("show");
+        if (navigator.vibrate) navigator.vibrate([20, 40, 20, 40, 20]);
+        playDiceSound();
+
+        /* Через 1.3с — выбираем случайное, летим и показываем попап маркера */
+        setTimeout(() => {
+          const pick = pool[Math.floor(Math.random() * pool.length)];
+          const place = pick.p;
+
+          if (map) {
+            map.flyTo([place.lat, place.lon], 15, {
+              animate: true,
+              duration: 1.1,
+            });
+          }
+
+          if (overlay) overlay.classList.remove("show");
+          if (navigator.vibrate) navigator.vibrate([10, 30, 60]);
+
+          /* После приземления: чуть приподнимаем маркер в нижнюю треть —
+             чтобы попап над ним попал в центр экрана */
+          setTimeout(() => {
+            if (map) {
+              map.panBy([0, -110], { animate: true, duration: 0.4 });
+            }
+            setTimeout(() => {
+              showMarkerPopup(pick.i);
+              rouletteBusy = false;
+            }, 380);
+          }, 1100);
+        }, 1300);
+      }
+
+      /* Открыть попап маркера по индексу — создаёт маркер при необходимости */
+      function showMarkerPopup(index) {
+        const m = markers[index];
+        if (!m || !map) return;
+        if (!m.marker) {
+          m.marker = L.marker([m.data.lat, m.data.lon], {
+            icon: getIcon(
+              m.data.category,
+              favorites.includes(index),
+              visited.includes(index),
+            ),
+            keyboard: false,
+            interactive: true,
+          });
+          m.marker.bindPopup(
+            `<div class="popup-card">
+               <div class="popup-cat">${m.data.category}</div>
+               <div class="popup-title">${m.data.name}</div>
+               <button class="popup-btn" onclick="openDetail(${m.index})">Открыть →</button>
+             </div>`,
+            {
+              closeButton: true,
+              maxWidth: 240,
+              offset: [0, -34],
+              autoPan: false,
+            },
+          );
+        }
+        if (!m.visible) {
+          m.marker.addTo(map);
+          m.visible = true;
+        }
+        m.marker.openPopup();
+      }
 
       /* ═══ КАТЕГОРИИ ═══ */
       const CATEGORIES = {
@@ -4435,6 +7339,117 @@
           status: "Снесён",
           image: "",
         },
+        /* ═══ КРЫМ · 10 НОВЫХ ОБЪЕКТОВ ═══ */
+        {
+          name: "Форт «Северная батарея»",
+          lat: 44.616,
+          lon: 33.525,
+          category: "Военные",
+          desc: "Руины береговой батареи в Севастополе. Сохранились казематы и орудийные дворики.",
+          danger: "Средняя",
+          access: "Свободный",
+          status: "Руины",
+          image: "",
+        },
+        {
+          name: "Херсонес Таврический (руины)",
+          lat: 44.611,
+          lon: 33.489,
+          category: "Исторические",
+          desc: "Древнегреческий город. Руины базилик, жилых кварталов и оборонительных стен.",
+          danger: "Низкая",
+          access: "Музей",
+          status: "Музей",
+          image: "",
+        },
+        {
+          name: "Заброшенный санаторий «Ясная Поляна»",
+          lat: 44.495,
+          lon: 34.168,
+          category: "Медицинские",
+          desc: "Пустующие корпуса бывшего санатория в Ялте. Интерьеры частично сохранились.",
+          danger: "Средняя",
+          access: "Сложно",
+          status: "Заброшен",
+          image: "",
+        },
+        {
+          name: "Вилла «Мечта» (руины)",
+          lat: 44.493,
+          lon: 34.162,
+          category: "Исторические",
+          desc: "Остатки дореволюционной виллы на Южном берегу. Мраморные лестницы и колонны.",
+          danger: "Средняя",
+          access: "Средне",
+          status: "Руины",
+          image: "",
+        },
+        {
+          name: "Заброшенный пансионат «Прибой»",
+          lat: 44.391,
+          lon: 33.801,
+          category: "Жилые",
+          desc: "Корпуса пансионата у моря. Доступ через территорию, охраны нет.",
+          danger: "Средняя",
+          access: "Свободный",
+          status: "Заброшен",
+          image: "",
+        },
+        {
+          name: "Феодосийская крепость (руины)",
+          lat: 45.031,
+          lon: 35.382,
+          category: "Исторические",
+          desc: "Генуэзская цитадель XIV века. Сохранились башни и фрагменты стен.",
+          danger: "Низкая",
+          access: "Ограничен",
+          status: "Руины",
+          image: "",
+        },
+        {
+          name: "Заброшенный винзавод «Массандра»",
+          lat: 44.517,
+          lon: 34.186,
+          category: "Промышленные",
+          desc: "Старые цеха и подвалы винзавода. Часть построек не используется.",
+          danger: "Средняя",
+          access: "Сложно",
+          status: "Заброшен",
+          image: "",
+        },
+        {
+          name: "Судакская крепость (нижние ярусы)",
+          lat: 44.841,
+          lon: 34.976,
+          category: "Исторические",
+          desc: "Генуэзская крепость. Нижние ярусы местами заброшены и заросли.",
+          danger: "Средняя",
+          access: "Свободный",
+          status: "Руины",
+          image: "",
+        },
+        {
+          name: "Заброшенная усадьба в Никите",
+          lat: 44.515,
+          lon: 34.231,
+          category: "Исторические",
+          desc: "Руины усадебного дома XIX века. Парк одичал, постройки разрушаются.",
+          danger: "Средняя",
+          access: "Средне",
+          status: "Руины",
+          image: "",
+        },
+        {
+          name: "Старый маяк на мысе Ай-Тодор",
+          lat: 44.428,
+          lon: 34.123,
+          category: "Инфраструктура",
+          desc: "Заброшенное строение старого маяка. Требуется проверка на месте.",
+          danger: "Средняя",
+          access: "Сложно",
+          status: "Заброшен",
+          image: "",
+        },
       ];
 
       /* ═══ СОСТОЯНИЕ ═══ */
@@ -4469,6 +7484,7 @@
       let checklistState = {};
       let currentAchView = "carousel";
       let currentAchIndex = 0;
+      let currentDetailIndex = null;
 
       /* ═══ УТИЛИТЫ ═══ */
       function shade(hex, pct) {
@@ -4517,7 +7533,7 @@
       function initMap() {
         map = L.map("map", {
           zoomControl: false,
-          attributionControl: true,
+          attributionControl: false,
           preferCanvas: true,
           updateWhenIdle: false,
           updateWhenZooming: true,
@@ -4533,11 +7549,10 @@
         }).setView([44.952, 34.1], 12);
 
         tileScheme = L.tileLayer(
-          "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+          "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
           {
             maxZoom: 19,
             subdomains: "abcd",
-            attribution: "© OpenStreetMap · © CARTO",
             detectRetina: false,
             crossOrigin: true,
             updateWhenIdle: false,
@@ -4550,12 +7565,11 @@
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
           {
             maxZoom: 19,
-            attribution: "© Esri · Maxar",
             detectRetina: false,
             crossOrigin: true,
             updateWhenIdle: false,
             updateWhenZooming: true,
-            keepBuffer: 3,
+            keepBuffer: 1,
             className: "tiles-satellite",
           },
         );
@@ -4565,26 +7579,14 @@
         (savedLayer === "satellite" ? tileSatellite : tileScheme).addTo(map);
         updateLayerButtons();
 
+        /* Ленивая инициализация маркеров — создаём по требованию */
         places.forEach((place, index) => {
-          const marker = L.marker([place.lat, place.lon], {
-            icon: getIcon(place.category, false, false),
-            keyboard: false,
-            interactive: true,
+          markers.push({
+            marker: null,
+            data: place,
+            index,
+            visible: false,
           });
-          marker.bindPopup(
-            `<div class="popup-card">
-               <div class="popup-cat">${place.category}</div>
-               <div class="popup-title">${place.name}</div>
-               <button class="popup-btn" onclick="openDetail(${index})">Открыть →</button>
-             </div>`,
-            {
-              closeButton: true,
-              maxWidth: 240,
-              offset: [0, -34],
-              autoPan: false,
-            },
-          );
-          markers.push({ marker, data: place, index, visible: false });
         });
 
         map.on("move", queueCull);
@@ -4644,16 +7646,41 @@
           const inView = bounds.contains([m.data.lat, m.data.lon]);
           const should = catOk && searchOk && inView;
           if (should && !m.visible) {
-            m.marker.setIcon(
-              getIcon(
-                m.data.category,
-                favSet.has(m.index),
-                visSet.has(m.index),
-              ),
-            );
+            if (!m.marker) {
+              m.marker = L.marker([m.data.lat, m.data.lon], {
+                icon: getIcon(
+                  m.data.category,
+                  favSet.has(m.index),
+                  visSet.has(m.index),
+                ),
+                keyboard: false,
+                interactive: true,
+              });
+              m.marker.bindPopup(
+                `<div class="popup-card">
+                   <div class="popup-cat">${m.data.category}</div>
+                   <div class="popup-title">${m.data.name}</div>
+                   <button class="popup-btn" onclick="openDetail(${m.index})">Открыть →</button>
+                 </div>`,
+                {
+                  closeButton: true,
+                  maxWidth: 240,
+                  offset: [0, -34],
+                  autoPan: false,
+                },
+              );
+            } else {
+              m.marker.setIcon(
+                getIcon(
+                  m.data.category,
+                  favSet.has(m.index),
+                  visSet.has(m.index),
+                ),
+              );
+            }
             m.marker.addTo(map);
             m.visible = true;
-          } else if (!should && m.visible) {
+          } else if (!should && m.visible && m.marker) {
             map.removeLayer(m.marker);
             m.visible = false;
           }
@@ -4685,17 +7712,31 @@
 
       /* ═══ ЭКРАНЫ ═══ */
       function switchScreen(id) {
-        document
-          .querySelectorAll(".screen")
-          .forEach((s) => s.classList.remove("active"));
         const target = document.getElementById(id);
-        target.classList.add("active");
-        if (id === "detailScreen") target.classList.add("detail-active");
+        const wasActive = target.classList.contains("active");
+
+        /* Снимаем .active только с ДРУГИХ экранов — текущий не трогаем,
+           иначе анимация входа перезапустится и экран «слетит». */
+        document.querySelectorAll(".screen").forEach((s) => {
+          if (s.id !== id) {
+            s.classList.remove("active");
+            s.classList.remove("detail-active");
+          }
+        });
+
+        if (!wasActive) {
+          /* Свежий переход: форсируем перезапуск анимации входа */
+          target.classList.remove("active");
+          void target.offsetWidth;
+          target.classList.add("active");
+          if (id === "detailScreen") target.classList.add("detail-active");
+        }
+
         document.querySelectorAll(".nav-btn").forEach((b) => {
           b.classList.toggle("active", b.dataset.screen === id);
         });
         document.getElementById("mainNav").style.display =
-          id === "detailScreen" ? "none" : "flex";
+          id === "detailScreen" || id === "guestScreen" ? "none" : "flex";
 
         if (id === "listScreen")
           renderList(
@@ -4799,7 +7840,8 @@
       }
 
       function weatherCodeInfo(code) {
-        if (code === 0) return { icon: "☀️", desc: "Ясно", color: "#ffb340" };
+        if (code === 0)
+          return { icon: "☀️", desc: "Ясно", color: "var(--accent-light)" };
         if (code <= 3)
           return {
             icon: "⛅",
@@ -4879,12 +7921,14 @@
           plans.push(index);
           localStorage.setItem("urbex_plans", JSON.stringify(plans));
           updatePlanBadge();
+          tryReward("plan_" + index, 3, "План вылазки", index);
           openDetail(index);
           setTimeout(() => showPlanModal(index), 250);
         } else {
           plans.splice(pos, 1);
           localStorage.setItem("urbex_plans", JSON.stringify(plans));
           updatePlanBadge();
+          undoReward("plan_" + index);
           openDetail(index);
           toast("Убрано из планов");
         }
@@ -5238,6 +8282,14 @@
           rarity: "secret",
           check: (s) => false,
         },
+        {
+          id: "a5000_satisfied",
+          icon: "🎉",
+          name: "A5000 доволен",
+          desc: "Нашёл секрет в 6 тапов",
+          rarity: "secret",
+          check: (s) => false,
+        },
       ];
 
       function getAchStats() {
@@ -5303,9 +8355,12 @@
             "urbex_achievements",
             JSON.stringify(unlockedAch),
           );
-          newOnes.forEach((a, i) =>
-            setTimeout(() => showAchUnlock(a), i * 3400),
-          );
+          newOnes.forEach((a, i) => {
+            const bonus = RELIC_RARITY_BONUS[a.rarity] || 0;
+            if (bonus > 0)
+              tryReward("ach_" + a.id, bonus, "Ачивка: " + a.name, null);
+            setTimeout(() => showAchUnlock(a), 1000 + i * 3400);
+          });
           updateAchProgress();
         }
       }
@@ -5317,19 +8372,38 @@
           if (!audioCtx)
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           const ctx = audioCtx;
-          [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
+          /* Фанфары: 8 нот мажорного арпеджио + финальный аккорд */
+          const notes = [
+            523.25, 659.25, 783.99, 1046.5, 1318.5, 1567.98, 2093.0,
+          ];
+          notes.forEach((freq, i) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = i < 5 ? "triangle" : "sine";
+            osc.frequency.value = freq;
+            const t = ctx.currentTime + i * 0.08;
+            gain.gain.setValueAtTime(0, t);
+            gain.gain.linearRampToValueAtTime(0.14, t + 0.015);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t);
+            osc.stop(t + 0.6);
+          });
+          /* Финальный аккорд C-E-G (три ноты одновременно) */
+          [1046.5, 1318.5, 1567.98].forEach((freq) => {
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.type = "sine";
             osc.frequency.value = freq;
-            const t = ctx.currentTime + i * 0.09;
+            const t = ctx.currentTime + 0.7;
             gain.gain.setValueAtTime(0, t);
-            gain.gain.linearRampToValueAtTime(0.15, t + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+            gain.gain.linearRampToValueAtTime(0.12, t + 0.03);
+            gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
             osc.connect(gain);
             gain.connect(ctx.destination);
             osc.start(t);
-            osc.stop(t + 0.5);
+            osc.stop(t + 1.3);
           });
         } catch (e) {}
       }
@@ -5338,18 +8412,70 @@
       function showAchUnlock(a) {
         const ov = document.getElementById("achUnlockOverlay");
         if (!ov) return;
+        /* Сначала снимаем возможный остаточный show — чтобы анимация перезапустилась */
+        ov.classList.remove("show");
+        void ov.offsetWidth;
+
         document.getElementById("achUnlockIcon").textContent = a.icon;
         document.getElementById("achUnlockName").textContent = a.name;
         document.getElementById("achUnlockDesc").textContent = a.desc;
-        ov.classList.add("show");
-        playAchievementSound();
-        if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 100]);
-        setTimeout(() => hideAchUnlock(), 3200);
+
+        requestAnimationFrame(() => {
+          ov.classList.add("show");
+          playAchievementSound();
+          spawnAchConfetti();
+          if (navigator.vibrate) navigator.vibrate([30, 50, 30, 50, 100]);
+          clearTimeout(ov._hideT);
+          ov._hideT = setTimeout(() => hideAchUnlock(), 3600);
+        });
+      }
+
+      /* Конфетти-салют при открытии ачивки */
+      function spawnAchConfetti() {
+        const colors = [
+          "#ff9500",
+          "#ffb340",
+          "#ffd700",
+          "#a855f7",
+          "#ff375f",
+          "#34c759",
+          "#5ac8fa",
+        ];
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight * 0.36;
+        const count = 46;
+        for (let i = 0; i < count; i++) {
+          const p = document.createElement("div");
+          p.className = "ach-confetti";
+          p.style.left = cx + "px";
+          p.style.top = cy + "px";
+          p.style.background = colors[i % colors.length];
+          const size = 6 + Math.random() * 8;
+          p.style.width = size + "px";
+          p.style.height = size * (0.6 + Math.random() * 0.8) + "px";
+          p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+          document.body.appendChild(p);
+          const angle = Math.random() * Math.PI * 2;
+          const dist = 130 + Math.random() * 240;
+          const tx = Math.cos(angle) * dist;
+          const ty = Math.sin(angle) * dist - 60;
+          const rot = Math.random() * 900 - 450;
+          requestAnimationFrame(() => {
+            p.style.transition =
+              "transform 1.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.5s ease-out";
+            p.style.transform = `translate(${tx}px, ${ty + 240}px) rotate(${rot}deg) scale(0.3)`;
+            p.style.opacity = "0";
+          });
+          setTimeout(() => p.remove(), 1600);
+        }
       }
 
       function hideAchUnlock() {
         const ov = document.getElementById("achUnlockOverlay");
-        if (ov) ov.classList.remove("show");
+        if (ov) {
+          ov.classList.remove("show");
+          clearTimeout(ov._hideT);
+        }
       }
 
       function switchAchView(view) {
@@ -5511,29 +8637,7 @@
         }
         document.getElementById("anKm").textContent = Math.round(km);
 
-        const dates = [
-          ...new Set(visitHistory.map((v) => new Date(v.date).toDateString())),
-        ];
-        const sorted = dates.map((d) => new Date(d)).sort((a, b) => b - a);
-        let streak = 0;
-        if (sorted.length) {
-          const today = new Date();
-          today.setHours(0, 0, 0, 0);
-          const check = new Date(sorted[0]);
-          check.setHours(0, 0, 0, 0);
-          if (Math.round((today - check) / 86400000) <= 1) {
-            streak = 1;
-            for (let i = 1; i < sorted.length; i++) {
-              const prev = new Date(sorted[i - 1]);
-              prev.setHours(0, 0, 0, 0);
-              const cur = new Date(sorted[i]);
-              cur.setHours(0, 0, 0, 0);
-              if (Math.round((prev - cur) / 86400000) === 1) streak++;
-              else break;
-            }
-          }
-        }
-        document.getElementById("anStreak").textContent = streak;
+        document.getElementById("anStreak").textContent = calcStreak();
 
         const catEntries = Object.entries(stats.cat).sort(
           (a, b) => b[1] - a[1],
@@ -5706,6 +8810,12 @@
 
       /* ═══ КАРТОЧКА ОБЪЕКТА ═══ */
       function openDetail(index) {
+        /* Если это ТА ЖЕ карточка — сохраняем скролл и НЕ перезапускаем анимацию */
+        const sameDetail = currentDetailIndex === index;
+        const detailScreen = document.getElementById("detailScreen");
+        const savedScroll = sameDetail ? detailScreen.scrollTop : 0;
+        currentDetailIndex = index;
+
         const p = places[index];
         const c = catOf(p.category);
         const isFav = favorites.includes(index);
@@ -5814,19 +8924,54 @@
             }
           </div>
         `;
+        /* Перезапускаем анимацию входа ТОЛЬКО при новой карточке */
+        if (!sameDetail) {
+          /* Снимаем ОБА класса — чтобы анимация стартовала «с чистого листа» */
+          detailScreen.classList.remove("detail-active", "flip-in");
+          void detailScreen.offsetWidth;
+          detailScreen.classList.add("detail-active");
+
+          /* FLIP: откуда «вылетает» карточка */
+          try {
+            const m = markers[index];
+            if (m && m.marker && map && m.marker._icon) {
+              const r = m.marker._icon.getBoundingClientRect();
+              const mx = r.left + r.width / 2;
+              const my = r.top + r.height / 2;
+              const cx = window.innerWidth / 2;
+              const cy = window.innerHeight / 2;
+              detailScreen.style.setProperty("--flip-x", mx - cx + "px");
+              detailScreen.style.setProperty("--flip-y", my - cy + "px");
+              detailScreen.classList.add("flip-in");
+              /* ВАЖНО: НЕ удаляем flip-in через setTimeout.
+                 Снятие класса меняет animation-name → запускает detailIn
+                 заново → карточка «дёргается». Класс оставляем — он просто
+                 «сидит», пока карточка открыта. */
+            }
+          } catch (e) {}
+        }
+
         switchScreen("detailScreen");
-        document.getElementById("detailScreen").scrollTop = 0;
+
+        /* Восстанавливаем скролл для той же карточки, сбрасываем — для новой */
+        if (sameDetail) {
+          detailScreen.scrollTop = savedScroll;
+        } else {
+          detailScreen.scrollTop = 0;
+        }
+
         history.replaceState(null, "", "#place-" + index);
         renderWeather(index);
         if (navigator.vibrate) navigator.vibrate(8);
       }
 
       function closeDetail() {
+        currentDetailIndex = null;
         history.replaceState(null, "", " ");
         switchScreen("mapScreen");
       }
 
-      /* ═══ ДЕЙСТВИЯ ═══ */
+      /* ═══ КНОПКИ ДЕЙСТВИЙ ═══ */
       function toggleFav(index) {
         const pos = favorites.indexOf(index);
         if (pos === -1) {
@@ -5839,7 +8984,7 @@
         localStorage.setItem("urbex_favorites", JSON.stringify(favorites));
         updateBadges();
         const m = markers[index];
-        if (m && m.visible)
+        if (m && m.visible && m.marker)
           m.marker.setIcon(
             getIcon(
               m.data.category,
@@ -5858,11 +9003,42 @@
           visitHistory.push({ index, date: Date.now() });
           localStorage.setItem("urbex_history", JSON.stringify(visitHistory));
           toast("✅ Отмечено как посещённое");
+          /* Реликты: первое посещение +10, повторное +2 (раз в день) */
+          const firstEver = tryReward(
+            "visit_" + index,
+            10,
+            "Новое место",
+            index,
+          );
+          if (!firstEver) {
+            const today = new Date().toISOString().slice(0, 10);
+            tryReward(
+              "visit_repeat_" + index + "_" + today,
+              2,
+              "Повторное посещение",
+              index,
+            );
+          }
+          /* Реликты: streak-бонус раз в день */
+          const streak = calcStreak();
+          if (streak > 0) {
+            const todayKey = "streak_" + new Date().toISOString().slice(0, 10);
+            if (relicCanReward(todayKey)) {
+              relicMarkDone(todayKey);
+              const bonus = Math.min(RELIC_STREAK_CAP, 5 * streak);
+              if (bonus > 0)
+                addRelics(bonus, "Серия: " + streak + " дн.", null);
+            }
+          }
         } else {
           visited.splice(pos, 1);
           visitHistory = visitHistory.filter((v) => v.index !== index);
           localStorage.setItem("urbex_history", JSON.stringify(visitHistory));
           toast("Отметка снята");
+          /* Реликты: откат за первое и/или повторное посещение */
+          undoReward("visit_" + index);
+          const today = new Date().toISOString().slice(0, 10);
+          undoReward("visit_repeat_" + index + "_" + today);
         }
         localStorage.setItem("urbex_visited", JSON.stringify(visited));
         updateBadges();
@@ -5876,13 +9052,32 @@
             ),
           );
         checkAchievements();
+        if (typeof renderRank === "function") renderRank();
         openDetail(index);
         if (navigator.vibrate) navigator.vibrate(10);
       }
 
       function setRating(index, n) {
+        /* Тап по текущей звезде — снять оценку */
+        if (ratings[index] === n) {
+          delete ratings[index];
+          localStorage.setItem("urbex_ratings", JSON.stringify(ratings));
+          undoReward("rating_" + index);
+          const row = document.getElementById("ratingRow");
+          if (row) {
+            row.querySelectorAll(".star").forEach((s) => {
+              s.classList.remove("on");
+            });
+            row.querySelector(".rating-hint").textContent = "Оцени";
+          }
+          toast("Оценка снята");
+          if (navigator.vibrate) navigator.vibrate(6);
+          return;
+        }
+        const isNew = !(index in ratings);
         ratings[index] = n;
         localStorage.setItem("urbex_ratings", JSON.stringify(ratings));
+        if (isNew) tryReward("rating_" + index, 3, "Оценка места", index);
         const row = document.getElementById("ratingRow");
         if (row) {
           row
@@ -5896,8 +9091,15 @@
       }
 
       function saveNote(index, val) {
+        const wasEmpty = !notes[index] || !notes[index].trim();
         notes[index] = val;
         localStorage.setItem("urbex_notes", JSON.stringify(notes));
+        const meaningful = val && val.trim().length >= 3;
+        if (wasEmpty && meaningful) {
+          tryReward("note_" + index, 5, "Заметка", index);
+        } else if (!wasEmpty && !meaningful) {
+          undoReward("note_" + index);
+        }
       }
 
       function copyCoords(index) {
@@ -5950,10 +9152,14 @@
           (pos) => {
             const { latitude: la, longitude: lo } = pos.coords;
             if (userMarker) map.removeLayer(userMarker);
+            const accentColor =
+              getComputedStyle(document.documentElement)
+                .getPropertyValue("--accent")
+                .trim() || "#ff9500";
             userMarker = L.circleMarker([la, lo], {
               radius: 9,
               color: "#fff",
-              fillColor: "#ff9500",
+              fillColor: accentColor,
               fillOpacity: 1,
               weight: 3,
             })
@@ -5984,7 +9190,381 @@
       }
 
       /* ═══ СТАТИСТИКА ═══ */
+      /* ═══ НИК ═══ */
+      function loadNickname() {
+        const el = document.getElementById("nickInput");
+        if (!el) return;
+        el.value = localStorage.getItem("urbex_nickname") || "";
+      }
+      /* ═══ QR-КОД ПРОФИЛЯ ═══ */
+      /* qrcodejs от davidshimjs — стабильная классика,
+         регистрирует window.QRCode как КОНСТРУКТОР. */
+      const QR_SOURCES = [
+        "https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js",
+        "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js",
+        "https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js",
+        "https://unpkg.com/qrcodejs@1.0.0/qrcode.min.js",
+      ];
+      let qrLibLoading = null;
+
+      function loadQrLib() {
+        /* Достаточно, чтобы QRCode вообще существовал — не проверяем toCanvas,
+           т.к. у qrcodejs API — конструктор, а не объект с методом. */
+        if (window.QRCode && typeof window.QRCode === "function") {
+          return Promise.resolve(window.QRCode);
+        }
+        if (qrLibLoading) return qrLibLoading;
+        qrLibLoading = new Promise((resolve, reject) => {
+          let idx = 0;
+          const tryLoad = () => {
+            if (idx >= QR_SOURCES.length) {
+              return reject(new Error("QR library load failed"));
+            }
+            if (window.QRCode && typeof window.QRCode === "function") {
+              return resolve(window.QRCode);
+            }
+            const src = QR_SOURCES[idx++];
+            const s = document.createElement("script");
+            s.src = src;
+            s.async = true;
+            let done = false;
+            s.onload = () => {
+              if (done) return;
+              done = true;
+              if (window.QRCode && typeof window.QRCode === "function") {
+                resolve(window.QRCode);
+              } else {
+                tryLoad();
+              }
+            };
+            s.onerror = () => {
+              if (done) return;
+              done = true;
+              console.warn("QR CDN fail:", src);
+              tryLoad();
+            };
+            document.head.appendChild(s);
+          };
+          tryLoad();
+        });
+        return qrLibLoading;
+      }
+
+      /* Собираем URL с зашитой статистикой для QR */
+      function buildShareURL() {
+        const nick = (localStorage.getItem("urbex_nickname") || "").trim();
+        const v = visited.length;
+        const f = favorites.length;
+        const p = plans.length;
+        const a = unlockedAch.length;
+        const r = getRelics();
+        const { current } = getRank(v);
+        const params = new URLSearchParams();
+        params.set("u", nick || "Игрок");
+        params.set("v", String(v));
+        if (f) params.set("f", String(f));
+        if (p) params.set("p", String(p));
+        if (a) params.set("a", String(a));
+        if (r) params.set("r", String(r));
+        params.set("k", current.id);
+        const notesCount = Object.values(notes).filter(
+          (x) => x && x.trim(),
+        ).length;
+        if (notesCount) params.set("n", String(notesCount));
+        const base = location.origin + location.pathname;
+        return base + "?" + params.toString();
+      }
+
+      async function openProfileQR() {
+        const ov = document.getElementById("qrModal");
+        if (!ov) return;
+        ov.classList.add("show");
+        if (navigator.vibrate) navigator.vibrate(8);
+
+        const nickEl = document.getElementById("qrNick");
+        const nick = (localStorage.getItem("urbex_nickname") || "").trim();
+        const displayNick = nick || "Игрок";
+        if (nickEl) nickEl.textContent = displayNick;
+
+        const url = buildShareURL();
+
+        const loading = document.getElementById("qrLoading");
+        const canvas = document.getElementById("qrCanvas");
+        if (loading) {
+          loading.classList.remove("hide");
+          loading.textContent = "Генерирую…";
+        }
+
+        /* 1. Пробуем библиотеку qrcodejs (кэшируется SW → офлайн).
+           У неё API: new QRCode(element, options) — рисует в <canvas>/<img>
+           внутри переданного элемента. Поэтому используем временный div
+           и переносим результат в наш #qrCanvas. */
+        try {
+          const QRCodeCtor = await loadQrLib();
+          await new Promise((resolve, reject) => {
+            const tmp = document.createElement("div");
+            tmp.style.cssText =
+              "position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;overflow:hidden;";
+            document.body.appendChild(tmp);
+
+            const cleanup = () => {
+              try {
+                document.body.removeChild(tmp);
+              } catch (e) {}
+            };
+
+            try {
+              new QRCodeCtor(tmp, {
+                text: url,
+                width: 520,
+                height: 520,
+                colorDark: "#ff9500",
+                colorLight: "#0a0a0c",
+                correctLevel: QRCodeCtor.CorrectLevel
+                  ? QRCodeCtor.CorrectLevel.M
+                  : 0,
+              });
+            } catch (err) {
+              cleanup();
+              return reject(err);
+            }
+
+            /* qrcodejs рисует синхронно, но на всякий случай ждём canvas */
+            const waitCanvas = (tries) => {
+              const c = tmp.querySelector("canvas");
+              if (c) {
+                canvas.width = 260;
+                canvas.height = 260;
+                const ctx = canvas.getContext("2d");
+                ctx.imageSmoothingEnabled = false;
+                try {
+                  ctx.drawImage(c, 0, 0, 260, 260);
+                } catch (err) {
+                  cleanup();
+                  return reject(err);
+                }
+                cleanup();
+                return resolve();
+              }
+              if (tries > 40) {
+                cleanup();
+                return reject(new Error("QR render timeout"));
+              }
+              setTimeout(() => waitCanvas(tries + 1), 25);
+            };
+            waitCanvas(0);
+          });
+          if (loading) loading.classList.add("hide");
+          return;
+        } catch (e) {
+          console.warn("QR lib недоступна, fallback:", e);
+        }
+
+        /* 2. Fallback: API QR */
+        try {
+          const qrUrl =
+            "https://api.qrserver.com/v1/create-qr-code/?size=520x520&margin=0" +
+            "&bgcolor=0a0a0c&color=ff9500&data=" +
+            encodeURIComponent(url);
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = qrUrl;
+          });
+          canvas.width = 260;
+          canvas.height = 260;
+          const ctx = canvas.getContext("2d");
+          ctx.imageSmoothingEnabled = false;
+          ctx.drawImage(img, 0, 0, 260, 260);
+          if (loading) loading.classList.add("hide");
+        } catch (e) {
+          console.warn("QR fallback fail:", e);
+          if (loading) {
+            loading.textContent =
+              "QR недоступен офлайн. Подключись к сети и попробуй снова.";
+          }
+        }
+      }
+
+      function closeQR() {
+        const ov = document.getElementById("qrModal");
+        if (ov) ov.classList.remove("show");
+      }
+
+      async function shareQR() {
+        const canvas = document.getElementById("qrCanvas");
+        if (!canvas) return;
+        const nick = localStorage.getItem("urbex_nickname") || "Игрок";
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            toast("QR ещё не готов");
+            return;
+          }
+          const file = new File([blob], "urbaxa-qr.png", { type: "image/png" });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+              await navigator.share({
+                files: [file],
+                title: "Мой профиль UrbaxA5000",
+                text: `Я в UrbaxA5000 — ${nick}`,
+              });
+              return;
+            } catch (e) {}
+          }
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = "urbaxa-qr.png";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+          toast("📱 QR сохранён");
+        }, "image/png");
+      }
+
+      /* ═══ ГОСТЕВОЙ ПРОФИЛЬ (открыт по QR) ═══ */
+      let __guestChecked = false;
+
+      function checkGuestShare() {
+        if (__guestChecked) return;
+        __guestChecked = true;
+        try {
+          const params = new URLSearchParams(location.search);
+          if (!params.has("u") && !params.has("v")) return;
+          const data = {
+            nick: (params.get("u") || "Игрок").slice(0, 24),
+            v: Math.max(0, parseInt(params.get("v")) || 0),
+            f: Math.max(0, parseInt(params.get("f")) || 0),
+            p: Math.max(0, parseInt(params.get("p")) || 0),
+            a: Math.max(0, parseInt(params.get("a")) || 0),
+            r: Math.max(0, parseInt(params.get("r")) || 0),
+            k: params.get("k") || "novice",
+            n: Math.max(0, parseInt(params.get("n")) || 0),
+          };
+          renderGuestProfile(data);
+        } catch (e) {
+          console.warn("share parse:", e);
+        }
+      }
+
+      function renderGuestProfile(d) {
+        const total = places.length || 60;
+        const totalAch = ACHIEVEMENTS.length || 31;
+
+        /* Avatar + nick + rank */
+        const av = document.getElementById("guestAvatar");
+        if (av) av.textContent = ((d.nick[0] || "A") + "").toUpperCase();
+
+        const nk = document.getElementById("guestNick");
+        if (nk) nk.textContent = d.nick;
+
+        const rank = RANKS.find((r) => r.id === d.k) || RANKS[0];
+        const badgeIc = document.querySelector("#guestRankBadge .ic");
+        if (badgeIc) badgeIc.textContent = rank.icon;
+        const rn = document.getElementById("guestRankName");
+        if (rn) rn.textContent = rank.name;
+
+        /* Три кольца: visits / favorites / achievements */
+        const pctV = Math.min(100, Math.round((d.v / total) * 100));
+        const pctF = Math.min(100, Math.round((d.f / 20) * 100));
+        const pctA = Math.min(100, Math.round((d.a / totalAch) * 100));
+
+        const setRing = (id, r, pct) => {
+          const el = document.getElementById(id);
+          if (!el) return;
+          const C = 2 * Math.PI * r;
+          el.setAttribute("stroke-dasharray", C.toFixed(1));
+          el.setAttribute("stroke-dashoffset", C.toFixed(1));
+          setTimeout(() => {
+            el.setAttribute(
+              "stroke-dashoffset",
+              (C * (1 - pct / 100)).toFixed(1),
+            );
+          }, 400);
+        };
+        setRing("guestRing1", 52, pctV);
+        setRing("guestRing2", 40, pctF);
+        setRing("guestRing3", 28, pctA);
+
+        /* Центр кольца — % посещённых */
+        const rp = document.getElementById("guestRingPct");
+        if (rp) {
+          let cur = 0;
+          const step = () => {
+            cur += Math.max(1, Math.ceil(pctV / 30));
+            if (cur >= pctV) {
+              rp.textContent = pctV + "%";
+              return;
+            }
+            rp.textContent = cur + "%";
+            requestAnimationFrame(step);
+          };
+          setTimeout(step, 400);
+        }
+
+        const rsub = document.getElementById("guestRingSub");
+        if (rsub) rsub.textContent = `${d.v} из ${total} мест исследовано`;
+
+        /* Статы */
+        const setTxt = (id, v) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = (v || 0).toLocaleString("ru-RU");
+        };
+        setTxt("guestStatVisits", d.v);
+        setTxt("guestStatRelics", d.r);
+        setTxt("guestStatFav", d.f);
+        setTxt("guestStatAch", d.a);
+
+        /* Прогресс до следующего ранга */
+        let curIdx = 0;
+        RANKS.forEach((r, i) => {
+          if (d.v >= r.min) curIdx = i;
+        });
+        const curR = RANKS[curIdx];
+        const nextR = RANKS[curIdx + 1];
+        const nrName = document.getElementById("guestNextRankName");
+        const rpctEl = document.getElementById("guestRankPct");
+        const rfill = document.getElementById("guestRankFill");
+        if (!nextR) {
+          if (nrName) nrName.textContent = "МАКСИМУМ";
+          if (rpctEl) rpctEl.textContent = "MAX";
+          if (rfill) setTimeout(() => (rfill.style.width = "100%"), 400);
+        } else {
+          const span = nextR.min - curR.min;
+          const inRank = d.v - curR.min;
+          const rPct = Math.max(
+            0,
+            Math.min(100, Math.round((inRank / span) * 100)),
+          );
+          if (nrName) nrName.textContent = nextR.name;
+          if (rpctEl) rpctEl.textContent = rPct + "%";
+          if (rfill) setTimeout(() => (rfill.style.width = rPct + "%"), 400);
+        }
+
+        switchScreen("guestScreen");
+      }
+
+      function openAppFromGuest() {
+        try {
+          history.replaceState(null, "", location.pathname + location.hash);
+        } catch (e) {}
+        switchScreen("mapScreen");
+      }
+
+      function saveNickname() {
+        const el = document.getElementById("nickInput");
+        if (!el) return;
+        const v = (el.value || "").trim().slice(0, 24);
+        localStorage.setItem("urbex_nickname", v);
+        toast(v ? "✅ Сохранено: " + v : "Ник очищен");
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
+
       function renderStats() {
+        renderRank();
+        loadNickname();
         document.getElementById("stTotal").textContent = places.length;
         document.getElementById("stTotal2").textContent = places.length;
         document.getElementById("stFav").textContent = favorites.length;
@@ -6093,6 +9673,86 @@
         updatePlanBadge();
       }
 
+      /* ═══ ЭКСПОРТ / ИМПОРТ ДАННЫХ ═══ */
+      function exportAllData() {
+        const data = {
+          app: "UrbaxA5000",
+          version: "1.0",
+          exportedAt: new Date().toISOString(),
+          nickname: localStorage.getItem("urbex_nickname") || "",
+          favorites,
+          visited,
+          notes,
+          ratings,
+          plans,
+          unlockedAch,
+          visitHistory,
+          settings,
+          relics: getRelics(),
+          relicsLog: getRelicsLog(),
+          relicsDone: getRelicsDone(),
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `urbaxa-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        toast("📦 Файл сохранён");
+        if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      }
+
+      function importAllData() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json,.json,text/plain";
+        input.onchange = async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          try {
+            const text = await file.text();
+            const data = JSON.parse(text);
+            if (!data || data.app !== "UrbaxA5000") {
+              toast("❌ Это не файл UrbaxA5000");
+              return;
+            }
+            if (!confirm("Импортировать данные? Текущие будут заменены."))
+              return;
+            const set = (k, v) => {
+              if (v === undefined) return;
+              localStorage.setItem(
+                k,
+                typeof v === "string" ? v : JSON.stringify(v),
+              );
+            };
+            set("urbex_nickname", data.nickname || "");
+            set("urbex_favorites", data.favorites || []);
+            set("urbex_visited", data.visited || []);
+            set("urbex_notes", data.notes || {});
+            set("urbex_ratings", data.ratings || {});
+            set("urbex_plans", data.plans || []);
+            set("urbex_achievements", data.unlockedAch || []);
+            set("urbex_history", data.visitHistory || []);
+            if (data.settings) set("urbex_settings", data.settings);
+            if (data.relics !== undefined)
+              set("urbex_relics", String(data.relics));
+            set("urbex_relics_log", data.relicsLog || []);
+            set("urbex_relics_done", data.relicsDone || []);
+            toast("✅ Данные загружены, перезагрузка…");
+            setTimeout(() => location.replace(location.pathname), 1000);
+          } catch (err) {
+            console.error(err);
+            toast("❌ Ошибка чтения файла");
+          }
+        };
+        input.click();
+      }
+
       function clearAll() {
         if (
           !confirm(
@@ -6118,7 +9778,14 @@
           "urbex_used_google",
           "urbex_used_yandex",
           "urbex_both_nav",
+          "urbex_night_manual",
+          "urbex_relics",
+          "urbex_relics_log",
+          "urbex_relics_done",
         ].forEach((k) => localStorage.removeItem(k));
+        if (typeof __nightTick === "function") __nightTick();
+        if (typeof updateRelicsUI === "function") updateRelicsUI();
+        if (typeof closeRelicHistory === "function") closeRelicHistory();
         updateBadges();
         cullMarkers();
         renderStats();
@@ -6204,23 +9871,47 @@
         { passive: true },
       );
       /* ═══ СТАРТ ═══ */
-      initMap();
-      renderChips();
-      updateBadges();
-      renderList(
-        "listContainer",
-        places.map((_, i) => i),
-        "listCounter",
-      );
-      document
-        .getElementById("searchInput")
-        .addEventListener("input", handleSearch);
-
+      /* ═══ BOOT: ждём Leaflet, потом стартуем ═══ */
+      function __bootApp(tries) {
+        tries = tries || 0;
+        if (typeof L === "undefined" || typeof L.map !== "function") {
+          if (tries > 200) {
+            console.error("❌ Leaflet не загрузился");
+            return;
+          }
+          return setTimeout(() => __bootApp(tries + 1), 40);
+        }
+        try {
+          initMap();
+          renderChips();
+          updateBadges();
+          document
+            .getElementById("searchInput")
+            .addEventListener("input", handleSearch);
+          /* Принудительный пересчёт размеров — лечит «серый» первый запуск */
+          setTimeout(() => {
+            if (map) map.invalidateSize({ pan: false });
+          }, 120);
+          /* Второй прогон — на случай, если экран смонтировался с нулевой высотой */
+          setTimeout(() => {
+            if (map) {
+              map.invalidateSize({ pan: false });
+              cullMarkers();
+            }
+          }, 600);
+        } catch (e) {
+          console.error("Boot error:", e);
+        }
+      }
+      requestAnimationFrame(() => __bootApp(0));
       window.addEventListener("load", () => {
         const m = location.hash.match(/^#place-(\d+)$/);
         if (m) {
           const i = parseInt(m[1]);
           if (!isNaN(i) && places[i]) setTimeout(() => openDetail(i), 300);
+        } else {
+          /* Не хеш места — возможно, пришли по QR-ссылке */
+          setTimeout(checkGuestShare, 200);
         }
       });
 
@@ -6250,27 +9941,25 @@
           const el = document.getElementById(map2[k]);
           if (el && settings[k]) el.classList.add("on");
         });
-        checkAchievements();
-        updateAchProgress();
-      }, 2500);
+      }, 500);
 
-      document.addEventListener("click", (e) => {
-        const a = e.target.closest("a");
-        if (!a) return;
-        if (a.classList.contains("google") || a.classList.contains("yandex")) {
-          const key = a.classList.contains("google")
-            ? "urbex_used_google"
-            : "urbex_used_yandex";
-          localStorage.setItem(key, "true");
-          if (
-            localStorage.getItem("urbex_used_google") === "true" &&
-            localStorage.getItem("urbex_used_yandex") === "true"
-          ) {
-            localStorage.setItem("urbex_both_nav", "true");
+      /* Реликты: инициализация UI при старте */
+      updateRelicsUI();
+
+      /* Проверка ачивок — после полной загрузки, чтобы не тормозить старт */
+      if (document.readyState === "complete") {
+        setTimeout(() => {
+          checkAchievements();
+          updateAchProgress();
+        }, 3000);
+      } else {
+        window.addEventListener("load", () => {
+          setTimeout(() => {
             checkAchievements();
-          }
-        }
-      });
+            updateAchProgress();
+          }, 3000);
+        });
+      }
       /* ═══ ЧАСТИЦЫ СПЛЭША ═══ */
       (function spawnSplashParticles() {
         const container = document.getElementById("splashParticles");
@@ -6296,12 +9985,137 @@
         if (!el) return;
         const text = el.textContent;
         el.textContent = "";
+        const frag = document.createDocumentFragment();
         [...text].forEach((ch, i) => {
           const span = document.createElement("span");
           span.textContent = ch;
-          span.style.animationDelay = 0.7 + i * 0.06 + "s";
-          el.appendChild(span);
+          span.style.animationDelay = 0.15 + i * 0.045 + "s";
+          frag.appendChild(span);
         });
+        el.appendChild(frag);
+      })();
+
+      /* ═══ ПАСХАЛКА: 6 тапов по 3D-иконке в профиле ═══ */
+      (function setupEasterEgg() {
+        const pin = document.querySelector(".app-icon-3d");
+        const hint = document.getElementById("easterHint");
+        if (!pin || !hint) return;
+        let taps = 0;
+        let lastTap = 0;
+        let unlocked = false;
+
+        pin.addEventListener("click", (e) => {
+          e.stopPropagation();
+          if (unlocked) return;
+          const now = Date.now();
+          if (now - lastTap > 1500) taps = 0;
+          lastTap = now;
+          taps++;
+          if (navigator.vibrate) navigator.vibrate(8);
+          if (taps >= 6) {
+            unlocked = true;
+            fireEasterEgg();
+          }
+        });
+
+        function fireEasterEgg() {
+          /* Звук — магический восходящий перезвон */
+          try {
+            if (!audioCtx)
+              audioCtx = new (
+                window.AudioContext || window.webkitAudioContext
+              )();
+            const ctx = audioCtx;
+            const notes = [880, 1108, 1318, 1760, 2217, 2637, 3520, 4186];
+            notes.forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "sine";
+              osc.frequency.value = freq;
+              const t = ctx.currentTime + i * 0.07;
+              gain.gain.setValueAtTime(0, t);
+              gain.gain.linearRampToValueAtTime(0.1, t + 0.01);
+              gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(t);
+              osc.stop(t + 0.5);
+            });
+          } catch (e) {}
+
+          /* Показать надпись */
+          hint.classList.add("show");
+          setTimeout(() => hint.classList.remove("show"), 2600);
+
+          /* Вибрация «салют» */
+          if (navigator.vibrate)
+            navigator.vibrate([20, 30, 20, 30, 20, 30, 60, 40, 100]);
+
+          /* Конфетти — 40 частиц с 3D-иконки */
+          const rect = document
+            .querySelector(".app-icon-3d")
+            .getBoundingClientRect();
+          const cx = rect.left + rect.width / 2;
+          const cy = rect.top + rect.height / 2;
+          const colors = [
+            "#ff9500",
+            "#ffb340",
+            "#ffd700",
+            "#a855f7",
+            "#ff375f",
+            "#34c759",
+            "#5ac8fa",
+          ];
+          for (let i = 0; i < 40; i++) {
+            const p = document.createElement("div");
+            p.className = "easter-confetti";
+            p.style.left = cx + "px";
+            p.style.top = cy + "px";
+            p.style.background = colors[i % colors.length];
+            p.style.borderRadius = Math.random() > 0.5 ? "50%" : "2px";
+            if (Math.random() > 0.7) {
+              p.style.width = "6px";
+              p.style.height = "14px";
+            }
+            document.body.appendChild(p);
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 120 + Math.random() * 200;
+            const tx = Math.cos(angle) * dist;
+            const ty = Math.sin(angle) * dist - 100;
+            const rot = Math.random() * 720 - 360;
+            requestAnimationFrame(() => {
+              p.style.transition =
+                "transform 1.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 1.4s ease-out";
+              p.style.transform = `translate(${tx}px, ${ty + 200}px) rotate(${rot}deg) scale(0.4)`;
+              p.style.opacity = "0";
+            });
+            setTimeout(() => p.remove(), 1500);
+          }
+
+          /* Секретная ачивка — через 1.5с после салюта */
+          if (!unlockedAch.includes("a5000_satisfied")) {
+            unlockedAch.push("a5000_satisfied");
+            localStorage.setItem(
+              "urbex_achievements",
+              JSON.stringify(unlockedAch),
+            );
+            tryReward(
+              "ach_a5000_satisfied",
+              RELIC_RARITY_BONUS.secret,
+              "Ачивка: A5000 доволен",
+              null,
+            );
+            updateAchCounter();
+            updateAchProgress();
+            setTimeout(() => {
+              showAchUnlock({
+                icon: "🎉",
+                name: "A5000 доволен",
+                desc: "Нашёл секрет в 6 тапов",
+              });
+            }, 1500);
+          }
+        }
       })();
 
       /* ═══ СКРЫТИЕ СПЛЭША ═══ */
@@ -6311,15 +10125,15 @@
         splash.classList.add("hide");
         setTimeout(() => {
           if (splash.parentNode) splash.parentNode.removeChild(splash);
-        }, 1200);
+        }, 800);
       }
 
       if (document.readyState === "complete") {
-        setTimeout(hideSplash, 2000);
+        setTimeout(hideSplash, 1400);
       } else {
-        window.addEventListener("load", () => setTimeout(hideSplash, 2000));
+        window.addEventListener("load", () => setTimeout(hideSplash, 1400));
       }
-      setTimeout(hideSplash, 3500); // страховка
+      setTimeout(hideSplash, 2500); // страховка
     </script>
   </body>
 </html>
