@@ -9432,17 +9432,30 @@
         __guestChecked = true;
         try {
           const params = new URLSearchParams(location.search);
-          if (!params.has("u") && !params.has("v")) return;
-          const data = {
-            nick: (params.get("u") || "Игрок").slice(0, 24),
-            v: Math.max(0, parseInt(params.get("v")) || 0),
-            f: Math.max(0, parseInt(params.get("f")) || 0),
-            p: Math.max(0, parseInt(params.get("p")) || 0),
-            a: Math.max(0, parseInt(params.get("a")) || 0),
-            r: Math.max(0, parseInt(params.get("r")) || 0),
-            k: params.get("k") || "novice",
-            n: Math.max(0, parseInt(params.get("n")) || 0),
+          /* Гостем считаем ТОЛЬКО если есть u=Ник.
+             Служебные параметры (?v=, ?_t=) игнорируем. */
+          const nick = (params.get("u") || "").trim().slice(0, 24);
+          if (!nick) return;
+
+          const clamp = (val, max) => {
+            const n = parseInt(val);
+            if (!isFinite(n) || n < 0) return 0;
+            return Math.min(n, max);
           };
+          const data = {
+            nick,
+            v: clamp(params.get("v"), 200),
+            f: clamp(params.get("f"), 200),
+            p: clamp(params.get("p"), 200),
+            a: clamp(params.get("a"), 100),
+            r: clamp(params.get("r"), 999999),
+            k: (params.get("k") || "novice").slice(0, 20),
+            n: clamp(params.get("n"), 200),
+          };
+          /* Чистим URL, чтобы не триггерилось при F5 */
+          try {
+            history.replaceState(null, "", location.pathname + location.hash);
+          } catch (e) {}
           renderGuestProfile(data);
         } catch (e) {
           console.warn("share parse:", e);
@@ -9960,7 +9973,7 @@
         }
         await new Promise((resolve) => setTimeout(resolve, 500));
         const url = new URL(window.location.href);
-        url.searchParams.set("v", Date.now().toString());
+        url.searchParams.set("_t", Date.now().toString());
         window.location.replace(url.toString());
       }
 
