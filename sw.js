@@ -2,7 +2,7 @@
    URBaxA5000 · Service Worker · A5000 Labs
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v52';
+const CACHE_VERSION = 'v53';
 const CACHE_NAME    = `urbaxa-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `urbaxa-runtime-${CACHE_VERSION}`;
 const TILES_CACHE   = `urbaxa-tiles-${CACHE_VERSION}`;
@@ -102,21 +102,7 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Manifest — всегда только из сети, НИКОГДА не подменяем на HTML
-  if (url.pathname.endsWith('manifest.json')) {
-    e.respondWith(
-      fetch(request).then(res => {
-        if (res && res.status === 200) {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(request, clone));
-        }
-        return res;
-      }).catch(() => caches.match(request))
-    );
-    return;
-  }
-
-   // ⚠ КРИТИЧНО: manifest.json — ТОЛЬКО сеть, НИКОГДА не отдаём HTML
+  // ⚠ КРИТИЧНО: manifest.json — ТОЛЬКО из сети, никогда не отдаём HTML
   if (url.pathname.endsWith('manifest.json')) {
     e.respondWith(
       fetch(request).then(res => {
