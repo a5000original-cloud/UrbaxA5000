@@ -10000,7 +10000,7 @@
       }
 
       /* ═══ APK: модалка + PWABuilder ═══ */
-     
+
       async function forceUpdate() {
         toast("🔄 Обновление...");
         if ("caches" in window) {
@@ -10279,6 +10279,8 @@
       })();
 
       /* ═══ СКРЫТИЕ СПЛЭША ═══ */
+      /* Если запущено как приложение (standalone / TWA) — скрываем сплэш моментально,
+         потому что Android уже показал свой нативный splash. Иначе — обычная задержка. */
       function hideSplash() {
         const splash = document.getElementById("splash");
         if (!splash || splash.classList.contains("hide")) return;
@@ -10286,6 +10288,29 @@
         setTimeout(() => {
           if (splash.parentNode) splash.parentNode.removeChild(splash);
         }, 800);
+      }
+
+      const isStandaloneApp =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.matchMedia("(display-mode: fullscreen)").matches ||
+        window.matchMedia("(display-mode: minimal-ui)").matches ||
+        window.navigator.standalone === true ||
+        document.referrer.startsWith("android-app://");
+
+      if (isStandaloneApp) {
+        /* В приложении — скрываем сразу, без задержки */
+        if (document.readyState === "complete") hideSplash();
+        else window.addEventListener("load", hideSplash);
+        /* Страховка на случай, если load уже прошёл */
+        setTimeout(hideSplash, 100);
+      } else {
+        /* В браузере — обычный красивый сплэш */
+        if (document.readyState === "complete") {
+          setTimeout(hideSplash, 1400);
+        } else {
+          window.addEventListener("load", () => setTimeout(hideSplash, 1400));
+        }
+        setTimeout(hideSplash, 2500);
       }
 
       if (document.readyState === "complete") {
