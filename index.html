@@ -263,8 +263,8 @@
       }
       .leaflet-popup-content-wrapper {
         background: rgba(20, 20, 26, 0.88) !important;
-        backdrop-filter: blur(60px) saturate(200%);
-        -webkit-backdrop-filter: blur(60px) saturate(200%);
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
         color: var(--text);
         border-radius: 14px !important;
         border: 1px solid rgba(255, 255, 255, 0.12) !important;
@@ -1706,8 +1706,8 @@
         border: 1px solid var(--border);
         position: relative;
         overflow: hidden;
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
         box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
       }
       .guest-ring-card::before {
@@ -2046,8 +2046,8 @@
         right: 16px;
         z-index: 99998;
         background: rgba(24, 24, 30, 0.92);
-        backdrop-filter: blur(60px) saturate(200%);
-        -webkit-backdrop-filter: blur(60px) saturate(200%);
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
         border: 1px solid rgba(255, 215, 0, 0.4);
         color: #ffd700;
         padding: 10px 16px;
@@ -2908,8 +2908,8 @@
         left: 50%;
         transform: translateX(-50%) translateY(20px);
         background: rgba(24, 24, 30, 0.86);
-        backdrop-filter: blur(60px) saturate(200%);
-        -webkit-backdrop-filter: blur(60px) saturate(200%);
+        backdrop-filter: blur(18px) saturate(180%);
+        -webkit-backdrop-filter: blur(18px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.12);
         color: var(--text);
         padding: 13px 22px;
@@ -2990,7 +2990,6 @@
         );
         animation: scanline 3s linear infinite;
         pointer-events: none;
-        will-change: transform, opacity;
       }
       @keyframes scanline {
         0% {
@@ -3137,17 +3136,14 @@
         );
         animation: glowPulse 3.5s ease-in-out infinite;
         pointer-events: none;
-        will-change: transform, opacity;
         contain: layout paint;
       }
       @keyframes glowPulse {
         0%,
         100% {
-          transform: scale(1);
           opacity: 0.7;
         }
         50% {
-          transform: scale(1.15);
           opacity: 1;
         }
       }
@@ -3161,9 +3157,7 @@
         align-items: center;
         justify-content: center;
         transform-style: preserve-3d;
-        animation:
-          pinIntro 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards,
-          pinFloat 4s ease-in-out 0.9s infinite;
+        animation: pinIntro 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
         transform: scale(0) rotateY(-180deg);
         z-index: 2;
       }
@@ -3340,9 +3334,7 @@
         height: 3px;
         border-radius: 50%;
         background: var(--accent);
-        box-shadow:
-          0 0 8px rgba(var(--accent-rgb), 0.9),
-          0 0 16px rgba(var(--accent-rgb), 0.5);
+        box-shadow: 0 0 6px rgba(var(--accent-rgb), 0.7);
         opacity: 0;
         animation: particleFloat linear infinite;
       }
@@ -3746,8 +3738,8 @@
         margin-bottom: 20px;
         position: relative;
         overflow: hidden;
-        backdrop-filter: blur(30px);
-        -webkit-backdrop-filter: blur(30px);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
       }
       .ach-progress-block::before {
         content: "";
@@ -10124,7 +10116,7 @@
       (function spawnSplashParticles() {
         const container = document.getElementById("splashParticles");
         if (!container) return;
-        const count = 14;
+        const count = 6;
         for (let i = 0; i < count; i++) {
           const p = document.createElement("div");
           p.className = "particle";
@@ -10279,46 +10271,66 @@
       })();
 
       /* ═══ СКРЫТИЕ СПЛЭША ═══ */
-      /* Если запущено как приложение (standalone / TWA) — скрываем сплэш моментально,
-         потому что Android уже показал свой нативный splash. Иначе — обычная задержка. */
+      /* Умная логика:
+         - В standalone (APK/TWA) — скрываем моментально, нативный сплэш уже был.
+         - В браузере — показываем МИНИМУМ 900мс, скрываем, как только
+           шрифты + Leaflet готовы. Максимум — 2400мс. */
+      let __splashHidden = false;
       function hideSplash() {
+        if (__splashHidden) return;
+        __splashHidden = true;
         const splash = document.getElementById("splash");
-        if (!splash || splash.classList.contains("hide")) return;
+        if (!splash) return;
         splash.classList.add("hide");
         setTimeout(() => {
           if (splash.parentNode) splash.parentNode.removeChild(splash);
-        }, 800);
+        }, 600);
       }
 
-      const isStandaloneApp =
+      const __isStandaloneApp =
         window.matchMedia("(display-mode: standalone)").matches ||
         window.matchMedia("(display-mode: fullscreen)").matches ||
         window.matchMedia("(display-mode: minimal-ui)").matches ||
         window.navigator.standalone === true ||
         document.referrer.startsWith("android-app://");
 
-      if (isStandaloneApp) {
-        /* В приложении — скрываем сразу, без задержки */
+      if (__isStandaloneApp) {
+        /* В приложении — прячем сразу, свой сплэш не нужен */
         if (document.readyState === "complete") hideSplash();
-        else window.addEventListener("load", hideSplash);
-        /* Страховка на случай, если load уже прошёл */
-        setTimeout(hideSplash, 100);
+        else window.addEventListener("load", hideSplash, { once: true });
+        setTimeout(hideSplash, 200);
       } else {
-        /* В браузере — обычный красивый сплэш */
-        if (document.readyState === "complete") {
-          setTimeout(hideSplash, 1400);
-        } else {
-          window.addEventListener("load", () => setTimeout(hideSplash, 1400));
-        }
-        setTimeout(hideSplash, 2500);
-      }
+        /* В браузере — умное скрытие */
+        const __startTime = Date.now();
+        const MIN_SHOW = 900;
+        const MAX_SHOW = 2400;
 
-      if (document.readyState === "complete") {
-        setTimeout(hideSplash, 1400);
-      } else {
-        window.addEventListener("load", () => setTimeout(hideSplash, 1400));
+        const __readyPromise = Promise.all([
+          document.fonts && document.fonts.ready
+            ? Promise.race([
+                document.fonts.ready,
+                new Promise((r) => setTimeout(r, 800)),
+              ])
+            : Promise.resolve(),
+          new Promise((resolve) => {
+            const check = () => {
+              if (typeof L !== "undefined" && typeof L.map === "function")
+                return resolve();
+              setTimeout(check, 40);
+            };
+            check();
+          }),
+        ]);
+
+        __readyPromise.then(() => {
+          const elapsed = Date.now() - __startTime;
+          const wait = Math.max(0, MIN_SHOW - elapsed);
+          setTimeout(hideSplash, wait + 100);
+        });
+
+        /* Абсолютная страховка */
+        setTimeout(hideSplash, MAX_SHOW);
       }
-      setTimeout(hideSplash, 2500); // страховка
     </script>
   </body>
 </html>
