@@ -5125,7 +5125,7 @@
           </button>
         </div>
 
-        <div class="detail-section" id="installBtn" style="display: none">
+        <div class="detail-section" id="installBtn">
           <h3>Установка</h3>
           <button
             class="action-btn share"
@@ -9813,6 +9813,12 @@
           deferredPrompt = e;
           const btn = document.getElementById("installBtn");
           if (btn) btn.style.display = "block";
+          console.log("✅ PWA: beforeinstallprompt получен");
+        });
+        window.addEventListener("appinstalled", () => {
+          deferredPrompt = null;
+          toast("📱 Приложение установлено!");
+          console.log("✅ PWA: appinstalled");
         });
       }
 
@@ -9827,18 +9833,118 @@
       }
 
       function installPWA() {
-        if (!deferredPrompt) {
-          if (isStandalone) toast("📱 Приложение уже установлено");
-          else if (isIOS) toast("📱 Используй инструкцию для iPhone");
-          else toast("Установка недоступна в этом браузере");
+        if (isStandalone) {
+          toast("📱 Приложение уже установлено");
           return;
         }
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choice) => {
-          if (choice.outcome === "accepted")
-            toast("📱 Приложение установлено!");
-          deferredPrompt = null;
-        });
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choice) => {
+            if (choice.outcome === "accepted")
+              toast("📱 Приложение установлено!");
+            else toast("Установка отменена");
+            deferredPrompt = null;
+          });
+          return;
+        }
+        /* Нет prompt — показываем диагностику */
+        diagnosePWA();
+      }
+
+      /* Диагностика PWA — покажет, что мешает установке */
+      async function diagnosePWA() {
+        const lines = [];
+        const ok = (t) => lines.push("✅ " + t);
+        const no = (t) => lines.push("❌ " + t);
+        const warn = (t) => lines.push("⚠️ " + t);
+
+        /* HTTPS или localhost */
+        const isSecure =
+          location.protocol === "https:" ||
+          location.hostname === "localhost" ||
+          location.hostname === "127.0.0.1";
+        isSecure
+          ? ok("HTTPS")
+          : no("Нужен HTTPS (сейчас " + location.protocol + ")");
+
+        /* Манифест */
+        const link = document.querySelector('link[rel="manifest"]');
+        link ? ok("Манифест подключён") : no("Нет <link rel=manifest>");
+
+        /* Fetch манифеста */
+        let mf = null;
+        try {
+          const r = await fetch("./manifest.json", { cache: "no-store" });
+          if (r.ok) {
+            mf = await r.json();
+            ok("manifest.json загружен");
+          } else no("manifest.json: HTTP " + r.status);
+        } catch (e) {
+          no("manifest.json недоступен: " + e.message);
+        }
+
+        if (mf) {
+          mf.name ? ok("name: " + mf.name) : no("Нет name");
+          mf.start_url ? ok("start_url: " + mf.start_url) : no("Нет start_url");
+          mf.display === "standalone" ||
+          mf.display === "fullscreen" ||
+          mf.display === "minimal-ui"
+            ? ok("display: " + mf.display)
+            : no("display должен быть standalone");
+          const icons = mf.icons || [];
+          const has192 = icons.some((i) => (i.sizes || "").includes("192"));
+          const has512 = icons.some((i) => (i.sizes || "").includes("512"));
+          has192 ? ok("Иконка 192×192") : no("Нет иконки 192×192");
+          has512 ? ok("Иконка 512×512") : no("Нет иконки 512×512");
+          const anyOk = icons.some((i) => (i.purpose || "any").includes("any"));
+          anyOk ? ok("Иконка purpose: any") : no("Нет иконки purpose: any");
+        }
+
+        /* Service Worker */
+        if ("serviceWorker" in navigator) {
+          const regs = await navigator.serviceWorker.getRegistrations();
+          if (regs.length) {
+            const active = regs.find((r) => r.active);
+            active
+              ? ok("Service Worker активен")
+              : warn("SW есть, но не активен (обнови страницу)");
+          } else no("Service Worker не зарегистрирован");
+        } else no("Service Worker не поддерживается браузером");
+
+        /* beforeinstallprompt */
+        if (deferredPrompt) ok("Установка доступна (prompt готов)");
+        else {
+          if (isIOS)
+            warn("iPhone: используй Safari → Поделиться → На экран «Домой»");
+          else if (isStandalone) ok("Уже запущено как приложение");
+          else warn("Браузер ещё не выдал beforeinstallprompt");
+        }
+
+        /* Браузер */
+        const ua = navigator.userAgent;
+        const browser = /Edg\//.test(ua)
+          ? "Edge"
+          : /OPR\//.test(ua)
+            ? "Opera"
+            : /YaBrowser/.test(ua)
+              ? "Yandex"
+              : /Firefox\//.test(ua)
+                ? "Firefox"
+                : /Chrome\//.test(ua)
+                  ? "Chrome"
+                  : /Safari\//.test(ua)
+                    ? "Safari"
+                    : "?";
+        lines.push("🌐 Браузер: " + browser);
+
+        /* Показываем */
+        const text = lines.join("\n");
+        console.log("PWA Diagnostics:\n" + text);
+        alert(
+          "Диагностика установки:\n\n" +
+            text +
+            "\n\nПолный лог — в F12 → Console.",
+        );
       }
 
       async function forceUpdate() {
