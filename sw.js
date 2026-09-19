@@ -2,7 +2,7 @@
    URBaxA5000 · Service Worker · A5000 Labs
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v45';
 const CACHE_NAME    = `urbaxa-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `urbaxa-runtime-${CACHE_VERSION}`;
 const TILES_CACHE   = `urbaxa-tiles-${CACHE_VERSION}`;
@@ -75,6 +75,12 @@ self.addEventListener('fetch', (e) => {
   // Map tiles — SWR with limit
   if (url.hostname.includes('cartocdn') || url.hostname.includes('arcgisonline') || url.hostname.includes('basemaps')) {
     e.respondWith(staleWhileRevalidate(request, TILES_CACHE, TILES_MAX));
+    return;
+  }
+
+  // QR API — cache-first с лимитом (картинки QR)
+  if (url.hostname.includes('qrserver.com') || url.hostname.includes('qr-code')) {
+    e.respondWith(cacheFirst(request, IMAGES_CACHE, IMAGES_MAX));
     return;
   }
 
