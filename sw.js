@@ -2,7 +2,7 @@
    URBaxA5000 · Service Worker · A5000 Labs
    ═══════════════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'v55';
+const CACHE_VERSION = 'v56';
 const CACHE_NAME    = `urbaxa-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `urbaxa-runtime-${CACHE_VERSION}`;
 const TILES_CACHE   = `urbaxa-tiles-${CACHE_VERSION}`;
@@ -123,6 +123,13 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+    // ⚠ Явный обработчик для Android Chrome (требуется для WebAPK)
+  if (request.mode === 'navigate') {
+    e.respondWith(
+      caches.match('./index.html').then(res => res || fetch(request))
+    );
+    return;
+  }
   // Default — network with runtime cache
   e.respondWith(
     fetch(request).then(res => {
