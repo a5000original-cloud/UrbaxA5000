@@ -229,12 +229,19 @@
         z-index: 0;
       }
 
-      /* ═══ КАРТА ═══ */
-      #map {
-        flex: 1;
-        background: #0a0a0c;
-        z-index: 1;
-      }
+/* ═══ КАРТА ═══ */
+/* Днём осветляем карту, ночью — приглушаем */
+.leaflet-tile-pane {
+  filter: brightness(1.35) contrast(1.1) saturate(1.15);
+}
+html.night .leaflet-tile-pane {
+  filter: brightness(0.9) contrast(1.05) saturate(1.05);
+}
+#map {
+  flex: 1;
+  background: #0a0a0c;
+  z-index: 1;
+}
       .leaflet-container {
         background: #0a0a0c;
         font-family: "Inter", sans-serif;
@@ -7724,8 +7731,7 @@
         },
         {
           name: "Усадьба Шмигельского (Форос)",
-          lat: 44.398781,
-          lon: 33.80538,
+lat: 44.398790, lon: 33.805364,
           category: "Исторические",
           desc: "Усадьба в Форосе, частично заброшена. Сохранились подвалы и флигели. Требует осторожности.",
           danger: "Средняя",
@@ -7922,8 +7928,7 @@
         },
         {
           name: "Усадьба Шмигельского (Форос)",
-          lat: 44.398781,
-          lon: 33.80538,
+lat: 44.398790, lon: 33.805364,
           category: "Исторические",
           desc: "Заброшенная усадьба XIX века в Форосе. Сохранились подвалы и парк.",
           danger: "Средняя",
@@ -10784,4 +10789,4 @@
       }
     </script>
   </body>
-</html>
+  </html>
